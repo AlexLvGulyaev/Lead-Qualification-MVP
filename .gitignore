@@ -25,12 +25,10 @@ workflow/n8n/credentials/
 
 # Task history - internal kitchen, not for GitHub
 task_history/
+docs/cursor_sessions
 
 # Research and experimental directories
 research/
-
-# Old screenshots in root (use docs/screenshots/ instead)
-screenshots/
 
 # Claude AI local settings
 .claude/
