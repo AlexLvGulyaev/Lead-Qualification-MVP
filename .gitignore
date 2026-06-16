@@ -1,0 +1,189 @@
+# =============================================================================
+# Lead Qualification MVP - Git Ignore Rules
+# =============================================================================
+# Purpose: Safe GitHub publication - exclude secrets, internal files, and
+#          runtime artifacts from version control.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# CRITICAL: Secrets and Credentials
+# MUST NEVER be committed to GitHub
+# -----------------------------------------------------------------------------
+
+# Environment files with secrets
+.env
+.env.*
+*.env
+!.env.example
+
+# n8n credentials (contain API keys and tokens)
+workflow/n8n/credentials/
+
+# =============================================================================
+# Internal Project Files (not for publication)
+# =============================================================================
+
+# Task history - internal kitchen, not for GitHub
+task_history/
+
+# Research and experimental directories
+research/
+
+# Old screenshots in root (use docs/screenshots/ instead)
+screenshots/
+
+# Claude AI local settings
+.claude/
+
+# =============================================================================
+# Runtime and Build Artifacts
+# =============================================================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.venv/
+venv/
+ENV/
+env/
+.pytest_cache/
+.mypy_cache/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Build outputs
+*.js.map
+*.min.js
+*.min.css
+
+# =============================================================================
+# Docker and Infrastructure
+# =============================================================================
+
+# Docker volumes (managed by Docker)
+postgres_data/
+n8n_data/
+
+# Backup files
+*.bak
+*.backup
+*.old
+*~
+
+# Docker compose backups
+docker-compose.yml.bak*
+docker-compose.*.bak
+
+# =============================================================================
+# IDE and Editor
+# =============================================================================
+
+# VS Code
+.vscode/
+
+# JetBrains IDEs
+.idea/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# =============================================================================
+# OS Generated Files
+# =============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# =============================================================================
+# Logs and Temporary Files
+# =============================================================================
+
+# Log files
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+tmp/
+temp/
+
+# =============================================================================
+# Database Files
+# =============================================================================
+
+# PostgreSQL dumps
+*.sql.backup
+*.sql.bak
+*.dump
+*.pg_dump
+
+# SQLite
+*.sqlite
+*.sqlite3
+*.db
+
+# =============================================================================
+# Test Files
+# =============================================================================
+
+# Test artifacts
+tests/*.actual
+tests/*.expected
+test-results/
+
+# =============================================================================
+# Documentation Build Artifacts
+# =============================================================================
+
+# Generated docs
+docs/_build/
+site/
+
+# =============================================================================
+# Project-specific Exclusions
+# =============================================================================
+
+# n8n execution data (runtime)
+n8n-execution-data/
+
+# Local development overrides
+docker-compose.override.yml

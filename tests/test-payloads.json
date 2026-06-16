@@ -1,0 +1,104 @@
+{
+  "description": "Test payloads for Lead Ingestion Webhook",
+  "payloads": [
+    {
+      "name": "Hot Lead - Valid",
+      "description": "Hot lead with all fields, high intent",
+      "valid": true,
+      "expected_status": 200,
+      "data": {
+        "name": "Иван Петров",
+        "phone": "+79991234567",
+        "email": "ivan@example.com",
+        "message": "Хочу купить вашу услугу прямо сейчас, готов оплатить сегодня. Перезвоните мне срочно!",
+        "source": "website_contact_form",
+        "utm_source": "google",
+        "utm_campaign": "brand_awareness"
+      }
+    },
+    {
+      "name": "Warm Lead - Valid",
+      "description": "Warm lead with phone only, medium intent",
+      "valid": true,
+      "expected_status": 200,
+      "data": {
+        "name": "Мария Сидорова",
+        "phone": "+79992222222",
+        "message": "Интересует ваш продукт, расскажите подробнее о возможностях и ценах.",
+        "source": "landing_page",
+        "utm_source": "yandex",
+        "utm_campaign": "search_ads"
+      }
+    },
+    {
+      "name": "Cold Lead - Valid",
+      "description": "Cold lead with email only, low intent",
+      "valid": true,
+      "expected_status": 200,
+      "data": {
+        "name": "Алексей Козлов",
+        "email": "alexey@example.com",
+        "message": "Может быть позже вернусь к вам, пока думаю над предложением.",
+        "source": "organic_search",
+        "utm_source": "google"
+      }
+    },
+    {
+      "name": "Spam Lead - Valid",
+      "description": "Spam message that should be classified later",
+      "valid": true,
+      "expected_status": 200,
+      "data": {
+        "name": "Спамер",
+        "phone": "+79994444444",
+        "message": "Предлагаю купить базу контактов для вашего бизнеса. Отличные цены!",
+        "source": "unknown"
+      }
+    },
+    {
+      "name": "Invalid - Missing Message",
+      "description": "Invalid: message too short",
+      "valid": false,
+      "expected_status": 400,
+      "data": {
+        "name": "Короткое сообщение",
+        "phone": "+79995555555",
+        "message": "Привет",
+        "source": "website"
+      }
+    },
+    {
+      "name": "Invalid - Missing Phone and Email",
+      "description": "Invalid: no contact info",
+      "valid": false,
+      "expected_status": 400,
+      "data": {
+        "name": "Без контактов",
+        "message": "Хочу узнать больше информации о ваших услугах и возможностях.",
+        "source": "website"
+      }
+    },
+    {
+      "name": "Invalid - Missing Source",
+      "description": "Invalid: source is required",
+      "valid": false,
+      "expected_status": 400,
+      "data": {
+        "name": "Без источника",
+        "phone": "+79996666666",
+        "message": "Хочу узнать больше информации о ваших услугах и возможностях."
+      }
+    },
+    {
+      "name": "Minimal Valid Lead",
+      "description": "Minimal valid lead with only required fields",
+      "valid": true,
+      "expected_status": 200,
+      "data": {
+        "phone": "+79997777777",
+        "message": "Прошу перезвонить мне по вопросу консультации по вашим услугам.",
+        "source": "callback_request"
+      }
+    }
+  ]
+}

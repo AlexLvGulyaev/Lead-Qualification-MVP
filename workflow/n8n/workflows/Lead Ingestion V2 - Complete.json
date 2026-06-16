@@ -1,0 +1,310 @@
+{
+  "name": "Lead Ingestion V2 - Complete",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "ab4d310d-2475-44ac-8d22-8c25cf654ab9",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -608,
+        208
+      ],
+      "webhookId": "lead-v2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.item.json.body || $input.item.json;\nconsole.log('INPUT:', JSON.stringify(body, null, 2));\n\nconst errors = [];\nif (!body.message || body.message.trim().length < 10) {\n  errors.push({ field: 'message', message: 'Message must be at least 10 characters' });\n}\nif (!body.source) {\n  errors.push({ field: 'source', message: 'Source is required' });\n}\nif (!body.phone && !body.email) {\n  errors.push({ field: 'contact', message: 'Phone or email is required' });\n}\n\nif (errors.length > 0) {\n  return [{ json: { valid: false, errors: errors } }];\n}\n\nconst lead = {\n  name: (body.name || '').trim().substring(0, 255),\n  phone: (body.phone || '').trim().substring(0, 50),\n  email: (body.email || '').trim().toLowerCase().substring(0, 255),\n  message: body.message.trim(),\n  source: body.source.trim().substring(0, 50),\n  utm_source: (body.utm_source || '').trim().substring(0, 100),\n  utm_campaign: (body.utm_campaign || '').trim().substring(0, 100)\n};\n\nconsole.log('NORMALIZED LEAD:', JSON.stringify(lead, null, 2));\n\nreturn [{ json: { valid: true, lead: lead } }];"
+      },
+      "id": "1412d24a-b0f9-4117-b86a-fcd07fbfca71",
+      "name": "Validate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "adee312a-67f3-4265-8b42-b48d3e33d282",
+      "name": "Is Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -208,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: false, error: 'validation_error', details: $json.errors }) }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "684da4ec-c4b2-4939-ac4a-b415300c493a",
+      "name": "Error 400",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT find_or_create_contact_by_email_phone(\n  {{ $('Validate').item.json.lead.email ? \"'\" + $('Validate').item.json.lead.email.replace(/'/g, \"''\") + \"'\" : \"NULL\" }},\n  {{ $('Validate').item.json.lead.phone ? \"'\" + $('Validate').item.json.lead.phone.replace(/'/g, \"''\") + \"'\" : \"NULL\" }},\n  {{ $('Validate').item.json.lead.name ? \"'\" + $('Validate').item.json.lead.name.replace(/'/g, \"''\") + \"'\" : \"NULL\" }}\n) AS contact_id;",
+        "options": {}
+      },
+      "id": "315696fd-8635-4451-97aa-36fe320e428e",
+      "name": "Find/Create Contact",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        0,
+        208
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": " INSERT INTO leads (contact_id, source, utm_source, utm_campaign, status, public_number, created_at, updated_at)\n  VALUES (\n    '{{ $json.contact_id }}',\n    '{{ $('Validate').item.json.lead.source }}',\n    {{ $('Validate').item.json.lead.utm_source ? \"'\" + $('Validate').item.json.lead.utm_source.replace(/'/g, \"''\") + \"'\" : \"NULL\" }},\n    {{ $('Validate').item.json.lead.utm_campaign ? \"'\" + $('Validate').item.json.lead.utm_campaign.replace(/'/g, \"''\") + \"'\" : \"NULL\" }},\n    'received',\n    generate_public_number(),\n    NOW(),\n    NOW()\n  )\n  RETURNING id AS lead_id, public_number, contact_id, source, status, created_at;",
+        "options": {}
+      },
+      "id": "faef3893-3ef6-4609-ac70-5607c42f405c",
+      "name": "Create Lead",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        208,
+        208
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": " // Combine data from previous nodes\n  const leadData = $('Validate').item.json.lead;\n  const insertedLead = $input.item.json;\n\n  return [{\n    json: {\n      lead_id: insertedLead.lead_id,\n      public_number: insertedLead.public_number,\n      contact_id: insertedLead.contact_id,\n      lead_source: insertedLead.source,\n      lead_created: insertedLead.created_at,\n      message_content: leadData.message\n    }\n  }];"
+      },
+      "id": "ef2d2c34-1f64-409a-a34d-1051fc5ab013",
+      "name": "Combine Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO messages (lead_id, channel, direction, content)\nVALUES (\n  '{{ $json.lead_id }}',\n  'web',\n  'inbound',\n  '{{ $json.message_content.replace(/'/g, \"''\") }}'\n)\nRETURNING id, lead_id, channel, created_at;",
+        "options": {}
+      },
+      "id": "fd2af1b4-4fb7-4607-8905-3561da1e4185",
+      "name": "Insert Message",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        608,
+        208
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO logs (lead_id, event_type, event_data, status)\n  VALUES (\n    '{{ $('Combine Data').item.json.lead_id }}',\n    'lead_received',\n    '{{ JSON.stringify({ source: $('Combine Data').item.json.lead_source, channel: 'web', public_number: $('Combine Data').item.json.public_number }) }}',\n    'success'\n  )\n  RETURNING id, lead_id, event_type, created_at;",
+        "options": {}
+      },
+      "id": "c37f7e6a-a3c4-4985-af69-b2a3afb12a9a",
+      "name": "Insert Log",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        800,
+        208
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "=\n  {\n    \"success\": true,\n    \"public_number\": \"{{ $('Combine Data').item.json.public_number }}\",\n    \"message\": \"Lead received successfully\",\n    \"created_at\": \"{{ $('Combine Data').item.json.lead_created }}\"\n  }",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "92225ad2-2408-402d-9b02-143d209a968c",
+      "name": "Success 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1008,
+        208
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate": {
+      "main": [
+        [
+          {
+            "node": "Is Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Valid?": {
+      "main": [
+        [
+          {
+            "node": "Find/Create Contact",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error 400",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find/Create Contact": {
+      "main": [
+        [
+          {
+            "node": "Create Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Lead": {
+      "main": [
+        [
+          {
+            "node": "Combine Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Data": {
+      "main": [
+        [
+          {
+            "node": "Insert Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Message": {
+      "main": [
+        [
+          {
+            "node": "Insert Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Log": {
+      "main": [
+        [
+          {
+            "node": "Success 200",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "88f7914c-ad24-4fa1-813f-6f94bbee449b",
+  "meta": {
+    "instanceId": "f0d1e9776960d0516e967caa749e2359995ba70308d140b1dbeca71329f9df22"
+  },
+  "nodeGroups": [],
+  "id": "lAVEAbQXCYdjYUsQ",
+  "tags": []
+}

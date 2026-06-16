@@ -1,0 +1,17 @@
+# Environment files
+.env
+
+# Docker volumes (managed by Docker)
+postgres_data/
+n8n_data/
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
