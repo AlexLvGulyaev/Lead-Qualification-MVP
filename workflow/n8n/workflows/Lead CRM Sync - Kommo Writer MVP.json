@@ -1,0 +1,763 @@
+{
+  "name": "Lead CRM Sync - Kommo Writer MVP",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "cb5ad7b9-ad1b-4a3e-97c4-b7617262b6df",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -608,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Get qualified leads that haven't been synced to CRM yet\n-- Join contacts, qualifications, and messages to build complete payload\nSELECT \n  l.id AS lead_id,\n  l.public_number,\n  l.source,\n  l.utm_source,\n  l.utm_campaign,\n  l.created_at AS lead_created_at,\n  c.name AS contact_name,\n  c.phone AS contact_phone,\n  c.email AS contact_email,\n  c.company AS contact_company,\n  q.lead_type,\n  q.interest,\n  q.priority,\n  q.category,\n  q.summary,\n  q.confidence,\n  q.suggested_action,\n  q.reasoning,\n  q.ai_model,\n  q.processed_at AS qualification_processed_at,\n  m.content AS first_message\nFROM leads l\nINNER JOIN contacts c ON l.contact_id = c.id\nINNER JOIN qualifications q ON q.lead_id = l.id\nLEFT JOIN messages m ON m.lead_id = l.id AND m.direction = 'inbound'\nWHERE l.status = 'qualified'\n  AND NOT EXISTS (\n    SELECT 1 FROM crm_sync cs \n    WHERE cs.lead_id = l.id \n    AND cs.sync_status = 'success'\n  )\nORDER BY l.created_at ASC\nLIMIT 10;",
+        "options": {}
+      },
+      "id": "aa757565-5ca8-43bf-8c1c-e23fe6dca86a",
+      "name": "Get Qualified Leads",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -400,
+        160
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ba0de743-8f3a-4087-ad72-769b82906d56",
+              "leftValue": "={{ !!$json.lead_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -208,
+        160
+      ],
+      "id": "0288cf2e-31cc-4747-acc8-7f6843f2b4f1",
+      "name": "Has Leads?"
+    },
+    {
+      "parameters": {
+        "jsCode": "// No leads to sync\nreturn [{\n  json: {\n    success: true,\n    message: 'No qualified leads to sync',\n    leads_processed: 0\n  }\n}];"
+      },
+      "id": "715b49cf-702e-4fc5-80c5-7411e7e57902",
+      "name": "No Leads",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build Kommo Payload Node\n// FIX #3: Use real Kommo status names instead of lead type labels\n\nconst leadData = $input.item.json;\n\n// Kommo env\nconst KOMMO_PIPELINE_ID = $env.KOMMO_PIPELINE_ID;\nconst KOMMO_STATUS_INITIAL_CONTACT = $env.KOMMO_STATUS_INITIAL_CONTACT;\nconst KOMMO_STATUS_DISCUSSIONS = $env.KOMMO_STATUS_DISCUSSIONS;\nconst KOMMO_STATUS_DECISION_MAKING = $env.KOMMO_STATUS_DECISION_MAKING;\nconst KOMMO_STATUS_LOST = $env.KOMMO_STATUS_LOST;\nconst KOMMO_RESPONSIBLE_USER_ID = $env.KOMMO_RESPONSIBLE_USER_ID;\n\n// Status names from env (FIX #3)\nconst KOMMO_STATUS_NAME_INITIAL_CONTACT = $env.KOMMO_STATUS_NAME_INITIAL_CONTACT || 'Первичный контакт';\nconst KOMMO_STATUS_NAME_DISCUSSIONS = $env.KOMMO_STATUS_NAME_DISCUSSIONS || 'Переговоры';\nconst KOMMO_STATUS_NAME_DECISION_MAKING = $env.KOMMO_STATUS_NAME_DECISION_MAKING || 'Принимается решение';\nconst KOMMO_STATUS_NAME_LOST = $env.KOMMO_STATUS_NAME_LOST || 'Закрыто и не реализовано';\n\nconst KOMMO_LEAD_TYPE_FIELD_ID = $env.KOMMO_LEAD_TYPE_FIELD_ID;\nconst KOMMO_PRIORITY_FIELD_ID = $env.KOMMO_PRIORITY_FIELD_ID;\nconst KOMMO_CONFIDENCE_FIELD_ID = $env.KOMMO_CONFIDENCE_FIELD_ID;\nconst KOMMO_PUBLIC_NUMBER_FIELD_ID = $env.KOMMO_PUBLIC_NUMBER_FIELD_ID;\nconst KOMMO_CATEGORY_FIELD_ID = $env.KOMMO_CATEGORY_FIELD_ID;\nconst KOMMO_ACTION_FIELD_ID = $env.KOMMO_ACTION_FIELD_ID;\n\n// Status mapping: lead_type -> status_id\nconst statusIdMap = {\n  hot: KOMMO_STATUS_INITIAL_CONTACT,\n  warm: KOMMO_STATUS_DISCUSSIONS,\n  cold: KOMMO_STATUS_DECISION_MAKING,\n  spam: KOMMO_STATUS_LOST,\n};\n\n// FIX #3: Status name mapping: status_id -> status_name (from env)\nconst statusNameMap = {\n  [KOMMO_STATUS_INITIAL_CONTACT]: KOMMO_STATUS_NAME_INITIAL_CONTACT,\n  [KOMMO_STATUS_DISCUSSIONS]: KOMMO_STATUS_NAME_DISCUSSIONS,\n  [KOMMO_STATUS_DECISION_MAKING]: KOMMO_STATUS_NAME_DECISION_MAKING,\n  [KOMMO_STATUS_LOST]: KOMMO_STATUS_NAME_LOST,\n};\n\nconst leadTypeLabelMap = {\n  hot: 'Горячий',\n  warm: 'Теплый',\n  cold: 'Холодный',\n  spam: 'Нецелевой',\n};\n\nconst priorityLabelMap = {\n  high: 'Высокий',\n  medium: 'Средний',\n  low: 'Низкий',\n};\n\nconst actionLabelMap = {\n  call: 'Позвонить',\n  email: 'Написать',\n  reject: 'Отклонить',\n  archive: 'В архив',\n};\n\nconst statusId = statusIdMap[leadData.lead_type] || KOMMO_STATUS_INITIAL_CONTACT;\nconst isSpam = leadData.lead_type === 'spam';\n\n// FIX #3: Use status name from Kommo, not lead type label\nconst statusName = statusNameMap[statusId] || 'Неизвестный статус';\n\nconst kommoPayload = {\n  name: `${leadData.public_number || 'LQ'} — ${leadData.contact_name || 'Неизвестный контакт'}`,\n  price: 0,\n  pipeline_id: Number(KOMMO_PIPELINE_ID),\n  status_id: Number(statusId),\n  responsible_user_id: Number(KOMMO_RESPONSIBLE_USER_ID),\n  custom_fields_values: [\n    {\n      field_id: Number(KOMMO_LEAD_TYPE_FIELD_ID),\n      values: [{ value: leadTypeLabelMap[leadData.lead_type] || 'Холодный' }],\n    },\n    {\n      field_id: Number(KOMMO_PRIORITY_FIELD_ID),\n      values: [{ value: priorityLabelMap[leadData.priority] || 'Низкий' }],\n    },\n    {\n      field_id: Number(KOMMO_CONFIDENCE_FIELD_ID),\n      values: [{ value: String(leadData.confidence ?? 0) }],\n    },\n    {\n      field_id: Number(KOMMO_PUBLIC_NUMBER_FIELD_ID),\n      values: [{ value: leadData.public_number }],\n    },\n    ...(leadData.category && KOMMO_CATEGORY_FIELD_ID ? [{\n      field_id: Number(KOMMO_CATEGORY_FIELD_ID),\n      values: [{ value: leadData.category }],\n    }] : []),\n    ...(leadData.suggested_action && KOMMO_ACTION_FIELD_ID ? [{\n      field_id: Number(KOMMO_ACTION_FIELD_ID),\n      values: [{ value: actionLabelMap[leadData.suggested_action] || leadData.suggested_action }],\n    }] : []),\n  ],\n  _embedded: {\n    contacts: [{\n      name: leadData.contact_name || 'Неизвестный контакт',\n      ...(leadData.contact_phone || leadData.contact_email\n        ? {\n            custom_fields_values: [\n              ...(leadData.contact_phone ? [{\n                field_code: 'PHONE',\n                values: [{ value: leadData.contact_phone, enum_code: 'WORK' }],\n              }] : []),\n              ...(leadData.contact_email ? [{\n                field_code: 'EMAIL',\n                values: [{ value: leadData.contact_email, enum_code: 'WORK' }],\n              }] : []),\n            ],\n          }\n        : {}\n      ),\n    }],\n  },\n};\n\n// Task configuration by lead_type\nconst taskConfig = {\n  hot: {\n    text: `Горячий лид ${leadData.public_number}. Связаться с клиентом.`,\n    due_minutes: 15,\n    create: true\n  },\n  warm: {\n    text: `Тёплый лид ${leadData.public_number}. Выполнить follow-up.`,\n    due_minutes: 1440, // 24 hours\n    create: true\n  },\n  cold: {\n    text: `Холодный лид ${leadData.public_number}. Отложенный контакт.`,\n    due_minutes: 10080, // 7 days\n    create: true\n  },\n  spam: {\n    text: '',\n    due_minutes: 0,\n    create: false\n  }\n};\n\nconst task = taskConfig[leadData.lead_type] || taskConfig.cold;\n\nreturn [{\n  json: {\n    lead_id: leadData.lead_id,\n    lead_type: leadData.lead_type,\n    public_number: leadData.public_number,\n    contact_name: leadData.contact_name,\n    contact_phone: leadData.contact_phone,\n    contact_email: leadData.contact_email,\n    summary: leadData.summary,\n    reasoning: leadData.reasoning,\n    suggested_action: leadData.suggested_action,\n    first_message: leadData.first_message,\n    \n    is_spam: isSpam,\n    create_task: task.create && !isSpam,\n    task_text: task.text,\n    task_due_minutes: task.due_minutes,\n    \n    kommo_payload: kommoPayload,\n    kommo_url: `${$env.KOMMO_BASE_URL}/api/v4/leads/complex`,\n    kommo_auth: `Bearer ${$env.KOMMO_ACCESS_TOKEN}`,\n    kommo_body: [kommoPayload],\n    \n    kommo_pipeline_id: KOMMO_PIPELINE_ID,\n    kommo_pipeline_name: 'Основная воронка',\n    kommo_status_id: statusId,\n    kommo_status_name: statusName,\n    kommo_responsible_user_id: KOMMO_RESPONSIBLE_USER_ID,\n  },\n}];"
+      },
+      "id": "5cbf1657-bf6a-4d62-8392-25ea57384cde",
+      "name": "Build Kommo Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Build Kommo Payload').item.json.kommo_url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ $('Build Kommo Payload').item.json.kommo_auth }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($('Build Kommo Payload').item.json.kommo_body) }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "c76326ac-7c36-4dfa-8349-1dcbd0b924dd",
+      "name": "Create Kommo Deal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        208,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.item.json;\nconst payload = $('Build Kommo Payload').item.json;\n\n// FIX #4: Correctly parse Kommo API response\nconst parsed = typeof response.data === 'string'\n  ? JSON.parse(response.data)\n  : response;\n\n// Handle array or single object response\nconst leadData = Array.isArray(parsed) ? parsed[0] : parsed;\nconst embeddedLeads = leadData?._embedded?.leads;\nconst firstLead = Array.isArray(embeddedLeads) ? embeddedLeads[0] : null;\n\nconst leadId = firstLead?.id || leadData?.id;\nconst contactId = leadData?._embedded?.contacts?.[0]?.id;\n\nreturn [{\n  json: {\n    lead_id: payload.lead_id,\n    lead_type: payload.lead_type,\n    public_number: payload.public_number,\n    \n    kommo_lead_id: leadId ? leadId.toString() : null,\n    kommo_contact_id: contactId ? contactId.toString() : null,\n    \n    is_spam: payload.is_spam,\n    create_task: payload.create_task,\n    task_text: payload.task_text,\n    task_due_minutes: payload.task_due_minutes,\n    \n    kommo_pipeline_id: payload.kommo_pipeline_id,\n    kommo_pipeline_name: payload.kommo_pipeline_name,\n    kommo_status_id: payload.kommo_status_id,\n    kommo_status_name: payload.kommo_status_name,\n    kommo_responsible_user_id: payload.kommo_responsible_user_id,\n    \n    kommo_auth: payload.kommo_auth,\n    kommo_base_url: $env.KOMMO_BASE_URL,\n    kommo_subdomain: $env.KOMMO_SUBDOMAIN,\n    \n    summary: payload.summary,\n    reasoning: payload.reasoning,\n    suggested_action: payload.suggested_action,\n    first_message: payload.first_message,\n    \n    sync_status: 'success',\n    sync_error: null,\n    synced_at: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "e5bca587-68f5-42f7-90ff-1c9bfc0c4c72",
+      "name": "Prepare Success Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const error = $input.item.json;\nconst payload = $('Build Kommo Payload').item.json;\n\nconst errorMessage = error.error?.message || \n                     error.message || \n                     JSON.stringify(error);\n\nreturn [{\n  json: {\n    lead_id: payload.lead_id,\n    lead_type: payload.lead_type,\n    public_number: payload.public_number,\n    \n    kommo_lead_id: null,\n    sync_status: 'failed',\n    sync_error: errorMessage.substring(0, 500),\n    synced_at: null\n  }\n}];"
+      },
+      "id": "409514ba-32c4-4c4a-916d-af61f5c3ea3b",
+      "name": "Prepare Error Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.kommo_base_url }}/api/v4/leads/{{ $json.kommo_lead_id }}/notes",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ $json.kommo_auth }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify([{ \"note_type\": \"common\", \"params\": { \"text\": `AI Classification: ${$json.lead_type}\\n\\nSummary: ${$json.summary || 'N/A'}\\n\\nReasoning: ${$json.reasoning || 'N/A'}\\n\\nSuggested Action: ${$json.suggested_action || 'N/A'}\\n\\nLead ID: ${$json.lead_id}\\nPublic Number: ${$json.public_number}\\nChannel: ${$('Get Qualified Leads').item.json.source || 'N/A'}\\nFirst Message: ${$json.first_message || 'N/A'}` } }]) }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "fbe2039f-cb0f-4c24-b7d1-3afa08b6b940",
+      "name": "Create Note",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        800,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// FIX: Restore context after Create Note HTTP Request\n// After Create Note, $json is overwritten with Kommo notes API response\n// We need to restore the original context from Prepare Success Data\n\nconst context = $('Prepare Success Data').item.json;\nconst noteResponse = $input.item.json;\n\n// Optional: extract note_id for diagnostics\nlet noteId = null;\ntry {\n  const parsed = typeof noteResponse.data === 'string'\n    ? JSON.parse(noteResponse.data)\n    : noteResponse;\n  noteId = parsed._embedded?.notes?.[0]?.id || parsed.id || null;\n} catch (e) {\n  // Note creation may have failed, but we continue with original context\n}\n\nreturn [{\n  json: {\n    ...context,\n    note_created: true,\n    note_id: noteId\n  }\n}];"
+      },
+      "id": "59528374-8c17-45ee-bd00-6a192ba586ca",
+      "name": "Restore Context After Note",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1008,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "create-task-condition",
+              "leftValue": "={{ $json.create_task }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1200,
+        208
+      ],
+      "id": "e6368ba5-7209-4c59-9fd0-47c016f571fc",
+      "name": "Create Task?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.kommo_base_url }}/api/v4/tasks",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ $json.kommo_auth }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify([{ \"entity_id\": Number($json.kommo_lead_id), \"entity_type\": \"leads\", \"responsible_user_id\": Number($json.kommo_responsible_user_id), \"task_type_id\": 1, \"text\": $json.task_text, \"complete_till\": Math.floor(Date.now() / 1000) + $json.task_due_minutes * 60 }]) }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "a9c79e76-5e04-4bd2-a078-fd7a673163fb",
+      "name": "Create Kommo Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1408,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// FIX: Use restored context from 'Restore Context After Note'\nconst prevData = $('Restore Context After Note').item.json;\n\nreturn [{\n  json: {\n    ...prevData,\n    initial_task_created: true,\n    crm_has_active_task: true,\n    crm_closest_task_at: new Date(Date.now() + prevData.task_due_minutes * 60000).toISOString(),\n    crm_closed_at: null,\n    crm_raw_snapshot: null\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        112
+      ],
+      "id": "ba54090d-3b04-49b3-8aa8-e3aca343aa7c",
+      "name": "Task Created Success"
+    },
+    {
+      "parameters": {
+        "jsCode": "// FIX: Use restored context from 'Restore Context After Note'\nconst prevData = $('Restore Context After Note').item.json;\n\nreturn [{\n  json: {\n    ...prevData,\n    initial_task_created: false,\n    crm_has_active_task: false,\n    crm_closest_task_at: null,\n    crm_closed_at: prevData.is_spam ? new Date().toISOString() : null,\n    crm_raw_snapshot: null\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1408,
+        304
+      ],
+      "id": "b31f32f2-4d40-474d-886e-2f658ca9dbe6",
+      "name": "Skip Task Data"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO crm_sync (\n    lead_id,\n    crm_type,\n    kommo_lead_id,\n    kommo_contact_id,\n    kommo_pipeline_id,\n    kommo_pipeline_name,\n    kommo_status_id,\n    kommo_status_name,\n    kommo_responsible_user_id,\n    crm_has_active_task,\n    crm_closest_task_at,\n    crm_closed_at,\n    crm_synced_at,\n    initial_task_created,\n    sync_status,\n    sync_error,\n    created_at\n) VALUES (\n    '{{ $json.lead_id }}',\n    'kommo',\n    {{ $json.kommo_lead_id ? $json.kommo_lead_id : 'NULL' }},\n    {{ $json.kommo_contact_id ? $json.kommo_contact_id : 'NULL' }},\n    {{ $json.kommo_pipeline_id ? $json.kommo_pipeline_id : 'NULL' }},\n    {{ $json.kommo_pipeline_name ? \"'\" + $json.kommo_pipeline_name.replace(/'/g, \"''\") + \"'\" : 'NULL' }},\n    {{ $json.kommo_status_id ? $json.kommo_status_id : 'NULL' }},\n    {{ $json.kommo_status_name ? \"'\" + $json.kommo_status_name.replace(/'/g, \"''\") + \"'\" : 'NULL' }},\n    {{ $json.kommo_responsible_user_id ? $json.kommo_responsible_user_id : 'NULL' }},\n    {{ $json.crm_has_active_task ? 'TRUE' : 'FALSE' }},\n    {{ $json.crm_closest_task_at ? \"'\" + $json.crm_closest_task_at + \"'\" : 'NULL' }},\n    {{ $json.crm_closed_at ? \"'\" + $json.crm_closed_at + \"'\" : 'NULL' }},\n    {{ $json.crm_synced_at ? \"'\" + $json.crm_synced_at + \"'\" : 'NOW()' }},\n    {{ $json.initial_task_created ? 'TRUE' : 'FALSE' }},\n    '{{ $json.sync_status }}',\n    {{ $json.sync_error ? \"'\" + $json.sync_error.replace(/'/g, \"''\") + \"'\" : 'NULL' }},\n    NOW()\n) RETURNING id, lead_id, kommo_lead_id, sync_status, created_at;",
+        "options": {}
+      },
+      "id": "31f494a3-f179-4cfd-b377-45a7b835f916",
+      "name": "Insert CRM Sync",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2000,
+        160
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO crm_sync (\n    lead_id,\n    crm_type,\n    kommo_lead_id,\n    sync_status,\n    sync_error,\n    synced_at,\n    created_at\n) VALUES (\n    '{{ $json.lead_id }}',\n    'kommo',\n    {{ $json.kommo_lead_id ? $json.kommo_lead_id : 'NULL' }},\n    '{{ $json.sync_status }}',\n    {{ $json.sync_error ? \"'\" + $json.sync_error.replace(/'/g, \"''\") + \"'\" : 'NULL' }},\n    {{ $json.synced_at ? \"'\" + $json.synced_at + \"'\" : 'NULL' }},\n    NOW()\n) RETURNING id, lead_id, sync_status, created_at;",
+        "options": {}
+      },
+      "id": "ee9601ac-9b6d-46b4-8415-5b64aa1c8f50",
+      "name": "Insert CRM Sync (Error)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        800,
+        448
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE leads\nSET status = 'processed',\n    updated_at = NOW()\nWHERE id = '{{ $json.lead_id }}'\nRETURNING id, status, updated_at;",
+        "options": {}
+      },
+      "id": "606483de-c032-4689-b473-831c5fd3faea",
+      "name": "Update Lead Status",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2208,
+        160
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare Success Log Node\nconst syncData = $('Insert CRM Sync').item.json;\nconst statusData = $input.item.json;\nconst payload = $('Build Kommo Payload').item.json;\n\nreturn [{\n  json: {\n    lead_id: syncData.lead_id,\n    event_type: 'crm_sync_success',\n    event_data: JSON.stringify({\n      crm_type: 'kommo',\n      kommo_lead_id: syncData.kommo_lead_id,\n      public_number: payload.public_number,\n      lead_type: payload.lead_type,\n      contact_name: payload.contact_name,\n      new_status: statusData.status,\n      initial_task_created: syncData.initial_task_created\n    }),\n    status: 'success',\n    error_message: null\n  }\n}];"
+      },
+      "id": "85ecc477-04dc-469c-a2a9-773c2ead4357",
+      "name": "Prepare Success Log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2400,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare Error Log Node\nconst syncData = $input.item.json;\nconst payload = $('Build Kommo Payload').item.json;\n\nreturn [{\n  json: {\n    lead_id: syncData.lead_id,\n    event_type: 'crm_sync_error',\n    event_data: JSON.stringify({\n      crm_type: 'kommo',\n      sync_error: syncData.sync_error,\n      public_number: payload.public_number,\n      lead_type: payload.lead_type,\n      contact_name: payload.contact_name\n    }),\n    status: 'error',\n    error_message: syncData.sync_error\n  }\n}];"
+      },
+      "id": "27907757-c1e9-4510-bbe6-88848610d987",
+      "name": "Prepare Error Log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1008,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO logs (\n    lead_id,\n    event_type,\n    event_data,\n    status,\n    error_message,\n    created_at\n) VALUES (\n    '{{ $json.lead_id }}',\n    '{{ $json.event_type }}',\n    '{{ $json.event_data }}',\n    '{{ $json.status }}',\n    {{ $json.error_message ? \"'\" + $json.error_message.replace(/'/g, \"''\") + \"'\" : 'NULL' }},\n    NOW()\n) RETURNING id, lead_id, event_type, status, created_at;",
+        "options": {}
+      },
+      "id": "5c178d39-2763-48ed-a139-a615ba194c29",
+      "name": "Insert Log",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2608,
+        160
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO logs (\n    lead_id,\n    event_type,\n    event_data,\n    status,\n    error_message,\n    created_at\n) VALUES (\n    '{{ $json.lead_id }}',\n    '{{ $json.event_type }}',\n    '{{ $json.event_data }}',\n    '{{ $json.status }}',\n    {{ $json.error_message ? \"'\" + $json.error_message.replace(/'/g, \"''\") + \"'\" : 'NULL' }},\n    NOW()\n) RETURNING id, lead_id, event_type, status, created_at;",
+        "options": {}
+      },
+      "id": "cd8d1ee2-91b0-4ba6-a2de-4e97e310e6a0",
+      "name": "Insert Log (Error)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1408,
+        448
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Final Success Response\nconst syncData = $('Insert CRM Sync').item.json;\nconst logData = $('Insert Log').item.json;\nconst statusData = $('Update Lead Status').item.json;\nconst payload = $('Build Kommo Payload').item.json;\n\nconst kommoUrl = syncData.kommo_lead_id \n  ? `https://${$env.KOMMO_SUBDOMAIN}.kommo.com/leads/detail/${syncData.kommo_lead_id}`\n  : null;\n\nreturn [{\n  json: {\n    success: true,\n    lead_id: syncData.lead_id,\n    kommo_lead_id: syncData.kommo_lead_id,\n    kommo_url: kommoUrl,\n    public_number: payload.public_number,\n    lead_type: payload.lead_type,\n    sync_status: syncData.sync_status,\n    initial_task_created: syncData.initial_task_created,\n    crm_has_active_task: syncData.crm_has_active_task,\n    new_lead_status: statusData.status,\n    log_id: logData.id,\n    synced_at: syncData.created_at\n  }\n}];"
+      },
+      "id": "c7b0046d-48d7-4e9a-8759-39c8f4ca02d7",
+      "name": "Success",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2800,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Final Error Response\nconst syncData = $('Insert CRM Sync (Error)').item.json;\nconst logData = $('Insert Log (Error)').item.json;\nconst payload = $('Build Kommo Payload').item.json;\n\nreturn [{\n  json: {\n    success: false,\n    lead_id: syncData.lead_id,\n    public_number: payload.public_number,\n    lead_type: payload.lead_type,\n    sync_status: syncData.sync_status,\n    sync_error: syncData.sync_error,\n    log_id: logData.id,\n    created_at: syncData.created_at\n  }\n}];"
+      },
+      "id": "8a4c98a5-ac8f-4e5a-b9e7-7565e5a6839d",
+      "name": "Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1808,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "23cf48e9-03d0-475c-9cb3-fa83f2691928",
+              "leftValue": "={{ String($json.id || $json[0]?.id || $json._embedded?.leads?.[0]?.id || '') }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        384,
+        320
+      ],
+      "id": "6feaa60f-0887-4b3f-943a-66aebae5aadb",
+      "name": "If"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Qualified Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Qualified Leads": {
+      "main": [
+        [
+          {
+            "node": "Has Leads?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Leads?": {
+      "main": [
+        [
+          {
+            "node": "Build Kommo Payload",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Kommo Payload": {
+      "main": [
+        [
+          {
+            "node": "Create Kommo Deal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Kommo Deal": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Success Data": {
+      "main": [
+        [
+          {
+            "node": "Create Note",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Error Data": {
+      "main": [
+        [
+          {
+            "node": "Insert CRM Sync (Error)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Note": {
+      "main": [
+        [
+          {
+            "node": "Restore Context After Note",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore Context After Note": {
+      "main": [
+        [
+          {
+            "node": "Create Task?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Task?": {
+      "main": [
+        [
+          {
+            "node": "Create Kommo Task",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Skip Task Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Kommo Task": {
+      "main": [
+        [
+          {
+            "node": "Task Created Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Task Created Success": {
+      "main": [
+        [
+          {
+            "node": "Insert CRM Sync",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip Task Data": {
+      "main": [
+        [
+          {
+            "node": "Insert CRM Sync",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert CRM Sync": {
+      "main": [
+        [
+          {
+            "node": "Update Lead Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert CRM Sync (Error)": {
+      "main": [
+        [
+          {
+            "node": "Prepare Error Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Lead Status": {
+      "main": [
+        [
+          {
+            "node": "Prepare Success Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Success Log": {
+      "main": [
+        [
+          {
+            "node": "Insert Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Error Log": {
+      "main": [
+        [
+          {
+            "node": "Insert Log (Error)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Log": {
+      "main": [
+        [
+          {
+            "node": "Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Log (Error)": {
+      "main": [
+        [
+          {
+            "node": "Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Prepare Success Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Error Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "3f893075-081b-400d-87cd-5f099b6c13a6",
+  "meta": {
+    "instanceId": "f0d1e9776960d0516e967caa749e2359995ba70308d140b1dbeca71329f9df22"
+  },
+  "nodeGroups": [],
+  "id": "ojtqEaFqdPpfMg4p",
+  "tags": []
+}

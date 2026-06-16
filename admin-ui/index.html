@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Qualification — Admin Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app">
+        <div class="app-layout">
+            <!-- Sidebar - Full Height -->
+            <aside class="sidebar">
+                <div class="sidebar-brand">
+                    <svg class="sidebar-logo" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 4l-12 8v16h24v-16l-12-8z"/>
+                        <path d="M16 12v8"/>
+                        <circle cx="16" cy="16" r="2"/>
+                    </svg>
+                    <div class="sidebar-brand-text">
+                        <div class="sidebar-brand-title">Lead Qualification</div>
+                    </div>
+                </div>
+                <nav class="sidebar-nav">
+                    <div class="nav-section">
+                        <div class="nav-section-title">Обзор</div>
+                        <a href="#dashboard" class="nav-item active" data-page="dashboard">
+                            <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="3" y="3" width="7" height="7" rx="1"/>
+                                <rect x="10" y="3" width="7" height="7" rx="1"/>
+                                <rect x="3" y="10" width="7" height="7" rx="1"/>
+                                <rect x="10" y="10" width="7" height="7" rx="1"/>
+                            </svg>
+                            Dashboard
+                        </a>
+                        <a href="#leads" class="nav-item" data-page="leads">
+                            <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M9 2H5a2 2 0 00-2 2v4a2 2 0 002 2h4a2 2 0 002-2V4a2 2 0 00-2-2z"/>
+                                <path d="M15 2h-2a2 2 0 00-2 2v4a2 2 0 002 2h2a2 2 0 002-2V4a2 2 0 00-2-2z"/>
+                                <path d="M9 12H5a2 2 0 00-2 2v4a2 2 0 002 2h4a2 2 0 002-2v-4a2 2 0 00-2-2z"/>
+                                <path d="M15 12h-2a2 2 0 00-2 2v4a2 2 0 002 2h2a2 2 0 002-2v-4a2 2 0 00-2-2z"/>
+                            </svg>
+                            Очередь лидов
+                        </a>
+                    </div>
+                    <div class="nav-section">
+                        <div class="nav-section-title">Аналитика</div>
+                        <a href="#monitoring" class="nav-item" data-page="monitoring">
+                            <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M2 16l4-8 4 4 4-6 4 8"/>
+                                <path d="M2 18h16"/>
+                            </svg>
+                            Monitoring
+                        </a>
+                        <a href="#system" class="nav-item" data-page="system">
+                            <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="10" cy="10" r="3"/>
+                                <path d="M10 2v2"/>
+                                <path d="M10 16v2"/>
+                                <path d="M2 10h2"/>
+                                <path d="M16 10h2"/>
+                                <path d="M4.93 4.93l1.41 1.41"/>
+                                <path d="M13.66 13.66l1.41 1.41"/>
+                                <path d="M4.93 15.07l1.41-1.41"/>
+                                <path d="M13.66 6.34l1.41-1.41"/>
+                            </svg>
+                            System Status
+                        </a>
+                    </div>
+                </nav>
+                <div class="sidebar-footer">
+                    <div class="system-status">
+                        <div class="status-indicator" id="system-status-indicator"></div>
+                        <span class="status-text" id="system-status-text">System Online</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="main">
+                <!-- Global Header -->
+                <header class="global-header">
+                    <div class="global-header__left">
+                        <div class="global-header__title">ADMIN CONSOLE</div>
+                        <div class="global-header__subtitle">Консоль квалификации лидов</div>
+                    </div>
+                    <div class="global-header__right">
+                        <div class="global-header__zerocoder">Zerocoder</div>
+                    </div>
+                </header>
+
+                <!-- Workspace Header -->
+                <div class="workspace-header" id="workspace-header">
+                    <h1 class="workspace-title" id="workspace-title">Dashboard</h1>
+                    <p class="workspace-subtitle" id="workspace-subtitle">Обзор показателей системы</p>
+                </div>
+
+                <div class="workspace-divider"></div>
+
+                <!-- Content -->
+                <div class="content">
+                    <!-- Dashboard Page -->
+                    <div id="dashboard-page" class="page active">
+                        <div class="dashboard-grid">
+                            <!-- Блок 1: Лиды -->
+                            <div class="metrics-block">
+                                <div class="metrics-block__title">Лиды</div>
+                                <div class="metrics-row">
+                                    <div class="metric-card">
+                                        <div class="metric-header">
+                                            <span class="metric-label">Всего лидов</span>
+                                        </div>
+                                        <div class="metric-value" id="metric-total">—</div>
+                                    </div>
+                                    <div class="metric-card hot">
+                                        <div class="metric-header">
+                                            <span class="metric-label">Горячие</span>
+                                        </div>
+                                        <div class="metric-value" id="metric-hot">—</div>
+                                    </div>
+                                    <div class="metric-card warm">
+                                        <div class="metric-header">
+                                            <span class="metric-label">Тёплые</span>
+                                        </div>
+                                        <div class="metric-value" id="metric-warm">—</div>
+                                    </div>
+                                    <div class="metric-card cold">
+                                        <div class="metric-header">
+                                            <span class="metric-label">Холодные</span>
+                                        </div>
+                                        <div class="metric-value" id="metric-cold">—</div>
+                                    </div>
+                                    <div class="metric-card spam">
+                                        <div class="metric-header">
+                                            <span class="metric-label">Спам</span>
+                                        </div>
+                                        <div class="metric-value" id="metric-spam">—</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Блок 2: Источники -->
+                            <div class="metrics-block">
+                                <div class="metrics-block__title">Источники</div>
+                                <div class="metrics-row">
+                                    <div class="metric-card telegram">
+                                        <div class="metric-header">
+                                            <span class="metric-label">Telegram</span>
+                                        </div>
+                                        <div class="metric-value" id="metric-telegram">—</div>
+                                    </div>
+                                    <div class="metric-card website">
+                                        <div class="metric-header">
+                                            <span class="metric-label">Website</span>
+                                        </div>
+                                        <div class="metric-value" id="metric-website">—</div>
+                                    </div>
+                                    <div class="metric-card social">
+                                        <div class="metric-header">
+                                            <span class="metric-label">Social</span>
+                                        </div>
+                                        <div class="metric-value" id="metric-social">—</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Блок 3: Система -->
+                            <div class="metrics-block">
+                                <div class="metrics-block__title">Система</div>
+                                <div class="metrics-row">
+                                    <div class="metric-card success">
+                                        <div class="metric-header">
+                                            <span class="metric-label">CRM Sync</span>
+                                        </div>
+                                        <div class="metric-value" id="metric-crm-success">—</div>
+                                    </div>
+                                    <div class="metric-card">
+                                        <div class="metric-header">
+                                            <span class="metric-label">AI Уверенность</span>
+                                        </div>
+                                        <div class="metric-value" id="metric-confidence">—</div>
+                                    </div>
+                                    <div class="metric-card">
+                                        <div class="metric-header">
+                                            <span class="metric-label">Лидов за 24 часа</span>
+                                        </div>
+                                        <div class="metric-value" id="metric-24h">—</div>
+                                    </div>
+                                    <div class="metric-card">
+                                        <div class="metric-header">
+                                            <span class="metric-label">Лидов за 7 дней</span>
+                                        </div>
+                                        <div class="metric-value" id="metric-7d">—</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Charts -->
+                            <div class="charts-section">
+                                <div class="chart-card">
+                                    <div class="chart-header">
+                                        <h3 class="chart-title">Распределение по типам</h3>
+                                    </div>
+                                    <div class="distribution-chart">
+                                        <div class="distribution-bar" id="distribution-bar">
+                                            <div class="bar-segment hot" id="bar-hot"></div>
+                                            <div class="bar-segment warm" id="bar-warm"></div>
+                                            <div class="bar-segment cold" id="bar-cold"></div>
+                                            <div class="bar-segment spam" id="bar-spam"></div>
+                                        </div>
+                                        <div class="distribution-legend" id="distribution-legend"></div>
+                                    </div>
+                                </div>
+                                <div class="chart-card">
+                                    <div class="chart-header">
+                                        <h3 class="chart-title">Распределение по источникам</h3>
+                                    </div>
+                                    <div class="distribution-chart">
+                                        <div class="distribution-bar" id="sources-bar">
+                                            <div class="bar-segment telegram" id="bar-telegram"></div>
+                                            <div class="bar-segment website" id="bar-website"></div>
+                                            <div class="bar-segment social_media" id="bar-social"></div>
+                                        </div>
+                                        <div class="distribution-legend" id="sources-legend"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Leads Page - Operational Workspace -->
+                    <div id="leads-page" class="page">
+                        <div class="operational-workspace">
+                            <!-- Left Macropanel -->
+                            <div class="left-macropanel">
+                                <!-- Filters -->
+                                <div class="filters-bar">
+                                    <select class="filter-select" id="filter-type">
+                                        <option value="">Все типы</option>
+                                        <option value="hot">🔥 Горячие</option>
+                                        <option value="warm">🌡️ Тёплые</option>
+                                        <option value="cold">❄️ Холодные</option>
+                                        <option value="spam">🗑️ Спам</option>
+                                    </select>
+                                    <select class="filter-select" id="filter-source">
+                                        <option value="">Все источники</option>
+                                        <option value="telegram">Telegram</option>
+                                        <option value="website">Website</option>
+                                        <option value="social_media">Social Media</option>
+                                    </select>
+                                </div>
+                                <!-- Search -->
+                                <div class="search-bar">
+                                    <input type="text" class="search-input" id="search-input" placeholder="Поиск по имени, телефону, email...">
+                                </div>
+                                <!-- Pagination -->
+                                <div class="pagination-bar">
+                                    <span class="pagination-meta">Страница <span id="pagination-page">1</span> · Всего: <span id="pagination-total">0</span> · Показано: <span id="pagination-shown">0</span></span>
+                                    <div class="pagination-controls">
+                                        <button class="pagination-btn" id="pagination-prev" disabled>←</button>
+                                        <button class="pagination-btn" id="pagination-next">→</button>
+                                    </div>
+                                </div>
+                                <!-- List -->
+                                <div class="list-container" id="leads-list">
+                                    <div class="loading-state">
+                                        <div class="spinner"></div>
+                                        <div class="loading-text">Загрузка...</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Macropanel -->
+                            <div class="right-macropanel" id="lead-detail">
+                                <div class="empty-state">
+                                    <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+                                        <rect x="9" y="3" width="6" height="4" rx="1"/>
+                                    </svg>
+                                    <h3 class="empty-title">Выберите лид</h3>
+                                    <p class="empty-text">Кликните на элемент в списке</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Monitoring Page -->
+                    <div id="monitoring-page" class="page">
+                        <div class="operational-workspace">
+                            <div class="left-macropanel">
+                                <div class="filters-bar">
+                                    <select class="filter-select" id="monitoring-type">
+                                        <option value="">Все события</option>
+                                        <option value="lead">Новые лиды</option>
+                                        <option value="qualification">Квалификации</option>
+                                        <option value="crm_sync">CRM синхронизации</option>
+                                        <option value="error">Ошибки</option>
+                                    </select>
+                                </div>
+                                <div class="search-bar">
+                                    <input type="text" class="search-input" id="monitoring-search" placeholder="Поиск по ID события...">
+                                </div>
+                                <div class="pagination-bar">
+                                    <span class="pagination-meta">Страница <span id="monitoring-pagination-page">1</span> · Всего: <span id="monitoring-pagination-total">0</span> · Показано: <span id="monitoring-pagination-shown">0</span></span>
+                                    <div class="pagination-controls">
+                                        <button class="pagination-btn" id="monitoring-pagination-prev" disabled>←</button>
+                                        <button class="pagination-btn" id="monitoring-pagination-next">→</button>
+                                    </div>
+                                </div>
+                                <div class="list-container" id="monitoring-list">
+                                    <div class="loading-state">
+                                        <div class="spinner"></div>
+                                        <div class="loading-text">Загрузка событий...</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="right-macropanel" id="event-detail">
+                                <div class="empty-state">
+                                    <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path d="M12 8v4"/>
+                                        <path d="M12 16h.01"/>
+                                    </svg>
+                                    <h3 class="empty-title">Выберите событие</h3>
+                                    <p class="empty-text">Кликните на событие в списке</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Status Page -->
+                    <div id="system-page" class="page">
+                        <div class="metrics-section">
+                            <div class="metrics-row" id="system-metrics"></div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

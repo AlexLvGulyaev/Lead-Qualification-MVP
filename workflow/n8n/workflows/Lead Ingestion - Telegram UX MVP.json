@@ -1,0 +1,1465 @@
+{
+  "name": "Lead Ingestion - Telegram UX MVP",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message",
+          "callback_query"
+        ],
+        "additionalFields": {}
+      },
+      "id": "d7aa0923-858a-4d19-96ba-4d77b687be3c",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        2576
+      ],
+      "webhookId": "470c12b0-5536-4eb3-b028-5dfac18a3384",
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot-credential",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const update = $input.item.json;\n\nlet result = {\n  chat_id: null,\n  telegram_id: null,\n  username: null,\n  first_name: null,\n  last_name: null,\n  text: null,\n  is_callback: false,\n  callback_data: null,\n  message_id: null\n};\n\nif (update.callback_query) {\n  const cq = update.callback_query;\n  result.is_callback = true;\n  result.chat_id = cq.message.chat.id;\n  result.telegram_id = cq.from.id.toString();\n  result.username = cq.from.username || '';\n  result.first_name = cq.from.first_name || '';\n  result.last_name = cq.from.last_name || '';\n  result.callback_data = cq.data;\n  result.message_id = cq.message.message_id;\n} else if (update.message) {\n  const msg = update.message;\n  result.chat_id = msg.chat.id;\n  result.telegram_id = msg.from.id.toString();\n  result.username = msg.from.username || '';\n  result.first_name = msg.from.first_name || '';\n  result.last_name = msg.from.last_name || '';\n  result.text = msg.text || '';\n}\n\nreturn [{ json: result }];"
+      },
+      "id": "953a41cb-a359-4f46-95aa-3b3e9e747ce1",
+      "name": "Parse Update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        2576
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM get_or_create_telegram_session(\n  '{{ $json.telegram_id }}',\n  {{ $json.chat_id }},\n  {{ $json.username ? \"'\" + $json.username.replace(/'/g, \"''\") + \"'\" : \"NULL\" }},\n  {{ $json.first_name ? \"'\" + $json.first_name.replace(/'/g, \"''\") + \"'\" : \"NULL\" }},\n  {{ $json.last_name ? \"'\" + $json.last_name.replace(/'/g, \"''\") + \"'\" : \"NULL\" }}\n);",
+        "options": {}
+      },
+      "id": "615f0e9b-98ac-4057-8b87-8560690830d2",
+      "name": "Get Session",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1520,
+        2576
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const parsed = $('Parse Update').item.json;\nconst session = $input.item.json;\n\nconst isCallback = parsed.is_callback;\nconst callbackData = parsed.callback_data || '';\nconst text = parsed.text || '';\nconst step = session.current_step || 'start';\n\nlet route = 'unknown';\n\nif (isCallback) {\n  if (callbackData === 'create_request') route = 'start_request';\n  else if (callbackData === 'help') route = 'help';\n  else if (callbackData === 'about') route = 'about';\n  else if (callbackData === 'confirm_yes') route = 'confirm_yes';\n  else if (callbackData === 'confirm_edit') route = 'confirm_edit';\n  else if (callbackData === 'confirm_cancel') route = 'confirm_cancel';\n  else if (callbackData === 'skip_email') route = 'skip_email';\n} else {\n  if (text.startsWith('/start')) route = 'main_menu';\n  else if (text.startsWith('/help')) route = 'help';\n  else if (text.startsWith('/about')) route = 'about';\n  else if (step === 'start') route = 'main_menu';\n  else if (step === 'name') route = 'collect_name';\n  else if (step === 'phone') route = 'collect_phone';\n  else if (step === 'email') route = 'collect_email';\n  else if (step === 'description') route = 'collect_description';\n  else if (step === 'confirm') route = 'waiting_confirm';\n}\n\nreturn [{\n  json: {\n    route, step,\n    session_id: session.id,\n    telegram_id: parsed.telegram_id,\n    chat_id: parsed.chat_id,\n    text, callback_data: callbackData,\n    is_callback: isCallback,\n    message_id: parsed.message_id,\n    collected_data: session.collected_data || {}\n  }\n}];"
+      },
+      "id": "066d89dd-2b71-48ae-858e-ddc25dfc9ced",
+      "name": "Route Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1712,
+        2576
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "id": "r1",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "main_menu",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                }
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "id": "r2",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "start_request",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                }
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "id": "r3",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "collect_name",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                }
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "id": "r4",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "collect_phone",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                }
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "id": "r5",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "collect_email",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                }
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "id": "r6",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "skip_email",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                }
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "id": "r7",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "collect_description",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                }
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "id": "r8",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "confirm_yes",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                }
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "id": "r9",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "confirm_edit",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                }
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "id": "r10",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "confirm_cancel",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                }
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "id": "r11",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "help",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                }
+              }
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "id": "r12",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "about",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                }
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "afbf646b-8b35-4741-aae3-db0d9c26e259",
+      "name": "Switch Route",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        1920,
+        2576
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Route Request').item.json.chat_id }}",
+        "text": "=👋 Добро пожаловать!\n\nВы находитесь в демо-системе автоматической квалификации лидов.\n\nЯ помогу зарегистрировать обращение и передать его менеджеру.\n\nЧто вы хотите сделать?",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "📝 Оставить заявку",
+                    "additionalFields": {
+                      "callback_data": "create_request"
+                    }
+                  },
+                  {
+                    "text": "❓ Помощь",
+                    "additionalFields": {
+                      "callback_data": "help"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "ℹ️ О системе",
+                    "additionalFields": {
+                      "callback_data": "about"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "d72eedb3-05ec-4879-ac79-6063c3cbc601",
+      "name": "Send Main Menu",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2112,
+        2368
+      ],
+      "webhookId": "d000feec-00f0-4133-996d-7d8a51d27b8a",
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot-credential",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT update_telegram_session_step(\n  '{{ $json.telegram_id }}',\n  'name',\n  NULL,\n  NULL\n);",
+        "options": {}
+      },
+      "id": "214b42ae-242c-4a5e-9480-b0bdfe4236fa",
+      "name": "Update Session (name)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2112,
+        2576
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Route Request').item.json.chat_id }}",
+        "text": "=Представьтесь, пожалуйста.\n\nКак вас зовут?",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "9afa35f0-742b-41a3-b846-a58150b7d6f5",
+      "name": "Send Ask Name",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2320,
+        2576
+      ],
+      "webhookId": "94705c5a-5048-4592-b7dd-4d6db2d21664",
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot-credential",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT update_telegram_session_step(\n  '{{ $json.telegram_id }}',\n  'phone',\n  'name',\n  '{{ $json.text.replace(/'/g, \"''\") }}'\n);",
+        "options": {}
+      },
+      "id": "45e4ff16-c56e-4f00-9492-44124d38e662",
+      "name": "Save Name",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2112,
+        2768
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Route Request').item.json.chat_id }}",
+        "text": "=📞 Какой номер телефона лучше использовать для связи?",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "16408cb0-e0c5-46df-bff2-869d37b91f96",
+      "name": "Send Ask Phone",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2320,
+        2768
+      ],
+      "webhookId": "8e32438b-f0c8-43fa-8b1f-00d136055fb4",
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot-credential",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT update_telegram_session_step(\n  '{{ $json.telegram_id }}',\n  'email',\n  'phone',\n  '{{ $json.text.replace(/'/g, \"''\") }}'\n);",
+        "options": {}
+      },
+      "id": "82a69615-50bf-4e7d-89af-ed0251aca6bf",
+      "name": "Save Phone",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2112,
+        2976
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Route Request').item.json.chat_id }}",
+        "text": "=📧 Если удобно, оставьте e-mail.",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Пропустить",
+                    "additionalFields": {
+                      "callback_data": "skip_email"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "1ccf2b89-d262-436a-b6b4-1dad1796da3c",
+      "name": "Send Ask Email",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2320,
+        2976
+      ],
+      "webhookId": "9769f2d9-54d4-4d5f-9a95-7c0774ae869c",
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot-credential",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT update_telegram_session_step(\n  '{{ $json.telegram_id }}',\n  'description',\n  'email',\n  '{{ $json.text.replace(/'/g, \"''\") }}'\n);",
+        "options": {}
+      },
+      "id": "bdc38942-fba5-439b-9675-611545a74110",
+      "name": "Save Email",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2112,
+        3168
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Route Request').item.json.chat_id }}",
+        "text": "=💬 Расскажите, чем мы можем помочь.\n\nНапример:\n• Telegram-бот\n• AI-ассистент\n• CRM-интеграция\n• Автоматизация процессов",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "d103c5ad-5363-4e48-ae66-86820d5d1f64",
+      "name": "Send Ask Description",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2320,
+        3168
+      ],
+      "webhookId": "6a7f7a55-57b8-4553-900c-215767192f46",
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot-credential",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT update_telegram_session_step(\n  '{{ $json.telegram_id }}',\n  'description',\n  'email',\n  ''\n);",
+        "options": {}
+      },
+      "id": "2a2bc879-3ef0-462e-b05f-cf8bda500067",
+      "name": "Skip Email DB",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2112,
+        3376
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT update_telegram_session_step(\n  '{{ $json.telegram_id }}',\n  'confirm',\n  'description',\n  '{{ $json.text.replace(/'/g, \"''\") }}'\n);",
+        "options": {}
+      },
+      "id": "faeb1144-085f-46a3-85b6-4caf3a605301",
+      "name": "Save Description",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1920,
+        3568
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM telegram_sessions WHERE telegram_id = '{{ $('Route Request').item.json.telegram_id }}' ORDER BY updated_at DESC LIMIT 1;",
+        "options": {}
+      },
+      "id": "2497cf9c-4017-4add-9c80-c09bcec4d71c",
+      "name": "Get Session After Description",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2112,
+        3568
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const routeData = $('Route Request').item.json;\nconst sessionData = $input.item.json;\nconst collected = sessionData.collected_data || {};\n\nfunction safe(v, fallback = 'не указано') {\n  return String(v || fallback);\n}\n\nconst message = `📋 Проверьте данные заявки\n\n👤 Имя:\n${safe(collected.name)}\n\n📞 Телефон:\n${safe(collected.phone, 'не указан')}\n\n📧 E-mail:\n${safe(collected.email, 'не указан')}\n\n💬 Описание:\n${safe(collected.description)}\n\nПодтвердить отправку?`;\n\nreturn [{\n  json: {\n    chat_id: routeData.chat_id,\n    telegram_id: routeData.telegram_id,\n    message,\n    collected_data: collected\n  }\n}];"
+      },
+      "id": "1a1b0b08-1795-45b7-be5e-b48c858ddfab",
+      "name": "Build Confirm Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2320,
+        3568
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chat_id }}",
+        "text": "={{ $json.message }}",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "✅ Отправить",
+                    "additionalFields": {
+                      "callback_data": "confirm_yes"
+                    }
+                  },
+                  {
+                    "text": "✏️ Изменить",
+                    "additionalFields": {
+                      "callback_data": "confirm_edit"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "❌ Отмена",
+                    "additionalFields": {
+                      "callback_data": "confirm_cancel"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "648dfb0c-d88a-4e55-8621-86339e2e3444",
+      "name": "Send Confirm",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2512,
+        3568
+      ],
+      "webhookId": "b56a1c5c-d2c9-4222-9249-bbd746b60028",
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot-credential",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT reset_telegram_session('{{ $json.telegram_id }}');",
+        "options": {}
+      },
+      "id": "39e1ac20-28bd-42a2-9f02-9c354f0367cf",
+      "name": "Reset Session (Edit)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1920,
+        3776
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT update_telegram_session_step(\n  '{{ $json.telegram_id }}',\n  'name',\n  NULL,\n  NULL\n);",
+        "options": {}
+      },
+      "id": "10c369ba-b7ae-4f7e-811c-949d2ba6aa0c",
+      "name": "Update Session (Edit→name)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2112,
+        3776
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Route Request').item.json.chat_id }}",
+        "text": "=Начнём заново. Как вас зовут?",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "bd476018-de78-40cb-b4b1-b729c7219b4c",
+      "name": "Send Edit Restart",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2320,
+        3776
+      ],
+      "webhookId": "014ca388-7f7b-4e93-98a4-b7cb3c4038c6",
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot-credential",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT reset_telegram_session('{{ $json.telegram_id }}');",
+        "options": {}
+      },
+      "id": "3f2181e4-98ed-4077-bc95-3a15a9874c62",
+      "name": "Reset Session (Cancel)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2112,
+        3968
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Route Request').item.json.chat_id }}",
+        "text": "=Заявка отменена. Вы можете начать заново через команду /start.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "ecb74947-ce9f-4d03-8a41-6000fe8b1567",
+      "name": "Send Cancel",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2320,
+        3968
+      ],
+      "webhookId": "e8a59231-dd39-46fa-b34b-1e1b34737f5f",
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot-credential",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM telegram_sessions WHERE telegram_id = '{{ $json.telegram_id }}' ORDER BY updated_at DESC LIMIT 1;",
+        "options": {}
+      },
+      "id": "7d0777ec-dabf-4ab5-bab4-5f3a058a621b",
+      "name": "Get Session for Confirm",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2112,
+        4176
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const routeData = $('Route Request').item.json;\nconst sessionData = $input.item.json;\nconst collected = sessionData.collected_data || {};\n\nreturn [{\n  json: {\n    telegram_id: routeData.telegram_id,\n    chat_id: routeData.chat_id,\n    full_name: collected.name || routeData.first_name || 'Неизвестный',\n    phone: collected.phone || '',\n    email: collected.email || '',\n    username: sessionData.username || '',\n    description: collected.description || ''\n  }\n}];"
+      },
+      "id": "b6a045c9-56dc-41c2-af17-76678e85623a",
+      "name": "Prepare Lead Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2320,
+        4176
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH c AS (\n  SELECT find_or_create_contact_by_telegram(\n    '{{ $json.telegram_id }}',\n    {{ $json.full_name ? \"'\" + $json.full_name.replace(/'/g, \"''\") + \"'\" : \"NULL\" }},\n    {{ $json.username ? \"'\" + $json.username.replace(/'/g, \"''\") + \"'\" : \"NULL\" }}\n  ) AS contact_id\n)\nUPDATE contacts\nSET\n  phone = {{ $json.phone ? \"'\" + $json.phone.replace(/'/g, \"''\") + \"'\" : \"NULL\" }},\n  email = {{ $json.email ? \"'\" + $json.email.replace(/'/g, \"''\") + \"'\" : \"NULL\" }},\n  updated_at = NOW()\nWHERE id = (SELECT contact_id FROM c)\nRETURNING id AS contact_id;",
+        "options": {}
+      },
+      "id": "ca039b09-0fdd-4c4b-9285-7406d278cdd7",
+      "name": "Find/Create Contact",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2512,
+        4176
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO leads (contact_id, source, status, public_number, created_at, updated_at)\nVALUES (\n  '{{ $json.contact_id }}',\n  'telegram',\n  'received',\n  generate_public_number(),\n  NOW(),\n  NOW()\n)\nRETURNING id AS lead_id, public_number, contact_id, source, status, created_at;",
+        "options": {}
+      },
+      "id": "7222aa88-088a-4973-b5b8-a5faa1cc144a",
+      "name": "Create Lead",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2944,
+        4176
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const leadData = $input.item.json;\nconst prepareData = $('Prepare Lead Data').item.json;\n\nreturn [{\n  json: {\n    lead_id: leadData.lead_id,\n    public_number: leadData.public_number,\n    contact_id: leadData.contact_id,\n    telegram_id: prepareData.telegram_id,\n    chat_id: prepareData.chat_id,\n    message_content: prepareData.description,\n    lead_created: leadData.created_at\n  }\n}];"
+      },
+      "id": "39abe19e-4893-4814-8650-51ff0eb4fa5b",
+      "name": "Combine Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3136,
+        4176
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO messages (lead_id, channel, direction, content)\nVALUES (\n  '{{ $json.lead_id }}',\n  'telegram',\n  'inbound',\n  '{{ $json.message_content.replace(/'/g, \"''\") }}'\n)\nRETURNING id, lead_id, channel, created_at;",
+        "options": {}
+      },
+      "id": "236cc77e-08c5-47ff-8dfe-47cdb27ba7fa",
+      "name": "Insert Message",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        3344,
+        4176
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO logs (lead_id, event_type, event_data, status)\nVALUES (\n  '{{ $json.lead_id }}',\n  'lead_received',\n  '{{ JSON.stringify({ source: \"telegram\", channel: \"telegram\" }) }}',\n  'success'\n)\nRETURNING id, lead_id, event_type, created_at;",
+        "options": {}
+      },
+      "id": "33cbc5cc-bbda-4cbd-b8a9-de2804f2ad56",
+      "name": "Insert Log",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        3536,
+        4176
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT complete_telegram_session('{{ $('Route Request').item.json.telegram_id }}');",
+        "options": {}
+      },
+      "id": "fef27cf7-df9c-410d-97e8-d1002c4b7dd8",
+      "name": "Complete Session",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        3744,
+        4176
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Combine Data').item.json.chat_id }}",
+        "text": "=✅ Заявка зарегистрирована\n\nНомер обращения: \n{{ $('Combine Data').item.json.public_number }}\n\nМы передали информацию в обработку.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "67528351-ec0c-49de-a4fa-3ff0df5eca49",
+      "name": "Send Confirmation Final",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3936,
+        4176
+      ],
+      "webhookId": "0e183058-812d-42f6-8efc-e3ff5479e1f9",
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot-credential",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Route Request').item.json.chat_id }}",
+        "text": "=❓ Помощь\n\nЭтот бот принимает заявки и передаёт их в систему обработки лидов.\n\nКак это работает:\n\n1. Вы оставляете заявку.\n2. AI выполняет первичную квалификацию.\n3. Обращение передаётся менеджеру в CRM.\n4. Менеджер связывается с вами.\n\nЧтобы начать, отправьте /start.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "5e753a47-c18a-4364-a509-2b5cd54142e8",
+      "name": "Send Help",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2112,
+        4368
+      ],
+      "webhookId": "cb4055fb-d3db-42ce-b7d6-81ce64449fb4",
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot-credential",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Route Request').item.json.chat_id }}",
+        "text": "=ℹ️ О проекте\n\nLead Qualification MVP — демонстрационный проект автоматической обработки входящих лидов.\n\nСистема показывает полный цикл:\n\nTelegram / Web-форма\n↓\nAI-квалификация\n↓\nCRM Kommo\n↓\nЗадача менеджеру\n↓\nМониторинг статуса\n\nПроект создан как портфельный кейс AI Automation Portfolio Lab.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "7161ac27-925c-44dd-99f0-e9693ccea118",
+      "name": "Send About",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2112,
+        4576
+      ],
+      "webhookId": "d6a77104-d553-4caa-9233-bda77bfaebcd",
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot-credential",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const prepared = $('Prepare Lead Data').item.json;\nconst contact = $input.item.json;\n\nreturn [{\n  json: {\n    ...prepared,\n    contact_id: contact.contact_id,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2736,
+        4176
+      ],
+      "id": "ab8f9491-5228-4322-beb8-813e45e084a5",
+      "name": "Merge Contact With Prepared Data"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Update": {
+      "main": [
+        [
+          {
+            "node": "Get Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Session": {
+      "main": [
+        [
+          {
+            "node": "Route Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Request": {
+      "main": [
+        [
+          {
+            "node": "Switch Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Route": {
+      "main": [
+        [
+          {
+            "node": "Send Main Menu",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Session (name)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save Name",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save Phone",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Skip Email DB",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save Description",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Session for Confirm",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reset Session (Edit)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reset Session (Cancel)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Help",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send About",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Session (name)": {
+      "main": [
+        [
+          {
+            "node": "Send Ask Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Name": {
+      "main": [
+        [
+          {
+            "node": "Send Ask Phone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Phone": {
+      "main": [
+        [
+          {
+            "node": "Send Ask Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Email": {
+      "main": [
+        [
+          {
+            "node": "Send Ask Description",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip Email DB": {
+      "main": [
+        [
+          {
+            "node": "Send Ask Description",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Description": {
+      "main": [
+        [
+          {
+            "node": "Get Session After Description",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Session After Description": {
+      "main": [
+        [
+          {
+            "node": "Build Confirm Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Confirm Message": {
+      "main": [
+        [
+          {
+            "node": "Send Confirm",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reset Session (Edit)": {
+      "main": [
+        [
+          {
+            "node": "Update Session (Edit→name)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Session (Edit→name)": {
+      "main": [
+        [
+          {
+            "node": "Send Edit Restart",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reset Session (Cancel)": {
+      "main": [
+        [
+          {
+            "node": "Send Cancel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Session for Confirm": {
+      "main": [
+        [
+          {
+            "node": "Prepare Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Lead Data": {
+      "main": [
+        [
+          {
+            "node": "Find/Create Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find/Create Contact": {
+      "main": [
+        [
+          {
+            "node": "Merge Contact With Prepared Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Lead": {
+      "main": [
+        [
+          {
+            "node": "Combine Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Data": {
+      "main": [
+        [
+          {
+            "node": "Insert Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Message": {
+      "main": [
+        [
+          {
+            "node": "Insert Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Log": {
+      "main": [
+        [
+          {
+            "node": "Complete Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Complete Session": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Contact With Prepared Data": {
+      "main": [
+        [
+          {
+            "node": "Create Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "0142faa9-5380-4a4f-9ea6-1bc7c3b1c411",
+  "meta": {
+    "instanceId": "f0d1e9776960d0516e967caa749e2359995ba70308d140b1dbeca71329f9df22"
+  },
+  "nodeGroups": [],
+  "id": "mZbcWVuDvQKlIJ5t",
+  "tags": []
+}

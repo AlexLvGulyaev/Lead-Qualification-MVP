@@ -1,0 +1,513 @@
+{
+  "name": "CRM Status Sync MVP",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "06405871-ff63-41e4-b378-e9b27a0d78aa",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -608,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Get leads with successful CRM sync that need status update\n-- Sync deals that have kommo_lead_id\nSELECT \n  cs.id AS crm_sync_id,\n  cs.lead_id,\n  cs.kommo_lead_id,\n  cs.kommo_contact_id,\n  cs.kommo_pipeline_id,\n  cs.kommo_pipeline_name,\n  cs.kommo_status_id,\n  cs.kommo_status_name,\n  cs.kommo_responsible_user_id,\n  cs.crm_has_active_task,\n  cs.crm_closest_task_at,\n  cs.crm_closed_at,\n  cs.crm_synced_at,\n  cs.initial_task_created,\n  l.public_number,\n  l.status AS lead_status\nFROM crm_sync cs\nINNER JOIN leads l ON l.id = cs.lead_id\nWHERE cs.kommo_lead_id IS NOT NULL\n  AND cs.sync_status = 'success'\nORDER BY cs.crm_synced_at ASC NULLS FIRST\nLIMIT 50;",
+        "options": {}
+      },
+      "id": "324599fd-1da6-49f1-9598-4f4f5bfafbd8",
+      "name": "Get Deals to Sync",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -400,
+        160
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// No deals to sync\nreturn [{\n  json: {\n    success: true,\n    message: 'No deals to sync',\n    deals_synced: 0\n  }\n}];"
+      },
+      "id": "bf32c361-7f43-48e3-b774-a9d767432650",
+      "name": "No Deals",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.kommo_fetch_url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ $json.kommo_auth_header }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "968285f4-5197-43f3-9428-c2a5c723494e",
+      "name": "Fetch Kommo Deal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        160,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.item.json;\nconst dealData = $('Get Deals to Sync').item.json;\n\n// FIX #4: Handle direct response (not embedded in array)\nconst deal = response.data ? JSON.parse(response.data) : response;\n\n// FIX #2: Use closest_task_at directly from lead object\n// According to Kommo API documentation:\n// https://developers.kommo.com/reference/leads-list\n// closest_task_at is a direct field on the lead object\n\n// Extract lead ID\nconst leadId = deal.id || dealData.kommo_lead_id;\n\n// Extract contact info\nconst contactId = deal._embedded?.contacts?.[0]?.id || dealData.kommo_contact_id;\n\n// Extract pipeline and status info\n// Note: pipeline_name and status_name are NOT in lead response\n// They must be fetched from /api/v4/leads/pipelines/{pipeline_id}\n// For now, we keep the cached values from previous sync\nconst pipelineId = deal.pipeline_id || dealData.kommo_pipeline_id;\nconst statusId = deal.status_id || dealData.kommo_status_id;\n\n// FIX #2: closest_task_at is a direct field on lead object\n// Type: int (Unix Timestamp) or null\n// Description: The time and date of the closest open task\nconst closestTaskAtTimestamp = deal.closest_task_at;\nconst closestTaskAt = closestTaskAtTimestamp \n  ? new Date(closestTaskAtTimestamp * 1000).toISOString() \n  : null;\n\n// FIX #2: has_active_task derived from closest_task_at\n// If closest_task_at is not null, there's at least one open task\nconst hasActiveTask = closestTaskAtTimestamp !== null && closestTaskAtTimestamp > 0;\n\n// Extract responsible user\nconst responsibleUserId = deal.responsible_user_id || dealData.kommo_responsible_user_id;\n\n// Extract closed_at\n// Type: int (Unix Timestamp) or null\nconst closedAtTimestamp = deal.closed_at;\nconst closedAt = closedAtTimestamp \n  ? new Date(closedAtTimestamp * 1000).toISOString() \n  : null;\n\nreturn [{\n  json: {\n    crm_sync_id: dealData.crm_sync_id,\n    lead_id: dealData.lead_id,\n    kommo_lead_id: leadId,\n    public_number: dealData.public_number,\n    \n    // Keep existing values (not returned by lead API)\n    kommo_contact_id: contactId ? contactId.toString() : dealData.kommo_contact_id,\n    kommo_pipeline_id: pipelineId,\n    kommo_pipeline_name: dealData.kommo_pipeline_name, // Cached\n    kommo_status_id: statusId,\n    kommo_status_name: dealData.kommo_status_name, // Cached\n    kommo_responsible_user_id: responsibleUserId || dealData.kommo_responsible_user_id,\n    \n    // FIX #2: Use closest_task_at from lead object\n    crm_has_active_task: hasActiveTask,\n    crm_closest_task_at: closestTaskAt,\n    crm_closed_at: closedAt,\n    crm_synced_at: new Date().toISOString(),\n    \n    // Preserve initial_task_created\n    initial_task_created: dealData.initial_task_created,\n    \n    // Raw snapshot for debug\n    crm_raw_snapshot: JSON.stringify(deal)\n  }\n}];"
+      },
+      "id": "8f39f5c2-19bb-47a8-9042-20cf3a563386",
+      "name": "Parse Kommo Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        368,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fetch-success-condition",
+              "leftValue": "={{ $json.kommo_lead_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1168,
+        192
+      ],
+      "id": "58769c15-9465-48eb-b223-66a83b4df3c0",
+      "name": "Fetch Success?"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE crm_sync\nSET \n    kommo_contact_id = COALESCE({{ $json.kommo_contact_id ? \"'\" + $json.kommo_contact_id + \"'\" : 'NULL' }}, kommo_contact_id),\n    kommo_pipeline_id = COALESCE({{ $json.kommo_pipeline_id ? $json.kommo_pipeline_id : 'NULL' }}, kommo_pipeline_id),\n    kommo_status_id = COALESCE({{ $json.kommo_status_id ? $json.kommo_status_id : 'NULL' }}, kommo_status_id),\n    kommo_status_name = COALESCE({{ $json.kommo_status_name ? \"'\" + $json.kommo_status_name.replace(/'/g, \"''\") + \"'\" : 'NULL' }}, kommo_status_name),\n    kommo_responsible_user_id = COALESCE({{ $json.kommo_responsible_user_id ? $json.kommo_responsible_user_id : 'NULL' }}, kommo_responsible_user_id),\n    crm_has_active_task = {{ $json.crm_has_active_task ? 'TRUE' : 'FALSE' }},\n    crm_closest_task_at = COALESCE({{ $json.crm_closest_task_at ? \"'\" + $json.crm_closest_task_at + \"'\" : 'NULL' }}, crm_closest_task_at),\n    crm_closed_at = COALESCE({{ $json.crm_closed_at ? \"'\" + $json.crm_closed_at + \"'\" : 'NULL' }}, crm_closed_at),\n    crm_synced_at = '{{ $json.crm_synced_at }}'\nWHERE id = '{{ $json.crm_sync_id }}'\nRETURNING id, lead_id, kommo_lead_id, kommo_status_id, kommo_status_name, crm_synced_at;",
+        "options": {}
+      },
+      "id": "2ee77063-6403-41ff-8a36-8acdb4af7d44",
+      "name": "Update CRM Sync",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1376,
+        80
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO logs (\n    lead_id,\n    event_type,\n    event_data,\n    status,\n    created_at\n) VALUES (\n    {{ $json.lead_id ? \"'\" + $json.lead_id + \"'\" : 'NULL' }},\n    'crm_status_sync_error',\n    '{{ JSON.stringify({ crm_sync_id: $json.crm_sync_id, error: $json.error }) }}',\n    'error',\n    NOW()\n) RETURNING id;",
+        "options": {}
+      },
+      "id": "be619be6-809a-4a5f-b839-192fee735196",
+      "name": "Log Error",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1376,
+        320
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const updateResult = $input.item.json;\nconst dealData = $('Get Deals to Sync').item.json;\n\nreturn [{\n  json: {\n    success: true,\n    lead_id: updateResult.lead_id,\n    kommo_lead_id: updateResult.kommo_lead_id,\n    public_number: dealData.public_number,\n    crm_synced_at: updateResult.crm_synced_at,\n    status_updated: true\n  }\n}];"
+      },
+      "id": "dd5c2cb2-78ee-4fc3-b8d8-9d951e04619a",
+      "name": "Sync Success",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const error = $input.item.json;\nconst dealData = $('Get Deals to Sync').item.json;\n\nreturn [{\n  json: {\n    lead_id: dealData.lead_id,\n    crm_sync_id: dealData.crm_sync_id,\n    kommo_lead_id: dealData.kommo_lead_id,\n    error: error.error || error.message || JSON.stringify(error)\n  }\n}];"
+      },
+      "id": "6be3262f-b295-442f-9b56-b8d57fc69730",
+      "name": "Sync Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1168,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aggregate results\nconst allResults = $input.all();\n\nconst successful = allResults.filter(r => r.json.success).length;\nconst failed = allResults.filter(r => !r.json.success).length;\n\nreturn [{\n  json: {\n    success: true,\n    message: 'CRM Status Sync completed',\n    deals_synced: successful,\n    deals_failed: failed,\n    total: allResults.length,\n    synced_at: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "9a5c2557-e917-4f3f-af2b-0147dcda4216",
+      "name": "Aggregate Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1776,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "689cc386-1f39-449d-bad9-6d9a86d9936d",
+              "leftValue": "={{ String($json.lead_id || '')}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -208,
+        160
+      ],
+      "id": "52073f82-9bdf-4f79-8249-73da032afdbb",
+      "name": "Has Deals?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.item.json;\n\nreturn [{\n  json: {\n    ...item,\n    kommo_fetch_url: `${$env.KOMMO_BASE_URL}/api/v4/leads/${item.kommo_lead_id}`,\n    kommo_auth_header: `Bearer ${$env.KOMMO_ACCESS_TOKEN}`,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        320
+      ],
+      "id": "0b5fb1f4-8847-4d2c-b436-7485137ece05",
+      "name": "Prepare Fetch Kommo Deal Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.item.json;\nconst dealReq = $('Prepare Fetch Kommo Deal Request').item.json;\n\nconst baseUrl = dealReq.kommo_fetch_url.split('/api/v4/')[0];\n\nreturn [{\n  json: {\n    ...item,\n    kommo_status_url: `${baseUrl}/api/v4/leads/pipelines/${item.kommo_pipeline_id}/statuses/${item.kommo_status_id}`,\n    kommo_auth_header: dealReq.kommo_auth_header,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        320
+      ],
+      "id": "b82ea06e-7f05-4ff0-acc6-9a13606ff786",
+      "name": "Prepare Fetch Kommo Status Request"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.kommo_status_url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ $json.kommo_auth_header }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "ac07ea3d-96d8-4ec9-a21f-b18d860e35d4",
+      "name": "Fetch Kommo Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        768,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const parsed = $('Prepare Fetch Kommo Status Request').item.json;\nconst input = $input.item.json;\n\nconst status = input.data ? JSON.parse(input.data) : input;\n\nreturn [{\n  json: {\n    ...parsed,\n    kommo_status_name: status.name || parsed.kommo_status_name\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        320
+      ],
+      "id": "a6dda41c-5d1f-4862-9b47-c23613d3eca9",
+      "name": "Merge Kommo Status"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Deals to Sync",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Deals to Sync": {
+      "main": [
+        [
+          {
+            "node": "Has Deals?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Kommo Deal": {
+      "main": [
+        [
+          {
+            "node": "Parse Kommo Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Kommo Response": {
+      "main": [
+        [
+          {
+            "node": "Prepare Fetch Kommo Status Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Success?": {
+      "main": [
+        [
+          {
+            "node": "Update CRM Sync",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sync Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update CRM Sync": {
+      "main": [
+        [
+          {
+            "node": "Sync Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sync Error": {
+      "main": [
+        [
+          {
+            "node": "Log Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sync Success": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Error": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Deals": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Deals?": {
+      "main": [
+        [
+          {
+            "node": "Prepare Fetch Kommo Deal Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Deals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Fetch Kommo Deal Request": {
+      "main": [
+        [
+          {
+            "node": "Fetch Kommo Deal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Fetch Kommo Status Request": {
+      "main": [
+        [
+          {
+            "node": "Fetch Kommo Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Kommo Status": {
+      "main": [
+        [
+          {
+            "node": "Merge Kommo Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Kommo Status": {
+      "main": [
+        [
+          {
+            "node": "Fetch Success?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "9525a954-8af4-44a0-8a9c-5c1f05c35618",
+  "meta": {
+    "instanceId": "f0d1e9776960d0516e967caa749e2359995ba70308d140b1dbeca71329f9df22"
+  },
+  "nodeGroups": [],
+  "id": "nhz9MHc8IJbgxWiK",
+  "tags": []
+}

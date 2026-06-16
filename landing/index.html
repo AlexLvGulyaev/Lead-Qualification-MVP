@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>n8n Lead Qualification Assistant — Автоматическая AI-квалификация лидов</title>
+    <meta name="description" content="Автоматическая AI-квалификация входящих лидов на платформе n8n с интеграцией CRM. Сократите время обработки заявок и передавайте менеджерам только качественные лиды.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="container nav-content">
+            <a href="#" class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 32 32" fill="none">
+                        <rect x="2" y="2" width="28" height="28" rx="6" stroke="currentColor" stroke-width="2"/>
+                        <path d="M10 16L14 20L22 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <span class="logo-text">Lead Qual</span>
+            </a>
+            <div class="nav-links">
+                <a href="#features">Возможности</a>
+                <a href="#product">Продукт</a>
+                <a href="#contact">Контакты</a>
+            </div>
+            <div class="nav-cta">
+                <a href="#contact" class="btn btn-secondary">Обсудить проект</a>
+                <a href="#demo" class="btn btn-primary">Получить демо</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-bg">
+            <div class="hero-grid"></div>
+            <div class="hero-glow"></div>
+        </div>
+        <div class="container hero-content">
+            <div class="hero-badge">
+                <span class="badge-icon">
+                    <svg viewBox="0 0 16 16" fill="none">
+                        <circle cx="8" cy="8" r="3" fill="currentColor"/>
+                        <path d="M8 1V3M8 13V15M1 8H3M13 8H15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </span>
+                <span>n8n + AI + CRM</span>
+            </div>
+            <h1 class="hero-title">
+                <span class="title-line">Автоматическая</span>
+                <span class="title-line title-accent">AI-квалификация</span>
+                <span class="title-line">входящих лидов</span>
+            </h1>
+            <p class="hero-subtitle">
+                Сократите время обработки заявок с часов до секунд. Передавайте менеджерам только качественные лиды с готовой оценкой.
+            </p>
+            <div class="hero-cta">
+                <a href="#demo" class="btn btn-primary btn-lg">
+                    Получить демо
+                    <svg class="btn-arrow" viewBox="0 0 20 20" fill="none">
+                        <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </a>
+                <a href="#contact" class="btn btn-ghost btn-lg">Обсудить проект</a>
+            </div>
+            <div class="hero-metrics">
+                <div class="metric">
+                    <span class="metric-value">&lt;5с</span>
+                    <span class="metric-label">время обработки лида</span>
+                </div>
+                <div class="metric-divider"></div>
+                <div class="metric">
+                    <span class="metric-value">24/7</span>
+                    <span class="metric-label">автоматическая работа</span>
+                </div>
+                <div class="metric-divider"></div>
+                <div class="metric">
+                    <span class="metric-value">Сквозное</span>
+                    <span class="metric-label">логирование операций</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem -->
+    <section class="problem" id="problem">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Проблема</span>
+                <h2 class="section-title">Ручная обработка лидов —<br>потеря времени и денег</h2>
+            </div>
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="problem-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3>Медленный отклик</h3>
+                    <p>Лиды теряются, пока менеджер добирается до заявки. Клиент уходит к конкурентам за часы.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>Неконсистентная оценка</h3>
+                    <p>Разные менеджеры по-разному оценивают одних и тех же клиентов. Нет стандартов.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M12 2V6M12 18V22M2 12H6M18 12H22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3>Потеря приоритетов</h3>
+                    <p>Горячие лиды теряются в потоке. Нет автоматической сортировки по важности.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M3 8H21" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M7 4V2M17 4V2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3>Нет 24/7</h3>
+                    <p>Ночные и выходные заявки остаются без внимания. Упущенные возможности.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M9 9V11C9 12.6569 10.3431 14 12 14C13.6569 14 15 12.6569 15 11V9C15 7.34315 13.6569 6 12 6C10.3431 6 9 7.34315 9 9Z" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M12 14V18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M5 18H19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M5 22H19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3>Перегрузка менеджеров</h3>
+                    <p>Сотрудники тратят часы на первичный отсев вместо работы с качественными клиентами.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M4 4V10H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M20 20V14H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M4 10C4 10 6.5 4 12 4C17.5 4 20 10 20 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M20 14C20 14 17.5 20 12 20C6.5 20 4 14 4 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3>Хаос в процессах</h3>
+                    <p>Нет прозрачности. Кто когда ответил. Какой статус. Всё в голове или в разных системах.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution -->
+    <section class="solution" id="solution">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Решение</span>
+                <h2 class="section-title">Автоматический конвейер<br>квалификации лидов</h2>
+            </div>
+            <div class="solution-flow">
+                <div class="flow-step">
+                    <div class="flow-node">
+                        <div class="node-icon source">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.5"/>
+                                <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                        </div>
+                        <span class="flow-label">Лид</span>
+                    </div>
+                    <span class="flow-desc">Входящее обращение с сайта или из Telegram</span>
+                </div>
+                <div class="flow-arrow">
+                    <svg viewBox="0 0 32 12" fill="none">
+                        <path d="M0 6H28M28 6L22 1M28 6L22 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-node">
+                        <div class="node-icon platform">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                                <path d="M4 8H20" stroke="currentColor" stroke-width="1.5"/>
+                                <path d="M8 12H16" stroke="currentColor" stroke-width="1.5"/>
+                                <path d="M8 16H12" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                        </div>
+                        <span class="flow-label">n8n</span>
+                    </div>
+                    <span class="flow-desc">Автоматический workflow обработки</span>
+                </div>
+                <div class="flow-arrow">
+                    <svg viewBox="0 0 32 12" fill="none">
+                        <path d="M0 6H28M28 6L22 1M28 6L22 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-node">
+                        <div class="node-icon ai">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M12 2L4 6V12C4 16.4 7.4 20.4 12 22C16.6 20.4 20 16.4 20 12V6L12 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                                <path d="M12 8V12M12 12L16 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <span class="flow-label">AI-анализ</span>
+                    </div>
+                    <span class="flow-desc">Классификация по типу, интересу, приоритету</span>
+                </div>
+                <div class="flow-arrow">
+                    <svg viewBox="0 0 32 12" fill="none">
+                        <path d="M0 6H28M28 6L22 1M28 6L22 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-node">
+                        <div class="node-icon score">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M4 15V9L8 12L12 6L16 9L20 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <rect x="3" y="16" width="18" height="4" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                        </div>
+                        <span class="flow-label">Lead Score</span>
+                    </div>
+                    <span class="flow-desc">Автоматическая оценка качества лида</span>
+                </div>
+                <div class="flow-arrow">
+                    <svg viewBox="0 0 32 12" fill="none">
+                        <path d="M0 6H28M28 6L22 1M28 6L22 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-node">
+                        <div class="node-icon crm">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                                <path d="M2 10H22" stroke="currentColor" stroke-width="1.5"/>
+                                <circle cx="6" cy="7" r="1" fill="currentColor"/>
+                                <circle cx="10" cy="7" r="1" fill="currentColor"/>
+                            </svg>
+                        </div>
+                        <span class="flow-label">CRM</span>
+                    </div>
+                    <span class="flow-desc">Запись результата, задача и уведомление менеджера</span>
+                </div>
+            </div>
+            <div class="solution-result">
+                <div class="result-card">
+                    <div class="result-icon">
+                        <svg viewBox="0 0 48 48" fill="none">
+                            <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2"/>
+                            <path d="M16 24L22 30L32 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="result-content">
+                        <h3>Менеджер получает квалифицированного лида</h3>
+                        <p>С готовой оценкой, приоритетом и кратким описанием. Без ручной обработки.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Возможности</span>
+                <h2 class="section-title">Автоматизация квалификации<br>и передачи лидов</h2>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2L4 6V12C4 16.4 7.4 20.4 12 22C16.6 20.4 20 16.4 20 12V6L12 2Z" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M12 8V12M12 12L16 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                    </div>
+                    <h3>AI Qualification</h3>
+                    <p>Автоматическая классификация по типу, интересу и приоритету. Настраиваемые критерии под ваш бизнес.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M4 15V9L8 12L12 6L16 9L20 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <rect x="3" y="16" width="18" height="4" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                            <circle cx="12" cy="7" r="2" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <h3>Lead Scoring</h3>
+                    <p>Количественная оценка качества лида. Confidence score для каждого результата классификации.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M2 10H22" stroke="currentColor" stroke-width="1.5"/>
+                            <circle cx="6" cy="7" r="1" fill="currentColor"/>
+                            <circle cx="10" cy="7" r="1" fill="currentColor"/>
+                            <path d="M7 14H17M7 17H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3>CRM Integration</h3>
+                    <p>Интеграция с Kommo CRM. Автоматическое создание сделки, заполнение полей квалификации и постановка задачи менеджеру.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M4 8H20" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M8 4V8" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M8 12H16M8 16H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3>Workflow Automation</h3>
+                    <p>n8n workflow для полной кастомизации. Добавляйте условия, ветвления, интеграции.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M18 8C18 6.93913 17.5786 5.92172 16.8284 5.17157C16.0783 4.42143 15.0609 4 14 4C12.9391 4 11.9217 4.42143 11.1716 5.17157L6 10.3431V18H13.6569L18 13.6569C18.75 12.9039 19.1716 11.8789 19.1716 10.8159C19.1716 9.75287 18.75 8.72787 18 8Z" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M10 18V12L14 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <circle cx="11" cy="11" r="2" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <h3>Manager Alerts</h3>
+                    <p>Быстрая передача лидов в работу менеджерам. Приоритетные обращения попадают к ответственным сотрудникам без задержек.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M3 9H21" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M9 3V9" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M7 14H11M7 17H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <circle cx="16" cy="15" r="3" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M14 17L16 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3>Analytics</h3>
+                    <p>Статистика классификации, контроль обработки лидов. Логирование операций и аудит действий.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Manager Result -->
+    <section class="manager-result" id="result">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Результат</span>
+                <h2 class="section-title">Что получает менеджер</h2>
+                <p class="section-desc">Автоматизация даёт менеджеру готового к работе лида без ручной обработки.</p>
+            </div>
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="result-number">1</div>
+                    <div class="result-content">
+                        <h4>Приоритет</h4>
+                        <p>Лид уже ранжирован: hot / warm / cold. Менеджер видит приоритет сразу.</p>
+                    </div>
+                </div>
+                <div class="result-item">
+                    <div class="result-number">2</div>
+                    <div class="result-content">
+                        <h4>Классификация</h4>
+                        <p>Тип обращения, уровень интереса, категория — все данные в карточке.</p>
+                    </div>
+                </div>
+                <div class="result-item">
+                    <div class="result-number">3</div>
+                    <div class="result-content">
+                        <h4>AI-резюме</h4>
+                        <p>Краткое описание обращения, сформированное автоматически.</p>
+                    </div>
+                </div>
+                <div class="result-item">
+                    <div class="result-number">4</div>
+                    <div class="result-content">
+                        <h4>Запись в CRM</h4>
+                        <p>Все результаты квалификации автоматически записаны в карточку лида.</p>
+                    </div>
+                </div>
+                <div class="result-item">
+                    <div class="result-number">5</div>
+                    <div class="result-content">
+                        <h4>Уведомление и задача</h4>
+                        <p>Менеджер получает уведомление и готовую задачу для работы.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Integrations -->
+    <section class="integrations" id="integrations">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Интеграции</span>
+                <h2 class="section-title">Подключение к вашей<br>инфраструктуре</h2>
+                <p class="section-desc">Подключение CRM, каналов поступления лидов и расширяемой автоматизации.</p>
+            </div>
+            <div class="integrations-grid">
+                <div class="integration-card">
+                    <div class="integration-logo kommo">
+                        <svg viewBox="0 0 40 40" fill="none">
+                            <rect x="4" y="4" width="32" height="32" rx="8" fill="currentColor" fill-opacity="0.1"/>
+                            <path d="M14 20H26M20 14V26" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h4>Kommo CRM</h4>
+                    <p>API-интеграция с автоматическим созданием сделки, заполнением полей и постановкой задачи менеджеру.</p>
+                </div>
+                <div class="integration-card">
+                    <div class="integration-logo telegram">
+                        <svg viewBox="0 0 40 40" fill="none">
+                            <rect x="4" y="4" width="32" height="32" rx="8" fill="currentColor" fill-opacity="0.1"/>
+                            <path d="M12 20L28 12L24 28L19 23L16 26L17 21L12 20Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h4>Telegram Bot</h4>
+                    <p>Приём обращений через Telegram-бот с автоматической квалификацией лидов.</p>
+                </div>
+                <div class="integration-card">
+                    <div class="integration-logo webhook">
+                        <svg viewBox="0 0 40 40" fill="none">
+                            <rect x="4" y="4" width="32" height="32" rx="8" fill="currentColor" fill-opacity="0.1"/>
+                            <path d="M16 12V16M24 12V16M16 28V24M24 28V24M12 16H16M12 24H16M28 16H24M28 24H24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h4>Webhook API</h4>
+                    <p>Подключение внешних источников лидов через API.</p>
+                </div>
+                <div class="integration-card">
+                    <div class="integration-logo n8n">
+                        <svg viewBox="0 0 40 40" fill="none">
+                            <rect x="4" y="4" width="32" height="32" rx="8" fill="currentColor" fill-opacity="0.1"/>
+                            <rect x="12" y="16" width="16" height="8" rx="2" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="16" cy="20" r="2" fill="currentColor"/>
+                            <circle cx="24" cy="20" r="2" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <h4>n8n Workflow</h4>
+                    <p>Расширяемая логика автоматизации для собственных сценариев и интеграций.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Product Preview -->
+    <section class="product" id="product">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Интерфейс</span>
+                <h2 class="section-title">Консоль квалификации<br>лидов</h2>
+                <p class="section-desc">Вся информация по лиду, результаты AI-квалификации, CRM-статус и история обработки — в одном интерфейсе.</p>
+            </div>
+            <div class="product-preview">
+                <div class="dashboard">
+                    <div class="dashboard-header">
+                        <div class="dashboard-title">
+                            <span class="status-dot"></span>
+                            Консоль квалификации лидов
+                        </div>
+                        <div class="dashboard-controls">
+                            <button class="control-btn active">Все лиды</button>
+                            <button class="control-btn">Горячие</button>
+                            <button class="control-btn">Telegram</button>
+                        </div>
+                    </div>
+                    <div class="dashboard-content">
+                        <div class="dashboard-stats">
+                            <div class="stat-card stat-card-hot">
+                                <div class="stat-value stat-hot">2</div>
+                                <div class="stat-label">Горячих лидов</div>
+                                <div class="stat-change">Приоритетные</div>
+                            </div>
+                            <div class="stat-card stat-card-telegram">
+                                <div class="stat-value stat-telegram">3</div>
+                                <div class="stat-label">Из Telegram</div>
+                                <div class="stat-change">Канал лидов</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">&lt;5с</div>
+                                <div class="stat-label">Время квалификации</div>
+                                <div class="stat-change">Демо-сценарий</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">100%</div>
+                                <div class="stat-label">История обработки</div>
+                                <div class="stat-change">Все действия фиксируются</div>
+                            </div>
+                        </div>
+                        <div class="dashboard-flow">
+                            <div class="flow-header">
+                                <span>Поток лидов</span>
+                                <span class="flow-time">Обновлено только что</span>
+                            </div>
+                            <div class="flow-container">
+                                <div class="flow-column incoming">
+                                    <div class="column-header">
+                                        <span class="column-dot"></span>
+                                        Входящие
+                                        <span class="column-count">12</span>
+                                    </div>
+                                    <div class="lead-cards" id="incoming-leads">
+                                        <div class="lead-card">
+                                            <div class="lead-header">
+                                                <span class="lead-name">Алексей М.</span>
+                                                <span class="lead-time">2 мин назад</span>
+                                            </div>
+                                            <div class="lead-message">Здравствуйте! Интересует подключение к сервису...</div>
+                                            <div class="lead-source source-website">Website</div>
+                                        </div>
+                                        <div class="lead-card">
+                                            <div class="lead-header">
+                                                <span class="lead-name">Мария С.</span>
+                                                <span class="lead-time">5 мин назад</span>
+                                            </div>
+                                            <div class="lead-message">Хочу узнать условия для корпоративных клиентов</div>
+                                            <div class="lead-source source-telegram">Telegram</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flow-column processing">
+                                    <div class="column-header">
+                                        <span class="column-dot processing"></span>
+                                        В обработке
+                                        <span class="column-count">3</span>
+                                    </div>
+                                    <div class="lead-cards" id="processing-leads">
+                                        <div class="lead-card processing">
+                                            <div class="lead-header">
+                                                <span class="lead-name">Иван К.</span>
+                                                <span class="lead-time">1 мин назад</span>
+                                            </div>
+                                            <div class="lead-message">Нужна консультация по тарифам</div>
+                                            <div class="lead-processing">
+                                                <div class="processing-bar"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flow-column qualified">
+                                    <div class="column-header">
+                                        <span class="column-dot qualified"></span>
+                                        Квалифицированы
+                                        <span class="column-count">8</span>
+                                    </div>
+                                    <div class="lead-cards" id="qualified-leads">
+                                        <div class="lead-card qualified hot">
+                                            <div class="lead-header">
+                                                <span class="lead-name">Ольга В.</span>
+                                                <span class="lead-badge hot">HOT</span>
+                                            </div>
+                                            <div class="lead-score">
+                                                <span class="score-label">Score:</span>
+                                                <span class="score-value">0.94</span>
+                                            </div>
+                                            <div class="lead-details">
+                                                <div class="detail">
+                                                    <span class="detail-label">Приоритет:</span>
+                                                    <span class="detail-value">Высокий</span>
+                                                </div>
+                                                <div class="detail">
+                                                    <span class="detail-label">Рекомендация:</span>
+                                                    <span class="detail-value">Позвонить</span>
+                                                </div>
+                                            </div>
+                                            <div class="lead-action call">
+                                                <span>→ Позвонить в течение 1 часа</span>
+                                                <svg viewBox="0 0 16 16" fill="none"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                            </div>
+                                        </div>
+                                        <div class="lead-card qualified warm">
+                                            <div class="lead-header">
+                                                <span class="lead-name">Дмитрий П.</span>
+                                                <span class="lead-badge warm">WARM</span>
+                                            </div>
+                                            <div class="lead-score">
+                                                <span class="score-label">Score:</span>
+                                                <span class="score-value">0.71</span>
+                                            </div>
+                                            <div class="lead-details">
+                                                <div class="detail">
+                                                    <span class="detail-label">Приоритет:</span>
+                                                    <span class="detail-value">Средний</span>
+                                                </div>
+                                                <div class="detail">
+                                                    <span class="detail-label">Рекомендация:</span>
+                                                    <span class="detail-value">Email</span>
+                                                </div>
+                                            </div>
+                                            <div class="lead-action follow-up">
+                                                <span>→ Связаться по email в течение 24 часов</span>
+                                                <svg viewBox="0 0 16 16" fill="none"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta" id="contact">
+        <div class="container">
+            <div class="cta-content">
+                <h2 class="cta-title">Готовы автоматизировать<br>квалификацию лидов?</h2>
+                <p class="cta-desc">Получите демо-версию под ваш бизнес или обсудите детали интеграции.</p>
+                <div class="cta-buttons">
+                    <a href="#demo" class="btn btn-primary btn-lg">
+                        Получить демо
+                        <svg class="btn-arrow" viewBox="0 0 20 20" fill="none">
+                            <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
+                    <a href="mailto:contact@example.com" class="btn btn-ghost btn-lg">Обсудить проект</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Project -->
+    <section class="portfolio" id="portfolio">
+        <div class="container">
+            <div class="portfolio-content">
+                <div class="portfolio-badge">Демонстрационный проект</div>
+                <h2 class="portfolio-title">AI Automation Portfolio Lab</h2>
+                <p class="portfolio-desc">
+                    n8n Lead Qualification Assistant — демонстрационный кейс из портфолио AI Automation Portfolio Lab.
+                    Показывает подход к автоматизации обработки входящих лидов с использованием n8n и AI.
+                </p>
+                <p class="portfolio-note">
+                    Решение может быть адаптировано под конкретного заказчика: другие CRM, другие критерии классификации, другие каналы поступления лидов.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a href="#" class="logo">
+                        <div class="logo-icon">
+                            <svg viewBox="0 0 32 32" fill="none">
+                                <rect x="2" y="2" width="28" height="28" rx="6" stroke="currentColor" stroke-width="2"/>
+                                <path d="M10 16L14 20L22 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="logo-text">Lead Qual</span>
+                    </a>
+                    <p class="footer-tagline">Автоматическая AI-квалификация лидов</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-group">
+                        <h4>Продукт</h4>
+                        <a href="#features">Возможности</a>
+                        <a href="#product">Интерфейс</a>
+                        <a href="#integrations">Интеграции</a>
+                    </div>
+                    <div class="footer-group">
+                        <h4>Интеграции</h4>
+                        <a href="#">Kommo CRM</a>
+                        <a href="#">Telegram</a>
+                        <a href="#">Webhook API</a>
+                    </div>
+                    <div class="footer-group">
+                        <h4>Контакты</h4>
+                        <a href="mailto:contact@example.com">contact@example.com</a>
+                        <a href="#">Telegram</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 AI Automation Portfolio Lab. Все права защищены.</p>
+                <p>n8n Lead Qualification Assistant — демонстрационный кейс.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

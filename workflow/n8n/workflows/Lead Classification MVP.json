@@ -1,0 +1,444 @@
+{
+  "name": "Lead Classification MVP",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "d2984f2f-2913-4d34-a025-6330f696b66d",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1408,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  l.id AS lead_id,\n  l.contact_id,\n  l.source,\n  l.status,\n  l.utm_source,\n  l.utm_campaign,\n  l.created_at,\n  c.name AS contact_name,\n  c.phone AS contact_phone,\n  c.email AS contact_email\nFROM leads l\nLEFT JOIN contacts c ON l.contact_id = c.id\nWHERE l.status = 'received'\nORDER BY l.created_at ASC\nLIMIT 10;",
+        "options": {}
+      },
+      "id": "daad5efa-e754-4189-b462-07858e95d2e0",
+      "name": "Get Received Leads",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -1200,
+        208
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  l.id AS lead_id,\n  l.contact_id,\n  l.source,\n  l.status,\n  l.utm_source,\n  l.utm_campaign,\n  l.created_at AS lead_created_at,\n  c.name AS contact_name,\n  c.phone AS contact_phone,\n  c.email AS contact_email,\n  m.content AS message_content,\n  m.channel AS message_channel,\n  (SELECT COUNT(*) FROM messages m2 WHERE m2.lead_id = l.id) AS message_count\nFROM leads l\nLEFT JOIN contacts c ON l.contact_id = c.id\nLEFT JOIN messages m ON l.id = m.lead_id AND m.direction = 'inbound'\nWHERE l.id = '{{ $json.lead_id }}'\nGROUP BY l.id, l.contact_id, l.source, l.status, l.utm_source, l.utm_campaign, l.created_at, c.name, c.phone, c.email, m.content, m.channel\nLIMIT 1;",
+        "options": {}
+      },
+      "id": "d5d3a2cb-ad17-4e70-b230-a60402648935",
+      "name": "Load Lead Data",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -1008,
+        208
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build Prompt Node\n// Prepares system and user prompts for OpenAI classification\n\nconst startTime = Date.now();\nconst leadData = $input.item.json;\n\nconst systemPrompt = `Ты — AI-классификатор входящих лидов для бизнес-консалтинга. Твоя задача — проанализировать обращение клиента и классифицировать его.\n\nВАЖНО: Верни результат ТОЛЬКО в формате JSON. Без markdown, без объяснений, без дополнительного текста. Только валидный JSON.\n\nПравила классификации:\n\n1. lead_type (тип лида):\n   - \"hot\" — клиент готов купить/подключиться прямо сейчас, упоминает конкретные сроки, слова \"срочно\", \"сегодня\", \"завтра\", \"хочу купить\", \"готов оплатить\"\n   - \"warm\" — клиент заинтересован, задаёт вопросы, просит информацию, слова \"интересует\", \"хочу узнать\", \"расскажите\", \"сколько стоит\"\n   - \"cold\" — клиент не планирует внедрение, не имеет проекта/сроков/бюджета, изучает тему в учебных, исследовательских или обзорных целях; слова \"не планируется\", \"учебная работа\", \"обзор\", \"исследую\", \"для ознакомления\", \"пока не внедряем\", \"не сейчас\"\n   - \"spam\" — нецелевое обращение, реклама, предложение услуг, слова \"предлагаю\", \"база контактов\", \"сотрудничество\"\n   ВАЖНО: если клиент прямо пишет, что внедрение не планируется, проект отсутствует, бюджет не утверждён, либо обращение связано с учебной/исследовательской/обзорной целью, классифицируй как \"cold\", даже если он просит материалы или примеры.\n\n2. interest (уровень интереса):\n   - \"high\" — горячий интерес, готовность к действию\n   - \"medium\" — умеренный интерес, нужен follow-up\n   - \"low\" — слабый интерес, низкая вероятность конверсии\n\n3. priority (приоритет обработки):\n   - \"high\" — требует немедленного реагирования (hot лиды)\n   - \"medium\" — стандартная обработка (warm лиды)\n   - \"low\" — низкий приоритет (cold, spam)\n\n4. suggested_action (рекомендуемое действие):\n   - \"call\" — немедленный звонок\n   - \"email\" — отправить информацию по email\n   - \"archive\" — архивировать\n   - \"reject\" — отклонить как спам\n\n5. confidence (уверенность классификации):\n   - Число от 0.00 до 1.00\n   - 0.90+ — высокая уверенность, явные признаки\n   - 0.70-0.89 — средняя уверенность, признаки есть но не однозначные\n   - 0.50-0.69 — низкая уверенность, неоднозначное обращение\n   - < 0.50 — использовать fallback классификацию\n\n6. summary (краткое описание):\n   - 1-2 предложения о сути обращения\n\n7. reasoning (обоснование):\n   - Краткое обоснование классификации`;\n\nconst userPrompt = `Обращение клиента:\n---\nИмя: ${leadData.contact_name || 'Не указано'}\nТелефон: ${leadData.contact_phone || 'Не указан'}\nEmail: ${leadData.contact_email || 'Не указан'}\nИсточник: ${leadData.source}\nUTM Source: ${leadData.utm_source || 'Не указан'}\nUTM Campaign: ${leadData.utm_campaign || 'Не указана'}\n---\nСообщение:\n${leadData.message_content || 'Сообщение отсутствует'}\n---\nКоличество сообщений от клиента: ${leadData.message_count || 1}\n\nПроанализируй обращение и верни результат классификации в JSON.`;\n\nreturn [{\n  json: {\n    lead_id: leadData.lead_id,\n    lead_data: leadData,\n    start_time: startTime,\n    system_prompt: systemPrompt,\n    user_prompt: userPrompt\n  }\n}];"
+      },
+      "id": "bb8e4593-a5f2-4f30-8a4a-2c8320e6f1a1",
+      "name": "Build Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -800,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o-mini\",\n  \"messages\": [\n    {\"role\": \"system\", \"content\": {{ JSON.stringify($json.system_prompt) }}},\n    {\"role\": \"user\", \"content\": {{ JSON.stringify($json.user_prompt) }}}\n  ],\n  \"temperature\": 0.3,\n  \"max_tokens\": 500,\n  \"response_format\": {\"type\": \"json_object\"}\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "07daad92-23f5-43e1-bc1c-34307615ab28",
+      "name": "OpenAI Classification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -608,
+        208
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "vrUm0LDlovQn9x3W",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validate AI Response Node\nconst aiResponse = $input.item.json;\nconst leadData = $('Build Prompt').item.json.lead_data;\nconst startTime = $('Build Prompt').item.json.start_time;\n\n// Check for HTTP errors\nif (aiResponse.error || aiResponse.status >= 400) {\n  return [{\n    json: {\n      valid: false,\n      lead_id: leadData.lead_id,\n      lead_data: leadData,\n      start_time: startTime,\n      error: 'openai_api_error',\n      error_message: aiResponse.error?.message || `HTTP ${aiResponse.status}`,\n      classification: null,\n      source: 'api_error'\n    }\n  }];\n}\n\n// Check for timeout (empty or incomplete response)\nif (!aiResponse.choices || !aiResponse.choices[0] || !aiResponse.choices[0].message) {\n  return [{\n    json: {\n      valid: false,\n      lead_id: leadData.lead_id,\n      lead_data: leadData,\n      start_time: startTime,\n      error: 'openai_timeout',\n      error_message: 'No response from OpenAI',\n      classification: null,\n      source: 'timeout'\n    }\n  }];\n}\n\n// Extract content\nconst content = aiResponse.choices[0].message.content;\nconst model = aiResponse.model || 'gpt-4o-mini';\n\n// Parse JSON\nlet parsed;\ntry {\n  let cleanJson = content.trim();\n  if (cleanJson.startsWith('```json')) {\n    cleanJson = cleanJson.replace(/^```json\\s*/i, '').replace(/\\s*```$/i, '');\n  } else if (cleanJson.startsWith('```')) {\n    cleanJson = cleanJson.replace(/^```\\s*/i, '').replace(/\\s*```$/i, '');\n  }\n  parsed = JSON.parse(cleanJson);\n} catch (e) {\n  return [{\n    json: {\n      valid: false,\n      lead_id: leadData.lead_id,\n      lead_data: leadData,\n      start_time: startTime,\n      error: 'json_parse_error',\n      error_message: e.message,\n      raw_response: content,\n      classification: null,\n      source: 'parse_error'\n    }\n  }];\n}\n\n// Validate required fields\nconst requiredFields = ['lead_type', 'interest', 'priority', 'confidence', 'suggested_action'];\nconst missingFields = requiredFields.filter(f => parsed[f] === undefined);\n\nif (missingFields.length > 0) {\n  return [{\n    json: {\n      valid: false,\n      lead_id: leadData.lead_id,\n      lead_data: leadData,\n      start_time: startTime,\n      error: 'missing_fields',\n      error_message: `Missing required fields: ${missingFields.join(', ')}`,\n      classification: null,\n      source: 'validation_error'\n    }\n  }];\n}\n\n// Validate enum values\nconst enumValidations = {\n  lead_type: ['hot', 'warm', 'cold', 'spam'],\n  interest: ['high', 'medium', 'low'],\n  priority: ['high', 'medium', 'low'],\n  suggested_action: ['call', 'email', 'archive', 'reject']\n};\n\nfor (const [field, allowedValues] of Object.entries(enumValidations)) {\n  if (!allowedValues.includes(parsed[field])) {\n    return [{\n      json: {\n        valid: false,\n        lead_id: leadData.lead_id,\n        lead_data: leadData,\n        start_time: startTime,\n        error: 'invalid_enum_value',\n        error_message: `Invalid value for ${field}: ${parsed[field]}. Allowed: ${allowedValues.join(', ')}`,\n        classification: null,\n        source: 'validation_error'\n      }\n    }];\n  }\n}\n\n// Validate confidence range\nconst confidence = parseFloat(parsed.confidence);\nif (isNaN(confidence) || confidence < 0 || confidence > 1) {\n  return [{\n    json: {\n      valid: false,\n      lead_id: leadData.lead_id,\n      lead_data: leadData,\n      start_time: startTime,\n      error: 'invalid_confidence',\n      error_message: `Confidence must be between 0 and 1, got: ${parsed.confidence}`,\n      classification: null,\n      source: 'validation_error'\n    }\n  }];\n}\n\n// Validate confidence threshold\nif (confidence < 0.5) {\n  return [{\n    json: {\n      valid: false,\n      lead_id: leadData.lead_id,\n      lead_data: leadData,\n      start_time: startTime,\n      error: 'low_confidence',\n      error_message: `Confidence too low: ${confidence}. Using fallback.`,\n      classification: parsed,\n      source: 'low_confidence'\n    }\n  }];\n}\n\n// All validations passed\nreturn [{\n  json: {\n    valid: true,\n    lead_id: leadData.lead_id,\n    lead_data: leadData,\n    start_time: startTime,\n    classification: {\n      lead_type: parsed.lead_type,\n      interest: parsed.interest,\n      priority: parsed.priority,\n      category: parsed.category || null,\n      summary: parsed.summary || null,\n      confidence: confidence,\n      suggested_action: parsed.suggested_action,\n      reasoning: parsed.reasoning || null\n    },\n    ai_model: model,\n    source: 'ai'\n  }\n}];"
+      },
+      "id": "82e5e051-b3a9-42f2-bb94-2d540d7122ca",
+      "name": "Validate AI Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "valid-check",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f62895cb-77bb-4066-905a-50ff15bc0540",
+      "name": "Is Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -208,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fallback Classification Node\n// Triggered when AI classification fails or returns invalid response\n\nconst input = $input.item.json;\nconst leadData = input.lead_data;\nconst startTime = input.start_time;\nconst message = (leadData.message_content || '').toLowerCase();\n\n// Keyword definitions for fallback classification\nconst KEYWORDS = {\n  spam: ['купить базу', 'предлагаю сотрудничество', 'рекламное предложение', 'база контактов', 'коммерческое предложение', 'рассылка', 'заработок в интернете', 'инвестиции', 'криптовалюта', 'seo продвижение', 'разработка сайта недорого'],\n  hot: ['срочно', 'хочу купить', 'готов оплатить', 'сегодня', 'завтра', 'прямо сейчас', 'немедленно', 'нужно срочно', 'горю', 'заказать', 'оформить', 'подписать'],\n  warm: ['интересует', 'хочу узнать', 'расскажите', 'сколько стоит', 'цена', 'стоимость', 'условия', 'подробнее', 'информация', 'консультация', 'вопрос', 'помогите'],\n  cold: ['подумаю', 'может быть', 'позже', 'не сейчас', 'пока', 'вернусь', 'посмотрю', 'сравню', 'посоветуюсь']\n};\n\n// Check keywords in priority order\n// 1. SPAM\nfor (const keyword of KEYWORDS.spam) {\n  if (message.includes(keyword)) {\n    return [{ json: { valid: true, lead_id: leadData.lead_id, lead_data: leadData, start_time: startTime, classification: { lead_type: 'spam', interest: 'low', priority: 'low', category: 'spam', summary: 'Обнаружены признаки спама в сообщении', confidence: 0.85, suggested_action: 'reject', reasoning: `Fallback: Spam keyword detected: \"${keyword}\"` }, ai_model: 'fallback', source: 'fallback' } }];\n  }\n}\n// 2. HOT\nfor (const keyword of KEYWORDS.hot) {\n  if (message.includes(keyword)) {\n    return [{ json: { valid: true, lead_id: leadData.lead_id, lead_data: leadData, start_time: startTime, classification: { lead_type: 'hot', interest: 'high', priority: 'high', category: 'urgent', summary: 'Клиент демонстрирует высокую готовность к покупке', confidence: 0.65, suggested_action: 'call', reasoning: `Fallback: Hot keyword detected: \"${keyword}\"` }, ai_model: 'fallback', source: 'fallback' } }];\n  }\n}\n// 3. WARM\nfor (const keyword of KEYWORDS.warm) {\n  if (message.includes(keyword)) {\n    return [{ json: { valid: true, lead_id: leadData.lead_id, lead_data: leadData, start_time: startTime, classification: { lead_type: 'warm', interest: 'medium', priority: 'medium', category: 'inquiry', summary: 'Клиент заинтересован, запрашивает информацию', confidence: 0.60, suggested_action: 'email', reasoning: `Fallback: Warm keyword detected: \"${keyword}\"` }, ai_model: 'fallback', source: 'fallback' } }];\n  }\n}\n// 4. COLD\nfor (const keyword of KEYWORDS.cold) {\n  if (message.includes(keyword)) {\n    return [{ json: { valid: true, lead_id: leadData.lead_id, lead_data: leadData, start_time: startTime, classification: { lead_type: 'cold', interest: 'low', priority: 'low', category: 'deferred', summary: 'Клиент не готов к немедленному решению', confidence: 0.55, suggested_action: 'archive', reasoning: `Fallback: Cold keyword detected: \"${keyword}\"` }, ai_model: 'fallback', source: 'fallback' } }];\n  }\n}\n// 5. DEFAULT (warm - conservative)\nreturn [{ json: { valid: true, lead_id: leadData.lead_id, lead_data: leadData, start_time: startTime, classification: { lead_type: 'warm', interest: 'medium', priority: 'medium', category: 'unknown', summary: 'Не удалось определить тип лида, используется классификация по умолчанию', confidence: 0.40, suggested_action: 'email', reasoning: 'Fallback: No matching keywords, defaulting to warm' }, ai_model: 'fallback', source: 'fallback_default' } }];"
+      },
+      "id": "73cdc944-c1e0-4a78-b804-74c11b34f725",
+      "name": "Fallback Classification",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Combine Classification Data Node\nconst input = $input.item.json;\nconst classification = input.classification;\nconst source = input.source;\nconst aiModel = input.ai_model || 'unknown';\nconst startTime = input.start_time || Date.now();\nconst processingMs = Date.now() - startTime;\n\nreturn [{\n  json: {\n    lead_id: input.lead_id,\n    lead_type: classification.lead_type,\n    interest: classification.interest,\n    priority: classification.priority,\n    category: classification.category,\n    summary: classification.summary,\n    confidence: classification.confidence,\n    suggested_action: classification.suggested_action,\n    reasoning: classification.reasoning,\n    source: source,\n    ai_model: aiModel,\n    processing_ms: processingMs\n  }\n}];"
+      },
+      "id": "95d1987f-a60b-41b6-9c46-7b0dbc242a28",
+      "name": "Combine Classification",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO qualifications (\n    lead_id,\n    lead_type,\n    interest,\n    priority,\n    category,\n    summary,\n    confidence,\n    suggested_action,\n    reasoning,\n    ai_model,\n    processing_ms,\n    processed_at\n)\nVALUES (\n    '{{ $json.lead_id }}',\n    '{{ $json.lead_type }}',\n    '{{ $json.interest }}',\n    '{{ $json.priority }}',\n    {{ $json.category ? \"'\" + $json.category.replace(/'/g, \"''\") + \"'\" : 'NULL' }},\n    {{ $json.summary ? \"'\" + $json.summary.replace(/'/g, \"''\") + \"'\" : 'NULL' }},\n    {{ $json.confidence }},\n    '{{ $json.suggested_action }}',\n    {{ $json.reasoning ? \"'\" + $json.reasoning.replace(/'/g, \"''\") + \"'\" : 'NULL' }},\n    '{{ $json.ai_model }}',\n    {{ $json.processing_ms }},\n    NOW()\n)\nRETURNING id, lead_id, lead_type, confidence, processed_at;",
+        "options": {}
+      },
+      "id": "b70506c7-a45c-4e26-82ba-b9feedf6b158",
+      "name": "Insert Qualification",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        400,
+        208
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE leads\nSET status = 'qualified',\n    updated_at = NOW()\nWHERE id = '{{ $json.lead_id }}'\nRETURNING id, status, updated_at;",
+        "options": {}
+      },
+      "id": "8d231076-bd16-4893-ac8d-5362c128f555",
+      "name": "Update Lead Status",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        608,
+        208
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare log data\nconst qualData = $('Insert Qualification').item.json;\nconst classData = $('Combine Classification').item.json;\n\nreturn [{\n  json: {\n    lead_id: classData.lead_id,\n    event_type: 'lead_classified',\n    event_data: JSON.stringify({\n      lead_type: classData.lead_type,\n      confidence: classData.confidence,\n      source: classData.source,\n      ai_model: classData.ai_model,\n      processing_ms: classData.processing_ms,\n      qualification_id: qualData.id\n    }),\n    status: 'success'\n  }\n}];"
+      },
+      "id": "37f38116-d92b-4d9f-9d86-77a288486cbb",
+      "name": "Prepare Log Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO logs (\n    lead_id,\n    event_type,\n    event_data,\n    status\n)\nVALUES (\n    '{{ $json.lead_id }}',\n    '{{ $json.event_type }}',\n    '{{ $json.event_data }}',\n    '{{ $json.status }}'\n)\nRETURNING id, lead_id, event_type, created_at;",
+        "options": {}
+      },
+      "id": "3f2d22d5-0fad-4b1d-a5d6-4438b110ca3b",
+      "name": "Insert Log",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1008,
+        208
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "PBhIDxkfY7JpZfWK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Final success response\nconst qualData = $('Insert Qualification').item.json;\nconst statusData = $('Update Lead Status').item.json;\nconst logData = $('Insert Log').item.json;\n\nreturn [{\n  json: {\n    success: true,\n    lead_id: qualData.lead_id,\n    qualification_id: qualData.id,\n    lead_type: qualData.lead_type,\n    confidence: qualData.confidence,\n    status: statusData.status,\n    log_id: logData.id,\n    processed_at: qualData.processed_at\n  }\n}];"
+      },
+      "id": "1dd6534a-0b31-4efe-ae3a-485c8de69fc0",
+      "name": "Success",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        208
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Received Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Received Leads": {
+      "main": [
+        [
+          {
+            "node": "Load Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Lead Data": {
+      "main": [
+        [
+          {
+            "node": "Build Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Prompt": {
+      "main": [
+        [
+          {
+            "node": "OpenAI Classification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Classification": {
+      "main": [
+        [
+          {
+            "node": "Validate AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate AI Response": {
+      "main": [
+        [
+          {
+            "node": "Is Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Valid?": {
+      "main": [
+        [
+          {
+            "node": "Combine Classification",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fallback Classification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fallback Classification": {
+      "main": [
+        [
+          {
+            "node": "Combine Classification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Classification": {
+      "main": [
+        [
+          {
+            "node": "Insert Qualification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Qualification": {
+      "main": [
+        [
+          {
+            "node": "Update Lead Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Lead Status": {
+      "main": [
+        [
+          {
+            "node": "Prepare Log Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Log Data": {
+      "main": [
+        [
+          {
+            "node": "Insert Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Log": {
+      "main": [
+        [
+          {
+            "node": "Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "b822ce8f-862c-492c-bf68-f61e9bb24610",
+  "meta": {
+    "instanceId": "f0d1e9776960d0516e967caa749e2359995ba70308d140b1dbeca71329f9df22"
+  },
+  "nodeGroups": [],
+  "id": "nKuSxX2XgAt0XccM",
+  "tags": []
+}
