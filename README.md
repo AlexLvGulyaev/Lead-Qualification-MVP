@@ -152,8 +152,15 @@
 |----------|------------|
 | [BUSINESS_VALUE.md](docs/BUSINESS_VALUE.md) | Ценность для бизнеса |
 | [SYSTEM_DEMO.md](docs/SYSTEM_DEMO.md) | Демонстрация системы |
-| [USER_GUIDE.md](docs/USER_GUIDE.md) | Руководство пользователя |
 | [E2E_SCENARIOS.md](docs/E2E_SCENARIOS.md) | Сквозные сценарии |
+
+### Для пользователя
+
+| Документ | Назначение |
+|----------|------------|
+| [USER_GUIDE.md](docs/USER_GUIDE.md) | Руководство клиента |
+| [MANAGER_GUIDE.md](docs/MANAGER_GUIDE.md) | Руководство менеджера |
+| [ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md) | Руководство администратора |
 
 ### Для инженера
 
