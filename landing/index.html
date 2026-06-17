@@ -33,7 +33,40 @@
             </div>
             <div class="nav-cta">
                 <a href="#contact" class="btn btn-secondary">Обсудить проект</a>
-                <a href="#demo" class="btn btn-primary">Получить демо</a>
+                <div class="demo-dropdown">
+                    <button class="btn btn-primary demo-trigger" id="demoTrigger">
+                        Получить демо
+                        <svg class="btn-arrow" viewBox="0 0 20 20" fill="none">
+                            <path d="M5 8L10 13L15 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="demo-popover" id="demoPopover">
+                        <div class="demo-popover-header">Доступ к демонстрации</div>
+                        <div class="demo-popover-content">
+                            <a class="demo-card" data-href="https://lead-qual.alex-n8n.site" role="button" tabindex="0">
+                                <div class="demo-card-icon">🌐</div>
+                                <div class="demo-card-content">
+                                    <div class="demo-card-title">Web-сайт</div>
+                                    <div class="demo-card-desc">Форма заявки и public demo</div>
+                                </div>
+                            </a>
+                            <a class="demo-card" data-href="https://t.me/OptimusLeadQualificationBot" role="button" tabindex="0">
+                                <div class="demo-card-icon">✈</div>
+                                <div class="demo-card-content">
+                                    <div class="demo-card-title">Telegram Bot</div>
+                                    <div class="demo-card-desc">@OptimusLeadQualificationBot</div>
+                                </div>
+                            </a>
+                            <a class="demo-card" data-href="https://lead-qual-admin.alex-n8n.site" role="button" tabindex="0">
+                                <div class="demo-card-icon">🛡</div>
+                                <div class="demo-card-content">
+                                    <div class="demo-card-title">Админ-консоль</div>
+                                    <div class="demo-card-desc">Мониторинг и управление</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>

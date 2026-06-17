@@ -1527,3 +1527,163 @@ section {
 .integration-logo.telegram {
     color: #0ea5e9;
 }
+
+/* ========================================
+   Demo Access Popover
+   ======================================== */
+
+.demo-dropdown {
+    position: relative;
+}
+
+.demo-trigger {
+    cursor: pointer;
+}
+
+.demo-trigger .btn-arrow {
+    transition: transform var(--transition-fast);
+}
+
+.demo-dropdown.active .demo-trigger .btn-arrow {
+    transform: rotate(180deg);
+}
+
+.demo-popover {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 320px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all var(--transition-normal);
+    z-index: 1100;
+}
+
+.demo-dropdown.active .demo-popover {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.demo-popover-header {
+    padding: var(--space-md) var(--space-lg);
+    font-family: var(--font-display);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.demo-popover-content {
+    padding: var(--space-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.demo-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    background: var(--bg-tertiary);
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.demo-card:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-default);
+    transform: translateX(4px);
+}
+
+.demo-card-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.demo-card-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.demo-card-title {
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.demo-card-desc {
+    font-size: 0.8125rem;
+    color: var(--text-tertiary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Demo Navigation - Back to Demo Landing */
+.demo-back {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+}
+
+.demo-back:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+}
+
+.demo-back-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Responsive adjustments for popover */
+@media (max-width: 768px) {
+    .demo-popover {
+        width: 280px;
+        right: 0;
+        left: auto;
+    }
+
+    .demo-card {
+        padding: var(--space-sm) var(--space-md);
+    }
+
+    .demo-card-icon {
+        font-size: 1.25rem;
+    }
+
+    .demo-card-title {
+        font-size: 0.875rem;
+    }
+
+    .demo-card-desc {
+        font-size: 0.75rem;
+    }
+}
+}

@@ -172,6 +172,27 @@ services:
       retries: 3
       start_period: 10s
 
+  # ============================================================================
+  # Landing - Demo Landing Hub
+  # Central entry point for demo access
+  # ============================================================================
+  landing:
+    image: nginx:alpine
+    container_name: lead-qualification-landing
+    restart: unless-stopped
+    volumes:
+      - ../landing:/usr/share/nginx/html:ro
+      - ./docker/nginx/landing-nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - lead-qualification-network
+      - traefik
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
 # ============================================================================
 # Networks
 # ============================================================================
