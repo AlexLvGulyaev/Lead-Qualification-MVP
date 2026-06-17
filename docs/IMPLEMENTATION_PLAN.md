@@ -108,11 +108,11 @@
 
 ### 1.4. Обязательная интеграция
 
-| Интеграция | Провайдер | Обязательность |
-|------------|-----------|----------------|
-| **CRM** | Kommo или Bitrix24 | P0 |
-| **AI** | OpenAI (основной), Claude/GigaChat (альтернатива) | P0 |
-| **Storage** | PostgreSQL на VPS | P0 |
+| Интеграция | Провайдер | Реализация |
+|------------|-----------|------------|
+| **CRM** | Kommo | ✅ Реализовано |
+| **AI** | OpenAI (основной) | ✅ Реализовано |
+| **Storage** | PostgreSQL на VPS | ✅ Реализовано |
 
 ---
 
@@ -120,90 +120,53 @@
 
 ### 2.1. Общая архитектура
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              ВНЕШНИЕ СИСТЕМЫ                                 │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│   ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                    │
-│   │   KOMMO     │    │  BITRIX24   │    │  TELEGRAM   │                    │
-│   │   CRM API   │    │   CRM API   │    │   BOT API   │                    │
-│   └──────┬──────┘    └──────┬──────┘    └──────┬──────┘                    │
-│          │                  │                   │                           │
-│          │                  │                   │                           │
-│          └──────────────────┼───────────────────┘                           │
-│                             │                                               │
-└─────────────────────────────┼───────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              VPS КОНТУР                                      │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│   ┌─────────────────────────────────────────────────────────────────────┐   │
-│   │                         n8n SERVER                                   │   │
-│   │                                                                      │   │
-│   │   ┌─────────────────────────────────────────────────────────────┐   │   │
-│   │   │              WORKFLOW: Lead Ingestion                        │   │   │
-│   │   │                                                              │   │   │
-│   │   │  ┌──────────┐    ┌──────────┐    ┌──────────┐              │   │   │
-│   │   │  │  Webhook │    │ Telegram │    │ Validate │              │   │   │
-│   │   │  │  Trigger │    │ Trigger  │    │  Input   │              │   │   │
-│   │   │  └────┬─────┘    └────┬─────┘    └────┬─────┘              │   │   │
-│   │   │       │               │               │                     │   │   │
-│   │   │       └───────────────┴───────────────┘                     │   │   │
-│   │   │                       │                                     │   │   │
-│   │   └───────────────────────┼─────────────────────────────────────┘   │   │
-│   │                           │                                         │   │
-│   │   ┌───────────────────────┼─────────────────────────────────────┐   │   │
-│   │   │              WORKFLOW: Lead Classification                   │   │   │
-│   │   │                       │                                     │   │   │
-│   │   │                       ▼                                     │   │   │
-│   │   │  ┌──────────┐    ┌──────────┐    ┌──────────┐              │   │   │
-│   │   │  │  Store   │───▶│    AI    │───▶│  Route   │              │   │   │
-│   │   │  │  Lead    │    │Classifier│    │  Action  │              │   │   │
-│   │   │  └──────────┘    └──────────┘    └────┬─────┘              │   │   │
-│   │   │                                        │                     │   │   │
-│   │   └────────────────────────────────────────┼────────────────────┘   │   │
-│   │                                            │                         │   │
-│   │   ┌────────────────────────────────────────┼────────────────────┐   │   │
-│   │   │              WORKFLOW: Lead Output                           │   │   │
-│   │   │                                            │                 │   │   │
-│   │   │                       ┌────────────────────┼───────────┐     │   │   │
-│   │   │                       │                    │           │     │   │   │
-│   │   │                       ▼                    ▼           ▼     │   │   │
-│   │   │  ┌──────────┐    ┌──────────┐    ┌──────────┐ ┌──────────┐  │   │   │
-│   │   │  │   CRM    │    │ Follow-up│    │  Log     │ │  Admin   │  │   │   │
-│   │   │  │  Writer  │    │ Trigger  │    │  Event   │ │   UI     │  │   │   │
-│   │   │  └──────────┘    └──────────┘    └──────────┘ └──────────┘  │   │   │
-│   │   │                                                               │   │   │
-│   │   └───────────────────────────────────────────────────────────────┘   │   │
-│   │                                                                      │   │
-│   └─────────────────────────────────────────────────────────────────────┘   │
-│                                                                              │
-│   ┌─────────────────────────────────────────────────────────────────────┐   │
-│   │                       PostgreSQL                                     │   │
-│   │                                                                      │   │
-│   │   ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ │   │
-│   │   │  leads   │ │ messages │ │qualifica-│ │crm_sync  │ │   logs   │ │   │
-│   │   │          │ │          │ │  tions   │ │          │ │          │ │   │
-│   │   └──────────┘ └──────────┘ └──────────┘ └──────────┘ └──────────┘ │   │
-│   │                                                                      │   │
-│   └─────────────────────────────────────────────────────────────────────┘   │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              AI PROVIDERS                                    │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│   ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                    │
-│   │   OpenAI    │    │   Claude    │    │  GigaChat   │                    │
-│   │  API (main) │    │  API (alt)  │    │  API (alt)  │                    │
-│   └─────────────┘    └─────────────┘    └─────────────┘                    │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph External["ВНЕШНИЕ СИСТЕМЫ"]
+        KOMMO["KOMMO CRM API"]
+        BITRIX24["BITRIX24 CRM API"]
+        TELEGRAM["TELEGRAM BOT API"]
+    end
+    
+    subgraph VPS["VPS КОНТУР"]
+        subgraph N8N["n8n SERVER"]
+            subgraph Workflow1["WORKFLOW: Lead Ingestion"]
+                W1_Webhook["Webhook Trigger"]
+                W1_Telegram["Telegram Trigger"]
+                W1_Validate["Validate Input"]
+            end
+            
+            subgraph Workflow2["WORKFLOW: Lead Classification"]
+                W2_Store["Store Lead"]
+                W2_AI["AI Classifier"]
+                W2_Route["Route Action"]
+            end
+            
+            subgraph Workflow3["WORKFLOW: Lead Output"]
+                W3_CRM["CRM Writer"]
+                W3_Followup["Follow-up Trigger"]
+                W3_Log["Log Event"]
+                W3_Admin["Admin UI"]
+            end
+        end
+        
+        subgraph PostgreSQL["PostgreSQL"]
+            DB_Leads["leads"]
+            DB_Messages["messages"]
+            DB_Qualifications["qualifications"]
+            DB_CRM["crm_sync"]
+            DB_Logs["logs"]
+        end
+    end
+    
+    subgraph AI["AI PROVIDERS"]
+        OpenAI["OpenAI API (main)"]
+        Claude["Claude API (alt)"]
+        GigaChat["GigaChat API (alt)"]
+    end
+    
+    External --> VPS
+    VPS --> AI
 ```
 
 ### 2.2. Компоненты и зоны ответственности
@@ -291,23 +254,17 @@
 
 **Шаги:**
 
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   Trigger   │────▶│  Validate   │────▶│  Normalize  │────▶│   Store     │
-│             │     │   Input     │     │   Format    │     │   Lead      │
-└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
-      │                    │
-      │                    ▼
-      │             ┌─────────────┐
-      │             │   Error     │
-      │             │   Response  │
-      │             └─────────────┘
-      │
-      ▼
-┌─────────────┐
-│   Log       │
-│   Event     │
-└─────────────┘
+```mermaid
+flowchart LR
+    Trigger["Trigger"]
+    Validate["Validate Input"]
+    Normalize["Normalize Format"]
+    Store["Store Lead"]
+    Error["Error Response"]
+    Log["Log Event"]
+    
+    Trigger --> Validate --> Normalize --> Store --> Log
+    Validate -->|Validation Error| Error
 ```
 
 **Входные данные (Web-форма):**
@@ -546,67 +503,96 @@ function fallbackClassification(message) {
 
 ### 4.1. ER-диаграмма (Target Model v2 — Implemented ✅)
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              POSTGRESQL SCHEMA v2                            │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────┐       ┌─────────────────────┐
-│    contacts     │       │ channel_identities  │
-├─────────────────┤       ├─────────────────────┤
-│ id (PK)         │───┐   │ id (PK)             │
-│ name            │   │   │ contact_id (FK)     │───┐
-│ phone           │   │   │ channel             │   │
-│ email           │   │   │ external_id         │   │
-│ company         │   │   │ channel_data (JSONB)│   │
-│ notes           │   │   └─────────────────────┘   │
-│ created_at      │   │                             │
-│ updated_at      │   │   UNIQUE(channel, external_id)
-└─────────────────┘   │
-        │             │
-        │ 1:N         │
-        ▼             │
-┌─────────────────┐   │
-│     leads       │   │
-├─────────────────┤   │
-│ id (PK)         │   │
-│ contact_id (FK) │───┘
-│ public_number   │
-│ source          │
-│ status          │
-│ utm_source      │
-│ utm_campaign    │
-│ created_at      │
-│ updated_at      │
-└────────┬────────┘
-         │
-         │ 1:N
-         ▼
-┌─────────────────┐       ┌─────────────────┐
-│    messages     │       │ qualifications  │
-├─────────────────┤       ├─────────────────┤
-│ id (PK)         │       │ id (PK)         │
-│ lead_id (FK)    │───┐   │ lead_id (FK)    │───┐
-│ channel         │   │   │ lead_type       │   │
-│ direction       │   │   │ interest        │   │
-│ content         │   │   │ priority        │   │
-│ created_at      │   │   │ confidence      │   │
-└─────────────────┘   │   │ ...             │   │
-                      │   └─────────────────┘   │
-                      │                         │
-                      └─────────────────────────┘
-
-┌─────────────────┐       ┌─────────────────┐       ┌─────────────────┐
-│    crm_sync     │       │  follow_ups     │       │      logs       │
-├─────────────────┤       ├─────────────────┤       ├─────────────────┤
-│ id (PK)         │       │ id (PK)         │       │ id (PK)         │
-│ lead_id (FK)    │       │ lead_id (FK)    │       │ lead_id (FK)    │
-│ crm_type        │       │ action_type     │       │ event_type      │
-│ crm_lead_id     │       │ scheduled_at    │       │ event_data      │
-│ sync_status     │       │ executed_at     │       │ status          │
-│ sync_error      │       │ status          │       │ error_message   │
-│ synced_at       │       │ result          │       │ created_at      │
-└─────────────────┘       └─────────────────┘       └─────────────────┘
+```mermaid
+erDiagram
+    contacts ||--o{ leads : "1:N"
+    contacts ||--o{ channel_identities : "1:N"
+    leads ||--o{ messages : "1:N"
+    leads ||--o{ qualifications : "1:N"
+    leads ||--o{ crm_sync : "1:N"
+    leads ||--o{ follow_ups : "1:N"
+    leads ||--o{ logs : "1:N"
+    
+    contacts {
+        UUID id PK
+        VARCHAR name
+        VARCHAR phone
+        VARCHAR email
+        VARCHAR company
+        TEXT notes
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+    
+    channel_identities {
+        UUID id PK
+        UUID contact_id FK
+        VARCHAR channel
+        VARCHAR external_id
+        JSONB channel_data
+    }
+    
+    leads {
+        UUID id PK
+        UUID contact_id FK
+        VARCHAR public_number
+        VARCHAR source
+        VARCHAR status
+        VARCHAR utm_source
+        VARCHAR utm_campaign
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+    
+    messages {
+        UUID id PK
+        UUID lead_id FK
+        VARCHAR channel
+        VARCHAR direction
+        TEXT content
+        TIMESTAMP created_at
+    }
+    
+    qualifications {
+        UUID id PK
+        UUID lead_id FK
+        VARCHAR lead_type
+        VARCHAR interest
+        VARCHAR priority
+        DECIMAL confidence
+        TEXT summary
+        TIMESTAMP processed_at
+    }
+    
+    crm_sync {
+        UUID id PK
+        UUID lead_id FK
+        VARCHAR crm_type
+        VARCHAR crm_lead_id
+        VARCHAR sync_status
+        TEXT sync_error
+        TIMESTAMP synced_at
+    }
+    
+    follow_ups {
+        UUID id PK
+        UUID lead_id FK
+        VARCHAR action_type
+        TIMESTAMP scheduled_at
+        TIMESTAMP executed_at
+        VARCHAR status
+        TEXT result
+    }
+    
+    logs {
+        UUID id PK
+        UUID lead_id FK
+        VARCHAR event_type
+        JSONB event_data
+        VARCHAR status
+        TEXT error_message
+        TIMESTAMP created_at
+    }
 ```
 
 ### 4.2. Таблица: contacts (NEW in v2)
@@ -1285,23 +1271,23 @@ ORDER BY date;
 
 **Цель:** Обеспечить запись результатов в CRM.
 
-**Статус:** ⏳ Pending (Phase 006)
+**Статус:** ✅ Complete
 
 **Задачи:**
 
 | # | Задача | Результат |
 |---|--------|-----------|
-| 4.1 | Выбор CRM (Kommo или Bitrix24) | CRM определена |
+| 4.1 | CRM интеграция (Kommo) | CRM подключена |
 | 4.2 | Создание тестового аккаунта CRM | Доступ к API есть |
 | 4.3 | Реализация CRM Writer node | Лиды создаются в CRM |
 | 4.4 | Маппинг полей | Поля корректно передаются |
 | 4.5 | Обработка ошибок | Retry + логирование |
 
 **Критерии готовности:**
-- [ ] Лид создаётся в CRM
-- [ ] Поля квалификации передаются
-- [ ] Примечание с summary добавляется
-- [ ] crm_sync заполняется
+- [x] Лид создаётся в CRM
+- [x] Поля квалификации передаются
+- [x] Примечание с summary добавляется
+- [x] crm_sync заполняется
 
 ---
 
@@ -1472,7 +1458,7 @@ Last CRM Sync: 2026-06-15 09:45
 
 **Цель:** Реализовать follow-up и полное логирование.
 
-**Статус:** ⏳ Pending (Phase 007)
+**Статус:** ✅ Complete
 
 **Задачи:**
 
@@ -1484,10 +1470,10 @@ Last CRM Sync: 2026-06-15 09:45
 | 5.4 | Минимальный Admin UI | Логи просматриваются |
 
 **Критерии готовности:**
-- [ ] Telegram ответ отправляется для hot/warm
-- [ ] CRM задачи создаются для hot
-- [ ] Таблица logs заполняется
-- [ ] Admin UI показывает последние логи
+- [x] Telegram ответ отправляется для hot/warm
+- [x] CRM задачи создаются для hot
+- [x] Таблица logs заполняется
+- [x] Admin UI показывает последние логи
 
 ---
 
@@ -1533,12 +1519,12 @@ Last CRM Sync: 2026-06-15 09:45
 | 8 | Публичный UI доступен | https://lead-qual.alex-n8n.site/ | ✅ |
 | 9 | Data Model v2 реализована | contacts, channel_identities | ✅ |
 
-#### Phase 2: Full MVP ⏳
+#### Phase 2: Full MVP ✅
 
 | # | Критерий | Проверка | Статус |
 |---|----------|----------|--------|
-| 1 | Интеграция с CRM работает | Создание лида в CRM | ❌ Phase 006 |
-| 2 | Follow-up автоматизация работает | Telegram + CRM tasks | ❌ Phase 007 |
+| 1 | Интеграция с CRM работает | Создание лида в CRM | ✅ |
+| 2 | Follow-up автоматизация работает | Telegram + CRM tasks | ✅ |
 
 ### 9.2. Portfolio Case Acceptance Criteria
 
@@ -1565,12 +1551,12 @@ Last CRM Sync: 2026-06-15 09:45
 | 5 | Проверить Telegram | Подтверждение получено | ✅ |
 | 6 | Проверить логи | События в logs | ✅ |
 
-#### Phase 2: Full MVP ⏳
+#### Phase 2: Full MVP ✅
 
 | # | Шаг | Ожидаемый результат | Статус |
 |---|-----|---------------------|--------|
-| 1 | Проверить CRM | Лид создан с полями | ❌ Phase 006 |
-| 2 | Проверить follow-up | Автоматический ответ | ❌ Phase 007 |
+| 1 | Проверить CRM | Лид создан с полями | ✅ |
+| 2 | Проверить follow-up | Автоматический ответ | ✅ |
 
 ---
 
@@ -1587,33 +1573,35 @@ Last CRM Sync: 2026-06-15 09:45
 | VPS resource limits | Средняя | Среднее | Мониторинг, autoscaling |
 | Telegram Bot webhook issues | Низкая | Низкое | Polling как backup |
 
-### 10.2. Architectural Decisions Required
+### 10.2. Architectural Decisions
 
 | Решение | Варианты | Рекомендация | Статус |
 |---------|----------|--------------|--------|
-| Выбор CRM для MVP | Kommo vs Bitrix24 | Bitrix24 (лучше документация) | ❌ |
-| Выбор AI провайдера | OpenAI vs Claude vs GigaChat | OpenAI (основной), другие (резерв) | ❌ |
-| Размещение Admin UI | n8n built-in vs отдельное | n8n built-in для MVP | ❌ |
-| Формат демо-формы | Отдельная страница vs embed | Отдельная страница | ❌ |
+| Выбор CRM для MVP | Kommo vs Bitrix24 | Kommo | ✅ Реализовано |
+| Выбор AI провайдера | OpenAI vs Claude vs GigaChat | OpenAI (основной) | ✅ Реализовано |
+| Размещение Admin UI | n8n built-in vs отдельное | Отдельное (FastAPI backend) | ✅ Реализовано |
+| Формат демо-формы | Отдельная страница vs embed | Отдельная страница | ✅ Реализовано |
 
-### 10.3. Decisions That Can Be Deferred
+### 10.3. Implementation Notes
 
-| Решение | Почему можно отложить |
-|---------|----------------------|
-| Мультиязычность промптов | Не требуется для демо |
-| Вторая CRM интеграция | MVP требует только одну |
-| Мультиагентная классификация | Усложнение для v2 |
-| A/B тестирование промптов | Требует аналитики |
-| Вебхуки в CRM (bidirectional) | MVP单向 |
+**Реализованные решения:**
 
-### 10.4. Open Questions
+| Решение | Реализация |
+|---------|------------|
+| Бюджет OpenAI API | Используется GPT-4o-mini (~$0.15/1K tokens) |
+| VPS инфраструктура | Развёрнут на VPS, PostgreSQL + n8n |
+| CRM интеграция | Kommo (выбран как основная CRM) |
+| Admin UI | Отдельное приложение (FastAPI backend) |
 
-| # | Вопрос | Контекст | Решение до |
-|---|--------|----------|------------|
-| 1 | Какой бюджет на OpenAI API? | ~$0.15/1K tokens | Начало разработки |
-| 2 | Есть ли доступ к VPS? | Требуется для n8n | Начало разработки |
-| 3 | Какую CRM используют целевые заказчики? | Kommo vs Bitrix24 | Этап 4 |
-| 4 | Нужен ли мультиязычный бот? | ES для Перу | Пост-MVP |
+**Отложенные улучшения (v2):**
+
+| Улучшение | Статус |
+|-----------|--------|
+| Мультиязычность промптов | Known Limitation |
+| Вторая CRM интеграция (Bitrix24) | Known Limitation |
+| Мультиагентная классификация | v2 |
+| A/B тестирование промптов | v2 |
+| Вебхуки в CRM (bidirectional) | v2 |
 
 ---
 
