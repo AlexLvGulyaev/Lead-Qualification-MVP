@@ -1,495 +1,242 @@
-# Сквозные сценарии Lead Qualification MVP
+# Сквозные сценарии работы системы
 
-Документ описывает основные E2E (End-to-End) сценарии работы системы Lead Qualification MVP. Каждый сценарий показывает полный путь лида от источника до результата в CRM.
+Документ показывает, как обращения проходят через систему Lead Qualification — от момента отправки до результата для бизнеса.
 
----
-
-## Визуальная демонстрация системы
-
-### Путь Website-лида
-
-```
-Website Form → Lead Ingestion → AI Classification → Kommo CRM → Dashboard
-```
-
-**Шаг 1: Форма заявки**
-
-![Website: Empty Form](screenshots/website-form-empty.png)
-
-**Шаг 2: Заполнение**
-
-![Website: Filled Form](screenshots/website-form-filled.png)
-
-**Шаг 3: Обработка**
-
-![Website: Request](screenshots/website-form-request.png)
-
-**Шаг 4: Успех**
-
-![Website: Success](screenshots/website-form-success.png)
+Каждый сценарий демонстрирует конкретный путь обращения: что видит клиент, что получает менеджер, что видит руководитель.
 
 ---
 
-### Путь Telegram-лида
+## Сценарий 1: Website → Warm Lead
 
-```
-Telegram Bot → Lead Ingestion → AI Classification → Kommo CRM → Dashboard
-```
-
-**Диалог с ботом**
-
-![Telegram: Hot Lead](screenshots/telegram-lead-hot.png)
+Потенциальный клиент оставляет заявку через Website. Его интересует внедрение системы автоматизации. Он хочет обсудить возможности, интеграцию и бюджет.
 
 ---
 
-### AI Classification
+### Исходная ситуация
 
-```
-Lead Ingestion → Classification Workflow → Qualification Table
-```
+Клиент заполняет форму на сайте:
 
-**Workflow в n8n**
-
-![n8n: Classification](screenshots/workflow-lead-classification-mvp.png)
+> **Имя:** Мария Петрова
+> **Телефон:** +79991234567
+> **Сообщение:** Добрый день! Интересуют ваши услуги, расскажите подробнее о возможностях и ценах.
 
 ---
 
-### CRM Integration
+### Путь обращения
 
-```
-Qualified Lead → Kommo Writer Workflow → Kommo Deal + Task
-```
+**1. Клиент отправляет заявку через Website**
 
-**Workflow в n8n**
+![Website: Успех](screenshots/website-form-success.png)
 
-![n8n: Kommo Writer](screenshots/workflow-kommo-writer-mvp.png)
-
-**Результат в Kommo**
-
-![Kommo: Hot Deal](screenshots/commo-deal-hot.png)
+Система подтверждает приём и выдаёт номер обращения.
 
 ---
 
-### Мониторинг через Admin Console
+**2. Автоматическая квалификация**
 
-**Dashboard**
+Система анализирует обращение за секунды. Определяет: клиент заинтересован, задаёт вопросы, нужен follow-up.
+
+**Результат классификации:** Warm Lead
+
+---
+
+**3. Создание сделки в Kommo**
+
+![Kommo: Warm Deal](screenshots/commo-deal-warm.png)
+
+Система создаёт сделку в CRM:
+- Статус: Warm Lead
+- Задача менеджеру: через 24 часа
+- Все данные клиента переданы
+
+---
+
+**4. Отображение в Dashboard**
 
 ![Dashboard: Overview](screenshots/dashboard-overview.png)
 
-**Lead Queue: Горячие лиды**
-
-![Lead Queue: Hot](screenshots/lead-queue-hot.png)
-
-**Lead Queue: Тёплые лиды**
-
-![Lead Queue: Warm](screenshots/lead-queue-warm.png)
-
-**Lead Queue: Холодные лиды**
-
-![Lead Queue: Cold](screenshots/lead-queue-cold.png)
+Информация о новом обращении появляется в Dashboard. Руководитель видит актуальную статистику.
 
 ---
 
-## Общая схема пути лида
+### Результат
 
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                           ИСТОЧНИК                                        │
-│   Website (HTTP POST)  или  Telegram Bot (Message)                        │
-└──────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌──────────────────────────────────────────────────────────────────────────┐
-│                        LEAD INGESTION                                     │
-│   n8n: Lead Ingestion V2 (webhook) или Lead Ingestion Telegram            │
-│   - Валидация данных                                                      │
-│   - Find/Create Contact                                                   │
-│   - Create Lead (LQ-NNNNNN)                                               │
-│   - Create Message                                                        │
-└──────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌──────────────────────────────────────────────────────────────────────────┐
-│                        AI CLASSIFICATION                                  │
-│   n8n: Lead Classification MVP (Schedule 5 min)                          │
-│   - Query leads (status=received)                                        │
-│   - Build prompt                                                          │
-│   - Call OpenAI API                                                       │
-│   - Fallback (rule-based) если нужно                                      │
-│   - Save qualification                                                     │
-│   - Update lead status                                                    │
-└──────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌──────────────────────────────────────────────────────────────────────────┐
-│                        CRM INTEGRATION                                     │
-│   n8n: Lead CRM Sync - Kommo Writer MVP                                   │
-│   - Create Kommo Lead (deal)                                              │
-│   - Create Kommo Contact                                                  │
-│   - Add Note (summary, confidence)                                        │
-│   - Create Initial Task                                                   │
-│   - Save to crm_sync                                                      │
-└──────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌──────────────────────────────────────────────────────────────────────────┐
-│                        MANAGER TASK                                        │
-│   Kommo: Task for manager                                                 │
-│   - Hot: +15 минут                                                        │
-│   - Warm: +24 часа                                                        │
-│   - Cold: +7 дней                                                         │
-│   - Spam: сделка закрыта                                                  │
-└──────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌──────────────────────────────────────────────────────────────────────────┐
-│                        MONITORING                                          │
-│   n8n: CRM Status Sync MVP (Schedule 15 min)                              │
-│   - Update crm_sync snapshot                                              │
-│   - Admin Console displays status                                         │
-└──────────────────────────────────────────────────────────────────────────┘
-```
+**Клиент получает:**
+- Подтверждение приёма заявки
+- Номер обращения для коммуникации
+- Ожидание контакта в течение 24 часов
 
----
+**Менеджер получает:**
+- Готовую сделку в Kommo с классификацией
+- Все данные клиента
+- Автоматическую задачу на звонок
+- Рекомендацию: follow-up через 24 часа
 
-## Сценарий 1: Website → Hot Lead
-
-### Описание
-
-Клиент оставляет заявку через Website форму с текстом, указывающим на готовность купить немедленно.
-
-### Входные данные
-
-```json
-{
-  "name": "Иван Петров",
-  "phone": "+79991234567",
-  "email": "ivan@example.com",
-  "message": "Хочу купить вашу услугу прямо сейчас, готов оплатить сегодня. Перезвоните мне срочно!"
-}
-```
-
-### Шаги
-
-| Шаг | Компонент | Действие | Результат |
-|-----|-----------|----------|----------|
-| 1 | Client UI | Клиент заполняет форму и отправляет | POST /webhook/lead |
-| 2 | Lead Ingestion V2 | Приём webhook, валидация | Lead создан: LQ-000123 |
-| 3 | PostgreSQL | Сохранение | leads, messages заполнены |
-| 4 | Lead Classification | AI-классификация (до 5 мин) | lead_type=hot, confidence=0.94 |
-| 5 | PostgreSQL | Сохранение квалификации | qualifications заполнена |
-| 6 | Kommo Writer | Создание сделки | Kommo Lead ID: 12345678 |
-| 7 | Kommo Writer | Создание задачи | Task: +15 минут |
-| 8 | PostgreSQL | Сохранение crm_sync | crm_sync заполнена |
-| 9 | Admin Console | Отображение | Dashboard показывает Hot Lead |
-
-### AI Response
-
-```json
-{
-  "lead_type": "hot",
-  "interest": "high",
-  "priority": "high",
-  "category": "service_a",
-  "summary": "Клиент готов к покупке, упоминает срочность и готовность оплатить сегодня",
-  "confidence": 0.94,
-  "suggested_action": "call",
-  "reasoning": "Ключевые слова 'прямо сейчас', 'готов оплатить', 'срочно' указывают на высокую готовность к покупке"
-}
-```
-
-### Kommo Result
-
-- **Pipeline:** Входящие лиды
-- **Status:** Hot Lead
-- **Task:** Звонок клиенту, срок +15 минут
-- **Note:** "AI Classification: hot (confidence: 0.94). Клиент готов к покупке..."
-
-### Ответ клиенту
-
-> Спасибо! Ваша заявка принята. Номер обращения: **LQ-000123**
->
-> Менеджер свяжется с вами в ближайшее время.
+**Руководитель получает:**
+- Информацию о новом обращении в Dashboard
+- Статистику по типам лидов
+- Контроль качества обработки
 
 ---
 
 ## Сценарий 2: Telegram → Hot Lead
 
-### Описание
-
-Клиент пишет в Telegram-бот с запросом, указывающим на высокую заинтересованность.
-
-### Входные данные
-
-```
-Telegram Message:
-User ID: 123456789
-Name: Алексей
-Text: "Здравствуйте! Хочу заказать ваши услуги, готов начать работу уже завтра"
-```
-
-### Шаги
-
-| Шаг | Компонент | Действие | Результат |
-|-----|-----------|----------|----------|
-| 1 | Telegram Bot | Клиент отправляет сообщение | Telegram Trigger |
-| 2 | Lead Ingestion Telegram | Парсинг, создание лида | Lead создан: LQ-000124 |
-| 3 | PostgreSQL | Сохранение | leads, messages заполнены |
-| 4 | Lead Classification | AI-классификация | lead_type=hot, confidence=0.88 |
-| 5 | Kommo Writer | Создание сделки + задача | Task: +15 минут |
-| 6 | Telegram Bot | Отправка подтверждения | "Заявка принята: LQ-000124" |
-
-### Ответ в Telegram
-
-> ✅ Заявка принята!
->
-> Номер обращения: **LQ-000124**
->
-> Менеджер свяжется с вами в ближайшее время.
+Клиент обращается через Telegram с запросом, требующим срочной обработки. Готов к быстрому внедрению решения.
 
 ---
 
-## Сценарий 3: Website → Warm Lead
+### Исходная ситуация
 
-### Описание
+Клиент пишет в Telegram-бот:
 
-Клиент оставляет заявку с вопросом, указывая заинтересованность, но не готовность купить немедленно.
-
-### Входные данные
-
-```json
-{
-  "name": "Мария Иванова",
-  "phone": "+79998765432",
-  "email": "maria@example.com",
-  "message": "Добрый день! Интересуют ваши услуги, расскажите подробнее о возможностях и ценах"
-}
-```
-
-### Шаги
-
-| Шаг | Компонент | Действие | Результат |
-|-----|-----------|----------|----------|
-| 1 | Client UI | Отправка формы | POST /webhook/lead |
-| 2 | Lead Ingestion V2 | Создание лида | LQ-000125 |
-| 3 | Lead Classification | AI-классификация | lead_type=warm, confidence=0.82 |
-| 4 | Kommo Writer | Создание сделки | Status: Warm Lead |
-| 5 | Kommo Writer | Создание задачи | Task: +24 часа |
-
-### AI Response
-
-```json
-{
-  "lead_type": "warm",
-  "interest": "high",
-  "priority": "medium",
-  "summary": "Клиент заинтересован, задаёт вопросы о возможностях и ценах, нужен follow-up",
-  "confidence": 0.82,
-  "suggested_action": "email",
-  "reasoning": "Ключевые слова 'интересуют', 'расскажите подробнее' указывают на заинтересованность без срочности"
-}
-```
-
-### Kommo Result
-
-- **Pipeline:** Входящие лиды
-- **Status:** Warm Lead
-- **Task:** Звонок клиенту, срок +24 часа
+> Здравствуйте! Нужна срочная интеграция, готовы начать работу завтра. Перезвоните, пожалуйста, как можно скорее.
 
 ---
 
-## Сценарий 4: Telegram → Cold Lead
+### Путь обращения
 
-### Описание
+**1. Клиент создаёт заявку через Telegram**
 
-Клиент пишет в Telegram с неопределённым интересом, возможно сравнивает варианты.
+![Telegram: Hot Lead](screenshots/telegram-lead-hot.png)
 
-### Входные данные
-
-```
-Telegram Message:
-User ID: 987654321
-Name: Дмитрий
-Text: "Привет, думаю насчёт вашей услуги, может быть закажу позже"
-```
-
-### Шаги
-
-| Шаг | Компонент | Действие | Результат |
-|-----|-----------|----------|----------|
-| 1 | Telegram Bot | Приём сообщения | Telegram Trigger |
-| 2 | Lead Ingestion Telegram | Создание лида | LQ-000126 |
-| 3 | Lead Classification | AI-классификация | lead_type=cold, confidence=0.75 |
-| 4 | Kommo Writer | Создание сделки | Status: Cold Lead |
-| 5 | Kommo Writer | Создание задачи | Task: +7 дней |
-
-### AI Response
-
-```json
-{
-  "lead_type": "cold",
-  "interest": "low",
-  "priority": "low",
-  "summary": "Клиент сомневается, откладывает решение, нужен длительный follow-up",
-  "confidence": 0.75,
-  "suggested_action": "archive",
-  "reasoning": "Ключевые слова 'думаю', 'может быть', 'позже' указывают на низкую готовность"
-}
-```
-
-### Kommo Result
-
-- **Pipeline:** Входящие лиды
-- **Status:** Cold Lead
-- **Task:** Звонок клиенту, срок +7 дней
+Бот подтверждает приём и регистрирует обращение.
 
 ---
 
-## Сценарий 5: Website → Spam
+**2. Автоматическая квалификация**
 
-### Описание
+Система определяет: клиент готов начать работу, упоминает срочность.
 
-Обращение, не связанное с целевой деятельностью (рекламное предложение, продажа базы и т.п.).
-
-### Входные данные
-
-```json
-{
-  "name": "Реклама",
-  "phone": "+79000000000",
-  "email": "spam@example.com",
-  "message": "Предлагаю купить базу контактов для вашего бизнеса, отличные цены!"
-}
-```
-
-### Шаги
-
-| Шаг | Компонент | Действие | Результат |
-|-----|-----------|----------|----------|
-| 1 | Client UI | Отправка формы | POST /webhook/lead |
-| 2 | Lead Ingestion V2 | Создание лида | LQ-000127 |
-| 3 | Lead Classification | AI-классификация | lead_type=spam, confidence=0.96 |
-| 4 | Kommo Writer | Создание сделки | Status: Closed (Spam) |
-| 5 | Kommo Writer | Задача НЕ создаётся | — |
-
-### AI Response
-
-```json
-{
-  "lead_type": "spam",
-  "interest": "none",
-  "priority": "low",
-  "summary": "Рекламное предложение, нецелевое обращение",
-  "confidence": 0.96,
-  "suggested_action": "reject",
-  "reasoning": "Ключевые слова 'купить базу', 'предлагаю' указывают на спам/рекламу"
-}
-```
-
-### Kommo Result
-
-- **Pipeline:** Closed
-- **Status:** Spam
-- **Task:** Не создаётся
+**Результат классификации:** Hot Lead
 
 ---
 
-## Сценарий 6: AI Fallback (OpenAI недоступен)
+**3. Создание сделки в Kommo**
 
-### Описание
+![Kommo: Hot Deal](screenshots/commo-deal-hot.png)
 
-Сценарий, когда OpenAI API недоступен или возвращает ошибку. Система использует rule-based fallback.
+Система создаёт сделку в CRM:
+- Статус: Hot Lead
+- Задача менеджеру: через 15 минут
+- Все данные клиента переданы
 
-### Триггер
+---
 
-- OpenAI API timeout (> 10s)
-- OpenAI API rate limit
-- OpenAI API error (500, 502, 503)
-- Invalid JSON в ответе
+**4. Отображение в Dashboard**
 
-### Fallback Logic
+![Dashboard: Overview](screenshots/dashboard-overview.png)
 
-```javascript
-function fallbackClassify(message) {
-  const lower = message.toLowerCase();
+Информация о горячем обращении мгновенно появляется в Dashboard.
 
-  // Spam keywords
-  if (['купить базу', 'предложение', 'реклама'].some(k => lower.includes(k))) {
-    return { lead_type: 'spam', confidence: 0.5, source: 'fallback' };
-  }
-
-  // Hot keywords
-  if (['срочно', 'хочу купить', 'готов оплатить', 'завтра'].some(k => lower.includes(k))) {
-    return { lead_type: 'hot', confidence: 0.6, source: 'fallback' };
-  }
-
-  // Warm keywords
-  if (['интересует', 'подробнее', 'сколько стоит'].some(k => lower.includes(k))) {
-    return { lead_type: 'warm', confidence: 0.6, source: 'fallback' };
-  }
-
-  // Cold keywords
-  if (['подумаю', 'может быть', 'позже'].some(k => lower.includes(k))) {
-    return { lead_type: 'cold', confidence: 0.6, source: 'fallback' };
-  }
-
-  // Default
-  return { lead_type: 'warm', confidence: 0.4, source: 'fallback_default' };
-}
-```
+---
 
 ### Результат
 
-- Квалификация сохраняется с пометкой `source: 'fallback'`
-- Confidence обычно ниже (0.4–0.6)
-- Менеджер может проверить вручную
+**Клиент получает:**
+- Мгновенное подтверждение приёма
+- Ожидание контакта в течение 15 минут
+
+**Менеджер получает:**
+- Приоритетную сделку с пометкой Hot
+- Автоматическую задачу на звонок через 15 минут
+- Все данные клиента
+- Рекомендацию: звонок немедленно
+
+**Руководитель получает:**
+- Информацию о горячем обращении в Dashboard
+- Контроль скорости реакции менеджера
 
 ---
 
-## Сценарий 7: CRM Status Sync
+## Сценарий 3: Website → Spam
 
-### Описание
+Через Website поступает нецелевое обращение с признаками рекламной рассылки.
 
-Периодическая синхронизация snapshot из Kommo для мониторинга.
+---
 
-### Триггер
+### Исходная ситуация
 
-Schedule: каждые 15 минут
+Посетитель отправляет форму:
 
-### Шаги
+> **Имя:** Рассылка
+> **Телефон:** +79001234567
+> **Сообщение:** Предлагаем услуги по продвижению вашего бизнеса! Только сегодня скидка 50%! Закажите прямо сейчас!
 
-| Шаг | Компонент | Действие | Результат |
-|-----|-----------|----------|----------|
-| 1 | CRM Status Sync | Query crm_sync | Список активных записей |
-| 2 | CRM Status Sync | For each: GET /leads/{id} | Kommo API вызов |
-| 3 | CRM Status Sync | Extract: pipeline, status, tasks | Данные сделки |
-| 4 | PostgreSQL | Update crm_sync | Snapshot обновлён |
-| 5 | Admin Console | Display | Актуальные данные |
+---
 
-### Обновляемые поля
+### Путь обращения
 
-| Поле | Источник |
-|------|----------|
-| kommo_pipeline_id | Kommo lead.pipeline_id |
-| kommo_pipeline_name | Kommo pipeline.name |
-| kommo_status_id | Kommo lead.status_id |
-| kommo_status_name | Kommo status.name |
-| kommo_responsible_user_id | Kommo lead.responsible_user_id |
-| crm_has_active_task | Kommo lead.closest_task_at |
-| crm_closest_task_at | Kommo lead.closest_task_at |
-| crm_closed_at | Kommo lead.closed_at |
-| crm_synced_at | NOW() |
+**1. Клиент отправляет обращение через Website**
+
+Система принимает и регистрирует обращение.
+
+---
+
+**2. Автоматическая квалификация**
+
+Система определяет: нецелевое обращение, рекламный характер, признаки спама.
+
+**Результат классификации:** Spam
+
+---
+
+**3. Обработка в системе**
+
+Лид помечается как нецелевой. Информация сохраняется для аналитики.
+
+---
+
+**4. Статистика в Dashboard**
+
+![Dashboard: Overview](screenshots/dashboard-overview.png)
+
+Обращение учитывается в статистике. Руководитель видит долю спама во входящем потоке.
+
+---
+
+### Результат
+
+**Клиент получает:**
+- Подтверждение приёма заявки (как и любое обращение)
+
+**Менеджер получает:**
+- Не тратит время на обработку спама
+- Сделка автоматически закрыта как нецелевая
+
+**Руководитель получает:**
+- Корректную статистику входящего потока
+- Контроль качества фильтрации
+- Понимание доли нецелевых обращений
 
 ---
 
 ## Сводная таблица сценариев
 
-| Сценарий | Источник | Тип | Confidence | Задача |
-|----------|----------|-----|------------|--------|
-| 1 | Website | Hot | 0.94 | +15 мин |
-| 2 | Telegram | Hot | 0.88 | +15 мин |
-| 3 | Website | Warm | 0.82 | +24 часа |
-| 4 | Telegram | Cold | 0.75 | +7 дней |
-| 5 | Website | Spam | 0.96 | Не создаётся |
-| 6 | Any | Fallback | 0.4–0.6 | По типу |
-| 7 | — | Sync | — | — |
+| Сценарий | Источник | Классификация | Задача менеджеру |
+|----------|----------|---------------|------------------|
+| Warm Lead | Website | Заинтересованный клиент | +24 часа |
+| Hot Lead | Telegram | Готов к внедрению | +15 минут |
+| Spam | Website | Нецелевое обращение | Не создаётся |
+
+---
+
+## Что показывает документ
+
+**Для бизнеса:**
+- Как обращения проходят через систему
+- Какие результаты получают stakeholders
+- Как автоматизация экономит время
+
+**Для оценки:**
+- Конкретные примеры работы системы
+- Визуальное подтверждение результатов
+- Понятные бизнес-сценарии без технических деталей
+
+---
+
+## Связанные документы
+
+- [SYSTEM_DEMO.md](SYSTEM_DEMO.md) — демонстрация системы
+- [BUSINESS_VALUE.md](BUSINESS_VALUE.md) — ценность для бизнеса
+- [USER_GUIDE.md](USER_GUIDE.md) — руководство клиента
+- [MANAGER_GUIDE.md](MANAGER_GUIDE.md) — руководство менеджера
