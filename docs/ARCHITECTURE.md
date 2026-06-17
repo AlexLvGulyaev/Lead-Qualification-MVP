@@ -105,8 +105,18 @@ Website / Telegram → Lead Ingestion → AI Classification → PostgreSQL → K
 
 **Реализованные маршруты (Frontend):**
 
+**Demo Landing** (https://lead-qual-demo.alex-n8n.site):
+- `/` — Demo Landing Hub — точка входа в демонстрационный контур
+- Попадание на Web-сайт, Telegram Bot, Admin Console через popover
+
+**Client UI** (https://lead-qual.alex-n8n.site):
 - `/` — Landing page с формой заявки
 - `/success` — Подтверждение отправки
+
+**Admin UI** (https://lead-qual-admin.alex-n8n.site):
+- `/` — Dashboard с метриками
+- `/leads` — Lead Queue
+- `/lead/:id` — Lead Details
 
 ---
 

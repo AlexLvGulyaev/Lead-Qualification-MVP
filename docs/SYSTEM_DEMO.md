@@ -16,6 +16,24 @@
 
 ---
 
+## Точка входа в демо-контур
+
+**Demo Landing:** https://lead-qual-demo.alex-n8n.site
+
+Demo Landing — центральная точка входа в демонстрационный контур системы.
+
+![Landing: Demo Hub](screenshots/landing-link-web.png)
+
+Нажмите **«Получить демо»** и выберите канал:
+
+| Канал | Описание |
+|-------|----------|
+| **Web-сайт** | Форма заявки и public demo |
+| **Telegram Bot** | @OptimusLeadQualificationBot |
+| **Админ-консоль** | Мониторинг и управление |
+
+---
+
 ## Шаг 1. Поступление обращения
 
 Клиент может оставить заявку через два канала: Website или Telegram.

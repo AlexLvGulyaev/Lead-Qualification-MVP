@@ -202,27 +202,28 @@ Telegram-боты с AI     ████████████████    
 | **Public Number** | Человекочитаемый номер обращения (LQ-NNNNNN) | Enhancement | ✅ Active |
 | **Client UI** | Публичный UI для подачи обращений | Enhancement | ✅ Active |
 
-#### Phase 2: Full MVP (Planned — Requires Phase 006-007 ⏳)
+#### Phase 2: Full MVP ✅ Complete
 
 | Компонент | Описание | Приоритет | Статус |
 |-----------|----------|-----------|--------|
-| **CRM writer** | Запись квалифицированного лида в CRM | P0 | ⏳ Phase 006 |
-| **Follow-up trigger** | Инициация базового follow-up | P1 | ⏳ Phase 007 |
-| **Admin UI (minimal)** | Просмотр логов, статистики, настроек | P2 | ⏳ Future |
+| **CRM writer** | Запись квалифицированного лида в CRM | P0 | ✅ Active |
+| **Follow-up trigger** | Инициация базового follow-up | P1 | ✅ Active |
+| **Admin UI** | Dashboard, Lead Queue, Details | P2 | ✅ Active |
 
 ### 6.2. Обязательные элементы MVP
 
-**Phase 1 (Current):**
+**Phase 1 (Input Channels):**
 - ✅ Каналы поступления лидов: Web-форма + Telegram-бот
 - ✅ Хранилище данных: PostgreSQL (Target Model v2)
 - ✅ Оркестрация: n8n на VPS проекта
 - ✅ Data Model v2: contacts, channel_identities, leads
 
 **Phase 2 (Full MVP):**
-- ⏳ Интеграция CRM: Kommo или Bitrix24
-- ⏳ Follow-up Automation
+- ✅ Интеграция CRM: Kommo
+- ✅ Follow-up Automation (Initial Task Creation)
+- ✅ Admin Console: Dashboard, Lead Queue, Lead Details
 
-**Важно:** Phase 1 является самодостаточным MVP для демонстрации AI-квалификации лидов. Phase 2 добавляет интеграцию с CRM и автоматизацию follow-up.
+**Важно:** Full MVP полностью реализован. Phase 1 обеспечивала входные каналы, Phase 2 добавила интеграцию с CRM и Admin Console.
 
 ### 6.3. Критерии успеха MVP
 
@@ -235,11 +236,12 @@ Telegram-боты с AI     ████████████████    
 - ✅ Telegram Bot работает 24/7
 - ✅ Data Model v2 реализована (contacts, channel_identities)
 
-#### Phase 2: Full MVP (Phase 006-007) ⏳
+#### Phase 2: Full MVP ✅
 
-- ⏳ Интеграция с CRM (Kommo или Bitrix24)
-- ⏳ Follow-up автоматизация
-- ⏳ Демонстрационный сценарий включает полный путь: web/telegram → классификация → PostgreSQL → CRM
+- ✅ Интеграция с CRM (Kommo)
+- ✅ Follow-up автоматизация (Initial Task Creation)
+- ✅ Admin Console (Dashboard, Lead Queue, Details)
+- ✅ Демонстрационный сценарий включает полный путь: web/telegram → классификация → PostgreSQL → CRM
 
 ### 6.4. Критерии готовности кейс-стади
 
@@ -271,7 +273,7 @@ Telegram-боты с AI     ████████████████    
 
 **Принцип «MVP за 5–7 дней»:**
 
-MVP Phase 1 реализован за 5-7 дней с имеющимися компетенциями. Phase 2 (CRM + Follow-up) требует дополнительных интеграций и будет реализован в Phase 006-007.
+MVP Phase 1 реализован за 5-7 дней с имеющимися компетенциями. Phase 2 (CRM + Follow-up) добавила интеграция с CRM и Admin Console.
 
 **Phase 1 (Input Channels MVP) — Реализован ✅**
 
@@ -283,19 +285,19 @@ Phase 1 включает:
 - Logger
 - Fallback Classification
 
-**Phase 2 (Full MVP) — Запланирован ⏳**
+**Phase 2 (Full MVP) — Реализован ✅**
 
-Phase 2 требует:
-- CRM-интеграцию (Kommo или Bitrix24) — Phase 006
-- Follow-up автоматизацию — Phase 007
+Phase 2 включает:
+- CRM-интеграцию (Kommo)
+- Follow-up автоматизацию (Initial Task Creation)
+- Admin Console (Dashboard, Lead Queue, Details)
 
 **Обоснование разделения:**
 
-CRM-интеграция вынесена в Phase 2, поскольку:
-- Требует отдельной настройки с каждым заказчиком (Kommo vs Bitrix24)
-- Требует тестовых аккаунтов CRM
-- Увеличивает время реализации на 2-3 дня
-- Phase 1 является самодостаточным демонстрационным кейсом
+CRM-интеграция была реализована в Phase 006-007:
+- Kommo CRM интеграция — Phase 006
+- Initial Task Creation — Phase 007
+- Admin Console — Phase 008
 
 ---
 
@@ -1174,13 +1176,14 @@ cases/n8n-lead-qualification/
 | README оформлен | ✅ Готово |
 | SPEC завершён | ✅ Готово |
 
-#### Phase 2: Full MVP ⏳
+#### Phase 2: Full MVP ✅
 
 | Критерий | Статус |
 |----------|--------|
-| CRM-интеграция работает | ❌ Не готово (Phase 006) |
-| Follow-up автоматизация работает | ❌ Не готово (Phase 007) |
-| Полный демо-сценарий (Web → AI → CRM) | ❌ Не готово |
+| CRM-интеграция работает | ✅ Готово (Kommo) |
+| Follow-up автоматизация работает | ✅ Готово (Initial Task Creation) |
+| Admin Console работает | ✅ Готово (Dashboard, Queue, Details) |
+| Полный демо-сценарий (Web → AI → CRM) | ✅ Готово |
 
 ---
 
