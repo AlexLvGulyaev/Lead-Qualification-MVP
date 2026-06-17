@@ -757,3 +757,80 @@ ORDER BY created_at DESC;
 | **Workflow Engine** | n8n, Zapier | n8n | Self-hosted, гибкость |
 | **Polling vs Event** | Polling, Event Chain | Polling | Простота MVP |
 | **Admin UI** | Custom, n8n built-in | Custom | Специализированный UX |
+
+---
+
+## 11. Технологический стек
+
+| Слой | Технология | Версия | Назначение |
+|------|------------|--------|------------|
+| **Workflow Engine** | n8n (self-hosted) | Latest | Оркестрация всех workflows |
+| **AI Provider** | OpenAI API | gpt-4o-mini | AI-классификация лидов |
+| **CRM** | Kommo | API v4 | Интеграция с CRM |
+| **Database** | PostgreSQL | 14+ | Хранение бизнес-данных |
+| **Admin Backend** | FastAPI, Python | 3.12 | API для Admin Console |
+| **Admin Frontend** | Vanilla JS | — | Dashboard и Lead Queue |
+| **Client Frontend** | Nginx + Static HTML | — | Landing и форма заявки |
+| **Telegram** | Telegram Bot API | — | Приём лидов из Telegram |
+| **Reverse Proxy** | Traefik | — | SSL termination, routing |
+| **Deploy** | Docker Compose | — | Контейнеризация |
+
+---
+
+## 12. Структура проекта
+
+```
+n8n-lead-qualification/
+├── README.md                    # Главное введение в проект
+├── docs/                        # Документация
+│   ├── BUSINESS_VALUE.md        # Ценность для бизнеса
+│   ├── SYSTEM_DEMO.md           # Демонстрация системы
+│   ├── ARCHITECTURE.md          # Архитектура системы (этот файл)
+│   ├── USER_GUIDE.md            # Руководство пользователя
+│   ├── DEPLOYMENT_GUIDE.md      # Руководство по развёртыванию
+│   ├── E2E_SCENARIOS.md         # Сквозные сценарии
+│   ├── AI_QUALIFICATION.md      # AI-классификация
+│   ├── PROJECT_STATE.md         # Текущее состояние
+│   ├── PROJECT_HISTORY.md       # История развития
+│   ├── IMPLEMENTATION_PLAN.md   # План реализации
+│   ├── SCREENSHOTS.md           # Галерея экранов
+│   └── TZ_COMPLIANCE_REPORT.md   # Соответствие ТЗ
+├── infra/                       # Инфраструктура
+│   ├── docker-compose.yml       # Сервисы Docker
+│   ├── sql/                      # Схема БД
+│   │   └── init-db.sql          # Инициализация БД
+│   └── docker/                   # Конфигурации Docker
+├── admin-ui/                    # Admin Console Frontend
+│   ├── index.html               # Dashboard
+│   ├── leads.html              # Lead Queue
+│   ├── lead.html                # Lead Details
+│   └── js/                      # JavaScript модули
+├── admin-backend/               # Admin Console Backend
+│   ├── main.py                  # FastAPI entry point
+│   ├── routers/                 # API routes
+│   └── models/                  # Pydantic models
+├── client-ui/                   # Клиентский UI
+│   ├── index.html               # Landing page
+│   ├── success.html             # Страница успеха
+│   └── js/                      # JavaScript модули
+├── workflow/                     # n8n workflows
+│   └── n8n/workflows/           # JSON экспорт workflows
+│       ├── lead-ingestion-v2.json
+│       ├── lead-classification-mvp.json
+│       ├── kommo-writer-mvp.json
+│       └── crm-status-sync-mvp.json
+├── task_history/                # История задач
+└── docs/screenshots/            # Скриншоты
+```
+
+### Ключевые директории
+
+| Директория | Назначение |
+|------------|------------|
+| `infra/` | Docker Compose, SQL-схемы, конфигурации |
+| `admin-ui/` | Dashboard, Lead Queue, Lead Details |
+| `admin-backend/` | FastAPI API для Admin Console |
+| `client-ui/` | Landing page и форма заявки |
+| `workflow/n8n/workflows/` | Экспортированные n8n workflows |
+| `docs/` | Вся документация проекта |
+| `task_history/` | История задач по разработке |

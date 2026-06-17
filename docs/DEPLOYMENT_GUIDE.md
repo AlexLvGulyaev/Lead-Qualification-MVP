@@ -4,6 +4,45 @@
 
 ---
 
+## Быстрый запуск
+
+### Предварительные требования
+
+- Docker и Docker Compose
+- OpenAI API ключ
+- Telegram Bot Token (опционально)
+- Kommo Access Token
+
+### Запуск
+
+```bash
+# 1. Клонировать репозиторий
+git clone <repository-url>
+cd n8n-lead-qualification
+
+# 2. Настроить переменные окружения
+cd infra
+cp .env.example .env
+# Отредактируйте .env с вашими ключами
+
+# 3. Запустить сервисы
+docker compose up -d
+
+# 4. Проверить статус
+docker compose ps
+```
+
+### После запуска
+
+| Сервис | URL | Назначение |
+|--------|-----|------------|
+| **Client UI** | http://localhost:5180 | Клиентская форма |
+| **Admin UI** | http://localhost:8080 | Admin Console |
+| **n8n UI** | http://localhost:5678 | Редактор workflows |
+| **Admin API** | http://localhost:8000/docs | API документация |
+
+---
+
 ## 1. Обзор инфраструктуры
 
 ### 1.1. Архитектура развёртывания
