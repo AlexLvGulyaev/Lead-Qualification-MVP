@@ -346,3 +346,65 @@ function updateFlowTime() {
 }
 
 setInterval(updateFlowTime, 10000);
+
+/**
+ * Demo Access Popover
+ * Handles popover toggle for demo access cards
+ */
+function initDemoPopover() {
+    const demoTrigger = document.getElementById('demoTrigger');
+    const demoDropdown = document.querySelector('.demo-dropdown');
+
+    if (!demoTrigger || !demoDropdown) return;
+
+    // Toggle popover on click
+    demoTrigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        demoDropdown.classList.toggle('active');
+    });
+
+    // Close popover when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!demoDropdown.contains(e.target) && !demoTrigger.contains(e.target)) {
+            demoDropdown.classList.remove('active');
+        }
+    });
+
+    // Close popover on escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            demoDropdown.classList.remove('active');
+        }
+    });
+
+    // Handle demo card clicks - open in new tab without showing URL in status bar
+    const demoCards = document.querySelectorAll('.demo-card');
+    demoCards.forEach(card => {
+        card.addEventListener('click', (e) => {
+            e.preventDefault();
+            const url = card.dataset.href;
+            if (url) {
+                window.open(url, '_blank', 'noopener,noreferrer');
+            }
+            demoDropdown.classList.remove('active');
+        });
+
+        // Handle keyboard navigation (Enter key)
+        card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const url = card.dataset.href;
+                if (url) {
+                    window.open(url, '_blank', 'noopener,noreferrer');
+                }
+                demoDropdown.classList.remove('active');
+            }
+        });
+    });
+}
+
+// Initialize on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+    initDemoPopover();
+});
