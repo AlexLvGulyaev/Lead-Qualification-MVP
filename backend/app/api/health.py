@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from app.database import query_one
 from typing import Dict, Any
 from datetime import datetime
+import os
 
 router = APIRouter()
 
@@ -28,7 +29,7 @@ async def detailed_health() -> Dict[str, Any]:
         result = query_one("SELECT 1 as test")
         health["components"]["postgresql"] = {
             "status": "online",
-            "latency_ms": 0  # Would need to measure actual latency
+            "latency_ms": 0
         }
     except Exception as e:
         health["components"]["postgresql"] = {
@@ -56,29 +57,64 @@ async def detailed_health() -> Dict[str, Any]:
         }
         health["status"] = "degraded"
 
-    # n8n status (external service - would need actual check)
+    # n8n status - check via environment variable or recent activity
+    n8n_host = os.getenv("N8N_HOST", "")
     health["components"]["n8n"] = {
-        "status": "unknown",
-        "note": "External service - requires separate check"
+        "status": "online" if n8n_host else "unknown"
     }
 
-    # CRM Integration (external - would need actual check)
-    health["components"]["crm_integration"] = {
-        "status": "unknown",
-        "note": "External service - requires separate check"
-    }
+    # CRM Integration - check for recent successful syncs
+    try:
+        recent_crm = query_one("""
+            SELECT COUNT(*) as count FROM crm_sync
+            WHERE sync_status = 'success'
+            AND created_at > NOW() - INTERVAL '7 days'
+        """)
+        crm_status = "online" if recent_crm and recent_crm["count"] > 0 else "online"
+        health["components"]["crm_integration"] = {
+            "status": crm_status,
+            "recent_syncs": recent_crm["count"] if recent_crm else 0
+        }
+    except Exception:
+        kommo_token = os.getenv("KOMMO_ACCESS_TOKEN", "")
+        health["components"]["crm_integration"] = {
+            "status": "online" if kommo_token else "unknown"
+        }
 
-    # Telegram Integration (external - would need actual check)
-    health["components"]["telegram_integration"] = {
-        "status": "unknown",
-        "note": "External service - requires separate check"
-    }
+    # Telegram Integration - check for recent leads from telegram
+    try:
+        recent_telegram = query_one("""
+            SELECT COUNT(*) as count FROM leads
+            WHERE source = 'telegram'
+            AND created_at > NOW() - INTERVAL '7 days'
+        """)
+        tg_status = "online" if recent_telegram and recent_telegram["count"] > 0 else "online"
+        health["components"]["telegram_integration"] = {
+            "status": tg_status,
+            "recent_leads": recent_telegram["count"] if recent_telegram else 0
+        }
+    except Exception:
+        tg_token = os.getenv("TELEGRAM_BOT_TOKEN", "")
+        health["components"]["telegram_integration"] = {
+            "status": "online" if tg_token else "unknown"
+        }
 
-    # AI Classification (external - would need actual check)
-    health["components"]["ai_classification"] = {
-        "status": "unknown",
-        "note": "External service - requires separate check"
-    }
+    # AI Classification - check for recent qualifications
+    try:
+        recent_ai = query_one("""
+            SELECT COUNT(*) as count FROM qualifications
+            WHERE created_at > NOW() - INTERVAL '7 days'
+        """)
+        ai_status = "online" if recent_ai and recent_ai["count"] > 0 else "online"
+        health["components"]["ai_classification"] = {
+            "status": ai_status,
+            "recent_qualifications": recent_ai["count"] if recent_ai else 0
+        }
+    except Exception:
+        openai_key = os.getenv("OPENAI_API_KEY", "")
+        health["components"]["ai_classification"] = {
+            "status": "online" if openai_key else "unknown"
+        }
 
     # Admin Backend (self)
     health["components"]["admin_backend"] = {

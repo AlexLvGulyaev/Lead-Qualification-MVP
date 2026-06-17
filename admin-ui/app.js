@@ -257,12 +257,6 @@ function renderLeadDetail(data) {
                 <span class="passport-field__label">Начальная задача создана</span>
                 <span class="passport-field__value">${crm.initial_task_created ? 'Да' : 'Нет'}</span>
             </div>
-            ${kommoUrl ? `
-            <div class="passport-field" style="margin-top: var(--space-sm);">
-                <span class="passport-field__label"></span>
-                <span class="passport-field__value"><a href="${kommoUrl}" target="_blank" class="kommo-link">↗ Открыть в Kommo</a></span>
-            </div>
-            ` : ''}
         </div>
         <div class="passport-panel">
             <div class="passport-panel__title">Состояние сделки</div>
