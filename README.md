@@ -30,8 +30,8 @@
 
 ### Для инженера
 
-- [Архитектура](docs/ARCHITECTURE.md) — как устроена система
-- [AI-классификация](docs/AI_QUALIFICATION.md) — логика квалификации
+- [Архитектура](docs/ARCHITECTURE.md) — как устроена система, стек, структура проекта
+- [AI-классификация](docs/AI_QUALIFICATION.md) — логика квалификации, категории лидов
 - [План реализации](docs/IMPLEMENTATION_PLAN.md) — этапы разработки
 - [Соответствие ТЗ](docs/TZ_COMPLIANCE_REPORT.md) — покрытие требований
 
@@ -144,159 +144,6 @@
 
 ---
 
-## Классификация лидов
-
-| Тип | Описание | CRM Status | Задача |
-|-----|----------|------------|--------|
-| **Hot** | Готов купить немедленно | Hot Lead | +15 минут |
-| **Warm** | Заинтересован, нужен follow-up | Warm Lead | +24 часа |
-| **Cold** | Не готов к решению сейчас | Cold Lead | +7 дней |
-| **Spam** | Нецелевое обращение | Spam | Не создаётся |
-
-Почему AI-классификация с fallback: [AI-классификация](docs/AI_QUALIFICATION.md)
-
----
-
-## Архитектура
-
-```mermaid
-flowchart TB
-    subgraph clients["Клиентские каналы"]
-        WEB["Website Form"]
-        TG["Telegram Bot"]
-    end
-
-    subgraph n8n["n8n Server"]
-        ING["Lead Ingestion"]
-        CLS["AI Classification"]
-        CRM["CRM Writer"]
-        SYNC["CRM Status Sync"]
-    end
-
-    subgraph storage["PostgreSQL"]
-        DB[("lead_qualification<br/>contacts, leads,<br/>qualifications, crm_sync")]
-    end
-
-    subgraph external["Внешние системы"]
-        OPENAI["OpenAI API<br/>gpt-4o-mini"]
-        KOMMO["Kommo CRM"]
-    end
-
-    subgraph admin["Admin Console"]
-        UI["Admin UI<br/>Dashboard + Leads"]
-        API["Admin API<br/>FastAPI"]
-    end
-
-    WEB -->|POST webhook| ING
-    TG -->|Message| ING
-    ING -->|Save| DB
-    ING -->|Trigger| CLS
-    CLS -->|Classify| OPENAI
-    CLS -->|Fallback| CLS
-    CLS -->|Save qualification| DB
-    CLS -->|Trigger| CRM
-    CRM -->|Create lead + task| KOMMO
-    CRM -->|Save sync| DB
-    SYNC -->|Poll every 15min| KOMMO
-    SYNC -->|Update snapshot| DB
-    API -->|Read| DB
-    UI -->|Display| API
-```
-
-Подробно: [Архитектура](docs/ARCHITECTURE.md)
-
----
-
-## Технологический стек
-
-| Слой | Технология | Версия |
-|------|------------|--------|
-| **Workflow Engine** | n8n (self-hosted) | Latest |
-| **AI Provider** | OpenAI API | gpt-4o-mini |
-| **CRM** | Kommo | API v4 |
-| **Database** | PostgreSQL | 14+ |
-| **Admin Backend** | FastAPI, Python | 3.12 |
-| **Admin Frontend** | Vanilla JS | — |
-| **Telegram** | Telegram Bot API | — |
-| **Reverse Proxy** | Traefik | — |
-| **Deploy** | Docker Compose | — |
-
----
-
-## Быстрый запуск
-
-### Предварительные требования
-
-- Docker и Docker Compose
-- OpenAI API ключ
-- Telegram Bot Token (опционально)
-- Kommo Access Token
-
-### Запуск
-
-```bash
-# 1. Клонировать репозиторий
-git clone <repository-url>
-cd n8n-lead-qualification
-
-# 2. Настроить переменные окружения
-cd infra
-cp .env.example .env
-# Отредактируйте .env с вашими ключами
-
-# 3. Запустить сервисы
-docker compose up -d
-
-# 4. Проверить статус
-docker compose ps
-```
-
-После запуска:
-
-| Сервис | URL |
-|--------|-----|
-| **Client UI** | http://localhost:5180 |
-| **Admin UI** | http://localhost:8080 |
-| **n8n UI** | http://localhost:5678 |
-| **Admin API** | http://localhost:8000/docs |
-
-Подробно: [Руководство по развёртыванию](docs/DEPLOYMENT_GUIDE.md)
-
----
-
-## Структура проекта
-
-```
-n8n-lead-qualification/
-├── README.md                    # Этот файл
-├── docs/                        # Документация
-│   ├── BUSINESS_VALUE.md        # Ценность для бизнеса
-│   ├── SYSTEM_DEMO.md           # Демонстрация системы
-│   ├── ARCHITECTURE.md          # Архитектура системы
-│   ├── USER_GUIDE.md            # Руководство пользователя
-│   ├── DEPLOYMENT_GUIDE.md      # Руководство по развёртыванию
-│   ├── E2E_SCENARIOS.md         # Сквозные сценарии
-│   ├── AI_QUALIFICATION.md      # AI-классификация
-│   ├── PROJECT_STATE.md         # Текущее состояние
-│   ├── PROJECT_HISTORY.md       # История развития
-│   ├── IMPLEMENTATION_PLAN.md   # План реализации
-│   ├── SCREENSHOTS.md           # Галерея экранов
-│   └── TZ_COMPLIANCE_REPORT.md   # Соответствие ТЗ
-├── infra/                       # Инфраструктура
-│   ├── docker-compose.yml       # Сервисы Docker
-│   ├── sql/                      # Схема БД
-│   └── docker/                   # Конфигурации Docker
-├── admin-ui/                    # Admin Console Frontend
-├── admin-backend/               # Admin Console Backend (FastAPI)
-├── client-ui/                   # Клиентский UI
-├── workflow/                     # n8n workflows
-│   └── n8n/workflows/           # JSON экспорт workflows
-├── task_history/                # История задач
-└── docs/screenshots/            # Скриншоты
-```
-
----
-
 ## Документация
 
 ### Для заказчика
@@ -312,7 +159,7 @@ n8n-lead-qualification/
 
 | Документ | Назначение |
 |----------|------------|
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Архитектура системы |
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Архитектура, стек, структура проекта |
 | [AI_QUALIFICATION.md](docs/AI_QUALIFICATION.md) | Логика AI-классификации |
 | [IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) | План реализации |
 | [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) | Развёртывание |
@@ -321,16 +168,9 @@ n8n-lead-qualification/
 
 ## Рыночное подтверждение
 
-**Подтверждающие заказы:**
+Система закрывает критический дефицит n8n-компетенций в портфолио (33% заказов упоминают n8n).
 
-| Заказ | Платформа | Бюджет | Ключевые требования |
-|-------|-----------|--------|---------------------|
-| FL.ru #5507855 | n8n + Claude API | 60 000 руб. | 5 AI-агентов для маркетплейсов |
-| FL.ru #5508101 | n8n + Asterisk | — | Анализ звонков, интеграция с Битрикс24 |
-| FL.ru #5506712 | Мессенджер + Kommo | — | Квалификация водителей такси (Перу) |
-| FL.ru #5507454 | Zapier + Kommo + OpenAI | — | Два последовательных запроса к OpenAI |
-
-**Покрытие спроса:** 33% заказов упоминают n8n — критический дефицит портфолио закрыт.
+Подробности: [Состояние проекта](docs/PROJECT_STATE.md)
 
 ---
 
