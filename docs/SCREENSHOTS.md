@@ -1,7 +1,55 @@
 # Галерея экранов Lead Qualification MVP
 
 Все изображения — реальные скриншоты из каталога [`docs/screenshots/`](screenshots/).
-Цель галереи — показать проект как законченный демонстрационный MVP: каналы входа, AI-классификация, CRM-интеграция и мониторинг.
+
+---
+
+## Инвентаризация скриншотов
+
+### Основные скриншоты (используются в README и документах)
+
+| Файл | Назначение | Где используется |
+|------|------------|------------------|
+| `dashboard-overview.png` | Главный экран системы | README.md, SYSTEM_DEMO.md |
+| `optimus-bp.png` | Визуализация бизнес-процесса | README.md, SYSTEM_DEMO.md |
+| `landing-LQ-console.png` | Продуктовый экран | BUSINESS_VALUE.md |
+| `landing-problems.png` | Проблемы бизнеса | BUSINESS_VALUE.md |
+| `landing-solution.png` | Решение и ценность | BUSINESS_VALUE.md |
+| `website-form-success.png` | Успешная отправка Website | README.md, SYSTEM_DEMO.md |
+| `telegram-lead-hot.png` | Telegram горячий лид | README.md, SYSTEM_DEMO.md |
+| `workflow-lead-ingestion-v2.png` | Workflow приёма лидов | README.md, SYSTEM_DEMO.md |
+| `workflow-lead-classification-mvp.png` | Workflow AI-классификации | README.md, SYSTEM_DEMO.md |
+| `workflow-kommo-writer-mvp.png` | Workflow CRM-интеграции | README.md, SYSTEM_DEMO.md |
+| `commo-deal-list.png` | Список сделок в CRM | README.md, SYSTEM_DEMO.md |
+| `commo-deal-hot.png` | Горячий лид в CRM | README.md, SYSTEM_DEMO.md |
+| `lead-queue-hot.png` | Очередь горячих лидов | README.md, SYSTEM_DEMO.md |
+
+### Резервные скриншоты
+
+| Файл | Статус | Примечание |
+|------|--------|------------|
+| `website-form-filled.png` | Резерв | Форма с данными |
+| `website-form-request.png` | Резерв | Обработка запроса |
+| `workflow-crm-status-sync-mvp.png` | Резерв | Архитектурные документы |
+| `workflow-telegram-lead-ingestion.png` | Резерв | Архитектурные документы |
+| `landing-integration.png` | Резерв | Лендинг |
+| `landing-manager.png` | Резерв | Лендинг |
+| `landing-features.png` | Резерв | Лендинг |
+| `landing-STA.png` | Резерв | Лендинг |
+| `landing-hero.png` | Резерв | Лендинг |
+
+### Не использовать без обоснования
+
+| Файл | Причина |
+|------|---------|
+| `website-form-empty.png` | Пустая форма не показывает ценность |
+| `lead-queue-cold.png` | Дублирует структуру hot/warm |
+| `lead-queue-spam.png` | Дублирует структуру hot/warm |
+| `lead-queue-warm.png` | Дублирует структуру hot/warm |
+| `commo-deal-warm.png` | Дублирует структуру hot |
+| `commo-deal-cold.png` | Дублирует структуру hot |
+| `commo-deal-change-status.png` | Операционный скриншот |
+| `lead-queue-hot-change-crm-status.png` | Операционный скриншот |
 
 ---
 
@@ -13,75 +61,35 @@
 
 - **Что показано**: главная секция лендинга с заголовком и CTA
 - **Роль в системе**: входная точка для клиентов
-- **Почему важно**: первое впечатление клиента о системе
+- **Статус**: Резерв
+
+### Landing: LQ Console
+
+![Landing: LQ Console](screenshots/landing-LQ-console.png)
+
+- **Что показано**: продуктовый экран Lead Qualification
+- **Роль в системе**: объяснение ценности решения
+- **Статус**: Основной (BUSINESS_VALUE.md)
 
 ### Landing: Problems
 
 ![Landing: Problems](screenshots/landing-problems.png)
 
 - **Что показано**: секция с описанием проблем клиентов
-- **Роль в системе**: объяснение ценности решения
-- **Почему важно**: демонстрирует понимание болей клиента
+- **Роль в системе**: объяснение болей целевой аудитории
+- **Статус**: Основной (BUSINESS_VALUE.md)
 
 ### Landing: Solution
 
 ![Landing: Solution](screenshots/landing-solution.png)
 
 - **Что показано**: секция с описанием решения
-- **Роль в системе**: презентация системы
-- **Почему важно**: объясняет как система решает проблемы
-
-### Landing: Features
-
-![Landing: Features](screenshots/landing-features.png)
-
-- **Что показано**: ключевые возможности системы
-- **Роль в системе**: демонстрация функциональности
-- **Почему важно**: показывает что клиент получает
-
-### Landing: Manager
-
-![Landing: Manager](screenshots/landing-manager.png)
-
-- **Что показано**: секция для менеджеров
-- **Роль в системе**: объяснение пользы для менеджеров
-- **Почему важно**: показывает интеграцию с работой менеджера
-
-### Landing: Integration
-
-![Landing: Integration](screenshots/landing-integration.png)
-
-- **Что показано**: секция интеграций
-- **Роль в системе**: связь с CRM
-- **Почему важно**: демонстрирует интеграцию с Kommo
+- **Роль в системе**: презентация ценности
+- **Статус**: Основной (BUSINESS_VALUE.md)
 
 ---
 
 ## 2) Клиентский контур — Website (Form)
-
-### Website: Empty Form
-
-![Website: Empty Form](screenshots/website-form-empty.png)
-
-- **Что показано**: форма заявки до заполнения
-- **Роль в системе**: точка входа Website-лидов
-- **Почему важно**: демонстрирует клиентский интерфейс
-
-### Website: Filled Form
-
-![Website: Filled Form](screenshots/website-form-filled.png)
-
-- **Что показано**: форма заявки с заполненными данными
-- **Роль в системе**: сбор данных клиента
-- **Почему важно**: показывает требуемые поля
-
-### Website: Request Processing
-
-![Website: Request](screenshots/website-form-request.png)
-
-- **Что показано**: состояние обработки запроса
-- **Роль в системе**: обратная связь клиенту
-- **Почему важно**: показывает процесс обработки
 
 ### Website: Success
 
@@ -89,7 +97,27 @@
 
 - **Что показано**: подтверждение успешной отправки
 - **Роль в системе**: финал клиентского сценария
-- **Почему важно**: показывает номер заявки LQ-XXXXXX
+- **Статус**: Основной (README.md, SYSTEM_DEMO.md)
+
+### Website: Filled Form
+
+![Website: Filled Form](screenshots/website-form-filled.png)
+
+- **Что показано**: форма заявки с заполненными данными
+- **Статус**: Резерв
+
+### Website: Request Processing
+
+![Website: Request](screenshots/website-form-request.png)
+
+- **Что показано**: состояние обработки запроса
+- **Статус**: Резерв
+
+### Website: Empty Form
+
+![Website: Empty Form](screenshots/website-form-empty.png)
+
+- **Статус**: Не использовать без обоснования
 
 ---
 
@@ -101,8 +129,7 @@
 
 - **Что показано**: Telegram-бот, классификация как Hot Lead
 - **Роль в системе**: альтернативный канал входа лидов
-- **Почему важно**: демонстрирует мультиканальность системы
-- **Особенности**: inline-кнопки, confirmation, LQ-номер
+- **Статус**: Основной (README.md, SYSTEM_DEMO.md)
 
 ---
 
@@ -114,8 +141,7 @@
 
 - **Что показано**: главная страница Admin Console с метриками
 - **Роль в системе**: оперативный мониторинг системы
-- **Почему важно**: ключевые метрики на одном экране
-- **Метрики**: всего лидов, распределение по типам, CRM sync
+- **Статус**: Основной (README.md, SYSTEM_DEMO.md)
 
 ---
 
@@ -126,41 +152,32 @@
 ![Admin: Lead Queue Hot](screenshots/lead-queue-hot.png)
 
 - **Что показано**: список лидов с фильтром по Hot
-- **Роль в системе**: рабочее место администратора
-- **Почему важно**: показывает результат AI-классификации
-- **Поля**: номер, имя, тип, приоритет, уверенность, источник
+- **Роль в системе**: рабочее место менеджера
+- **Статус**: Основной (README.md, SYSTEM_DEMO.md)
 
 ### Lead Queue: Warm
 
 ![Admin: Lead Queue Warm](screenshots/lead-queue-warm.png)
 
-- **Что показано**: список лидов с фильтром по Warm
-- **Роль в системе**: просмотр теплых лидов
-- **Почему важно**: демонстрирует фильтрацию по типам
+- **Статус**: Резерв (дублирует структуру hot)
 
 ### Lead Queue: Cold
 
 ![Admin: Lead Queue Cold](screenshots/lead-queue-cold.png)
 
-- **Что показано**: список лидов с фильтром по Cold
-- **Роль в системе**: просмотр холодных лидов
-- **Почему важно**: показывает разные типы классификации
+- **Статус**: Резерв (дублирует структуру hot)
 
 ### Lead Queue: Spam
 
 ![Admin: Lead Queue Spam](screenshots/lead-queue-spam.png)
 
-- **Что показано**: список лидов с фильтром по Spam
-- **Роль в системе**: просмотр спама
-- **Почему важно**: демонстрирует фильтрацию нецелевых обращений
+- **Статус**: Резерв (дублирует структуру hot)
 
 ### Lead Queue: Change CRM Status
 
 ![Admin: Lead Queue CRM Status](screenshots/lead-queue-hot-change-crm-status.png)
 
-- **Что показано**: детальный просмотр лида со ссылкой на CRM
-- **Роль в системе**: связь LQ ↔ Kommo
-- **Почему важно**: показывает интеграцию без входа в CRM
+- **Статус**: Резерв
 
 ---
 
@@ -172,17 +189,13 @@
 
 - **Что показано**: workflow приёма лидов из Website
 - **Роль в системе**: точка входа данных
-- **Почему важно**: демонстрирует n8n-оркестрацию
-- **Ноды**: Webhook, Validate, Find/Create Contact, Create Lead
+- **Статус**: Основной (README.md, SYSTEM_DEMO.md)
 
 ### Workflow: Telegram Lead Ingestion
 
 ![n8n: Telegram Ingestion](screenshots/workflow-telegram-lead-ingestion.png)
 
-- **Что показано**: workflow приёма лидов из Telegram
-- **Роль в системе**: Telegram-канал
-- **Почему важно**: показывает мультиканальность на уровне n8n
-- **Ноды**: Telegram Trigger, Parse, UX, Find/Create Contact
+- **Статус**: Резерв (архитектурные документы)
 
 ### Workflow: Lead Classification MVP
 
@@ -190,8 +203,7 @@
 
 - **Что показано**: AI-классификация с OpenAI и fallback
 - **Роль в системе**: ядро квалификации
-- **Почему важно**: демонстрирует AI-интеграцию и отказоустойчивость
-- **Ноды**: Schedule, Query, OpenAI, Fallback, Save
+- **Статус**: Основной (README.md, SYSTEM_DEMO.md)
 
 ### Workflow: Kommo Writer MVP
 
@@ -199,17 +211,13 @@
 
 - **Что показано**: создание сделок и задач в Kommo
 - **Роль в системе**: CRM-интеграция
-- **Почему важно**: демонстрирует end-to-end интеграцию
-- **Ноды**: Webhook, Prepare Payload, Kommo API, Create Task
+- **Статус**: Основной (README.md, SYSTEM_DEMO.md)
 
 ### Workflow: CRM Status Sync MVP
 
 ![n8n: CRM Sync](screenshots/workflow-crm-status-sync-mvp.png)
 
-- **Что показано**: периодическая синхронизация snapshot
-- **Роль в системе**: мониторинг CRM-состояния
-- **Почему важно**: показывает polling-подход
-- **Ноды**: Schedule, Query, Kommo API, Update DB
+- **Статус**: Резерв (архитектурные документы)
 
 ---
 
@@ -221,62 +229,70 @@
 
 - **Что показано**: список сделок в Kommo
 - **Роль в системе**: результат CRM Writer
-- **Почему важно**: подтверждает работу интеграции
-- **Поля**: Name, Pipeline, Status, Custom Fields
+- **Статус**: Основной (README.md, SYSTEM_DEMO.md)
 
 ### Kommo: Deal Hot
 
 ![Kommo: Deal Hot](screenshots/commo-deal-hot.png)
 
 - **Что показано**: сделка типа Hot в Kanban
-- **Роль в системе**: классификация Hot Lead
-- **Почему важно**: демонстрирует маппинг lead_type → status
+- **Статус**: Основной (README.md, SYSTEM_DEMO.md)
 
 ### Kommo: Deal Warm
 
 ![Kommo: Deal Warm](screenshots/commo-deal-warm.png)
 
-- **Что показано**: сделка типа Warm в Kanban
-- **Роль в системе**: классификация Warm Lead
-- **Почему важно**: показывает разные колонки воронки
+- **Статус**: Резерв (дублирует структуру hot)
 
 ### Kommo: Deal Cold
 
 ![Kommo: Deal Cold](screenshots/commo-deal-cold.png)
 
-- **Что показано**: сделка типа Cold в Kanban
-- **Роль в системе**: классификация Cold Lead
-- **Почему важно**: демонстрирует низкоприоритетную воронку
+- **Статус**: Резерв (дублирует структуру hot)
 
 ### Kommo: Change Status
 
 ![Kommo: Change Status](screenshots/commo-deal-change-status.png)
 
-- **Что показано**: изменение статуса сделки в Kommo
-- **Роль в системе**: менеджер работает с сделкой
-- **Почему важно**: показывает Sales Execution SOT
+- **Статус**: Резерв
+
+---
+
+## 8) Бизнес-процесс
+
+### Optimus BP
+
+![Бизнес-процесс](screenshots/optimus-bp.png)
+
+- **Что показано**: визуализация ключевого бизнес-процесса
+- **Роль в системе**: объяснение потока лидов
+- **Статус**: Основной (README.md, SYSTEM_DEMO.md)
 
 ---
 
 ## Сводная таблица скриншотов
 
-| Категория | Количество | Файлы |
-|-----------|------------|-------|
-| Landing | 8 | landing-*.png |
-| Website Form | 4 | website-form-*.png |
-| Telegram | 1 | telegram-*.png |
-| Dashboard | 1 | dashboard-*.png |
-| Lead Queue | 5 | lead-queue-*.png |
-| Workflows | 5 | workflow-*.png |
-| Kommo CRM | 5 | commo-*.png |
-| **Итого** | **29** | |
+| Категория | Основные | Резерв | Итого |
+|-----------|----------|--------|-------|
+| Landing | 3 | 5 | 8 |
+| Website Form | 1 | 2 | 3 |
+| Telegram | 1 | 0 | 1 |
+| Dashboard | 1 | 0 | 1 |
+| Lead Queue | 1 | 4 | 5 |
+| Workflows | 3 | 2 | 5 |
+| Kommo CRM | 2 | 3 | 5 |
+| Бизнес-процесс | 1 | 0 | 1 |
+| **Итого** | **13** | **16** | **29** |
 
 ---
 
 ## Использование в документации
 
-Скриншоты используются в:
-- [README.md](../README.md) — обзор проекта
-- [USER_GUIDE.md](USER_GUIDE.md) — руководство пользователя
-- [E2E_SCENARIOS.md](E2E_SCENARIOS.md) — сквозные сценарии
-- [ARCHITECTURE.md](ARCHITECTURE.md) — архитектура системы
+| Документ | Скриншоты |
+|----------|-----------|
+| [README.md](../README.md) | dashboard-overview, optimus-bp, website-form-success, telegram-lead-hot, workflow-*, commo-deal-*, lead-queue-hot |
+| [BUSINESS_VALUE.md](BUSINESS_VALUE.md) | landing-LQ-console, landing-problems, landing-solution |
+| [SYSTEM_DEMO.md](SYSTEM_DEMO.md) | optimus-bp, website-form-success, telegram-lead-hot, workflow-*, commo-deal-*, lead-queue-hot, dashboard-overview |
+| [USER_GUIDE.md](USER_GUIDE.md) | Все основные + резервные |
+| [E2E_SCENARIOS.md](E2E_SCENARIOS.md) | Все основные + резервные |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | workflow-*, dashboard-overview |
