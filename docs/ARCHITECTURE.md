@@ -14,8 +14,22 @@
 
 ### Общая схема
 
-```
-Website / Telegram → Lead Ingestion → AI Classification → PostgreSQL → Kommo CRM → Admin Console
+```mermaid
+flowchart LR
+    Website["Website"]
+    Telegram["Telegram"]
+    Lead_Ingestion["Lead Ingestion"]
+    AI_Classification["AI Classification"]
+    PostgreSQL["PostgreSQL"]
+    Kommo_CRM["Kommo CRM"]
+    Admin_Console["Admin Console"]
+    
+    Website --> Lead_Ingestion
+    Telegram --> Lead_Ingestion
+    Lead_Ingestion --> AI_Classification
+    AI_Classification --> PostgreSQL
+    PostgreSQL --> Kommo_CRM
+    PostgreSQL --> Admin_Console
 ```
 
 ### Ключевые n8n Workflows
@@ -40,48 +54,34 @@ Website / Telegram → Lead Ingestion → AI Classification → PostgreSQL → K
 
 ## 1. Общая схема системы (as-is)
 
-```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           ВНЕШНИЕ СИСТЕМЫ                                     │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│   ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐  │
-│   │   KOMMO     │    │  TELEGRAM   │    │   OPENAI    │    │   CLIENT    │  │
-│   │   CRM API   │    │   BOT API   │    │    API      │    │  BROWSER    │  │
-│   └──────┬──────┘    └──────┬──────┘    └──────┬──────┘    └──────┬──────┘  │
-│          │                  │                   │                   │        │
-└──────────┼──────────────────┼───────────────────┼───────────────────┼────────┘
-           │                  │                   │                   │
-           └──────────────────┼───────────────────┼───────────────────┘
-                              │                   │
-                              ▼                   ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              TRAEFIK (Reverse Proxy)                          │
-│                    /opt/n8n/dynamic.yml (внешний конфиг)                      │
-└─────────────────────────────────────────────────────────────────────────────┘
-                              │
-           ┌──────────────────┼──────────────────┬──────────────────┐
-           │                  │                  │                  │
-           ▼                  ▼                  ▼                  ▼
-┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-│   CLIENT UI     │ │   ADMIN UI      │ │   ADMIN API     │ │      n8n        │
-│   (static)      │ │   (static)     │ │   (FastAPI)     │ │   (workflows)   │
-│   Nginx         │ │   Nginx         │ │   Port 8000     │ │   Port 5678     │
-└─────────────────┘ └─────────────────┘ └─────────────────┘ └─────────────────┘
-                                                  │                   │
-                                                  └─────────┬─────────┘
-                                                            │
-                                                            ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              POSTGRESQL                                      │
-├─────────────────────────────────────────────────────────────────────────────┤
-│   ┌─────────────────────────────────┐   ┌─────────────────────────────────┐  │
-│   │     Database: n8n               │   │  Database: lead_qualification   │  │
-│   │     (n8n internal tables)       │   │  (business data)                │  │
-│   │     ~107 tables                 │   │  contacts, leads, messages,    │  │
-│   │                                 │   │  qualifications, crm_sync, logs │  │
-│   └─────────────────────────────────┘   └─────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph External["ВНЕШНИЕ СИСТЕМЫ"]
+        KOMMO["KOMMO CRM API"]
+        TELEGRAM["TELEGRAM BOT API"]
+        OPENAI["OPENAI API"]
+        CLIENT["CLIENT BROWSER"]
+    end
+    
+    TRAEFIK["TRAEFIK (Reverse Proxy)<br/>/opt/n8n/dynamic.yml"]
+    
+    subgraph Internal["ВНУТРЕННИЕ КОМПОНЕНТЫ"]
+        CLIENT_UI["CLIENT UI<br/>(static Nginx)"]
+        ADMIN_UI["ADMIN UI<br/>(static Nginx)"]
+        ADMIN_API["ADMIN API<br/>(FastAPI Port 8000)"]
+        N8N["n8n<br/>(workflows Port 5678)"]
+    end
+    
+    subgraph Storage["ХРАНИЛИЩЕ"]
+        subgraph PostgreSQL["PostgreSQL"]
+            DB_N8N["Database: n8n<br/>(~107 tables)"]
+            DB_LQ["Database: lead_qualification<br/>(contacts, leads, messages,<br/>qualifications, crm_sync, logs)"]
+        end
+    end
+    
+    External --> TRAEFIK
+    TRAEFIK --> Internal
+    Internal --> Storage
 ```
 
 **Запуск:** [`infra/docker-compose.yml`](../infra/docker-compose.yml) поднимает `postgres`, `n8n`, `admin-backend`, `admin-ui`, `client-ui`.
@@ -142,22 +142,23 @@ Website / Telegram → Lead Ingestion → AI Classification → PostgreSQL → K
 
 **Архитектура баз данных:**
 
-```
-PostgreSQL Container
-├── Database: n8n                    # n8n internal tables (~107 tables)
-│   ├── workflow_entity
-│   ├── execution_entity
-│   ├── credentials_entity
-│   └── ... (n8n platform tables)
-│
-└── Database: lead_qualification      # Business data (Target Model v2)
-    ├── contacts                      # Контакты (люди/организации)
-    ├── channel_identities            # Идентификаторы в каналах
-    ├── leads                         # Обращения
-    ├── messages                      # Сообщения
-    ├── qualifications                # Результаты AI-классификации
-    ├── crm_sync                      # CRM мониторинговый snapshot
-    └── logs                          # События системы
+```mermaid
+flowchart TB
+    subgraph PostgreSQL["PostgreSQL Container"]
+        subgraph DB_N8N["Database: n8n"]
+            N8N_TABLES["~107 tables<br/>(workflow_entity, execution_entity,<br/>credentials_entity, ...)"]
+        end
+        
+        subgraph DB_LQ["Database: lead_qualification"]
+            CONTACTS["contacts<br/>(Контакты)"]
+            CHANNEL["channel_identities<br/>(Идентификаторы в каналах)"]
+            LEADS["leads<br/>(Обращения)"]
+            MESSAGES["messages<br/>(Сообщения)"]
+            QUAL["qualifications<br/>(AI-классификация)"]
+            CRM["crm_sync<br/>(CRM snapshot)"]
+            LOGS["logs<br/>(События системы)"]
+        end
+    end
 ```
 
 **Data Model v2 Features:**
@@ -197,17 +198,16 @@ PostgreSQL Container
 
 **Поток данных:**
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Webhook       │────▶│   Validate      │────▶│   Find/Create   │
-│   Trigger       │     │   Input         │     │   Contact       │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-                                                        │
-                                                        ▼
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Response      │◀────│   Create        │◀────│   Create        │
-│   (LQ-NNNNNN)   │     │   Log           │     │   Lead          │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
+```mermaid
+flowchart LR
+    Webhook["Webhook Trigger"]
+    Validate["Validate Input"]
+    FindContact["Find/Create Contact"]
+    CreateLead["Create Lead"]
+    CreateLog["Create Log"]
+    Response["Response<br/>(LQ-NNNNNN)"]
+    
+    Webhook --> Validate --> FindContact --> CreateLead --> CreateLog --> Response
 ```
 
 **Входные данные:**
@@ -245,19 +245,17 @@ PostgreSQL Container
 
 **Поток данных:**
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Telegram      │────▶│   Parse         │────▶│   Is Command?   │
-│   Trigger       │     │   Message       │     │                 │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-                                                        │
-                            ┌───────────────────────────┴───────────┐
-                            │                                       │
-                            ▼                                       ▼
-                    ┌─────────────────┐                     ┌─────────────────┐
-                    │   Send Welcome  │                     │   Process      │
-                    │   Message       │                     │   Lead         │
-                    └─────────────────┘                     └─────────────────┘
+```mermaid
+flowchart TB
+    Telegram["Telegram Trigger"]
+    Parse["Parse Message"]
+    IsCommand{"Is Command?"}
+    SendWelcome["Send Welcome Message"]
+    ProcessLead["Process Lead"]
+    
+    Telegram --> Parse --> IsCommand
+    IsCommand -->|Yes| SendWelcome
+    IsCommand -->|No| ProcessLead
 ```
 
 **Обработка команд:**
@@ -281,24 +279,19 @@ PostgreSQL Container
 
 **Поток данных:**
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Query Leads   │────▶│   For Each      │────▶│   Build         │
-│   (status=      │     │   Unqualified   │     │   Prompt        │
-│    received)    │     │                 │     │                 │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-                                                        │
-                                                        ▼
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Update Lead   │◀────│   Save          │◀────│   Call          │
-│   Status        │     │   Qualification │     │   OpenAI API    │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-                                                        │
-                                                        ▼
-                                                ┌─────────────────┐
-                                                │   Fallback      │
-                                                │   (rule-based)  │
-                                                └─────────────────┘
+```mermaid
+flowchart TB
+    Query["Query Leads<br/>(status=received)"]
+    ForEach["For Each Unqualified"]
+    Build["Build Prompt"]
+    Call["Call OpenAI API"]
+    Fallback["Fallback<br/>(rule-based)"]
+    Save["Save Qualification"]
+    Update["Update Lead Status"]
+    
+    Query --> ForEach --> Build --> Call
+    Call -->|Success| Save --> Update
+    Call -->|Error/Low Confidence| Fallback --> Save
 ```
 
 **AI Request (OpenAI):**
@@ -357,17 +350,16 @@ const RULES = {
 
 **Поток данных:**
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Receive       │────▶│   Prepare       │────▶│   Create        │
-│   Lead Data     │     │   Kommo Payload │     │   Kommo Lead    │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-                                                        │
-                                                        ▼
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Save to       │◀────│   Create        │◀────│   Create        │
-│   crm_sync      │     │   Task          │     │   Contact       │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
+```mermaid
+flowchart LR
+    Receive["Receive Lead Data"]
+    Prepare["Prepare Kommo Payload"]
+    CreateLead["Create Kommo Lead"]
+    CreateContact["Create Contact"]
+    CreateTask["Create Task"]
+    SaveSync["Save to crm_sync"]
+    
+    Receive --> Prepare --> CreateLead --> CreateContact --> CreateTask --> SaveSync
 ```
 
 **Kommo Lead Creation:**
@@ -406,19 +398,16 @@ const RULES = {
 
 **Поток данных:**
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Query Active   │────▶│   For Each:     │────▶│   Get Kommo     │
-│   CRM Syncs      │     │   Kommo Lead    │     │   Lead Data     │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-                                                        │
-                                                        ▼
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Log Sync      │◀────│   Update        │◀────│   Extract:      │
-│   Result        │     │   crm_sync      │     │   pipeline,     │
-└─────────────────┘     └─────────────────┘     │   status,       │
-                                                │   tasks         │
-                                                └─────────────────┘
+```mermaid
+flowchart TB
+    Query["Query Active CRM Syncs"]
+    ForEach["For Each: Kommo Lead"]
+    GetLead["Get Kommo Lead Data"]
+    Extract["Extract:<br/>pipeline, status, tasks"]
+    Update["Update crm_sync"]
+    Log["Log Sync Result"]
+    
+    Query --> ForEach --> GetLead --> Extract --> Update --> Log
 ```
 
 **Синхронизируемые поля:**
@@ -440,64 +429,85 @@ const RULES = {
 
 ### 4.1 ER-диаграмма
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              POSTGRESQL SCHEMA v2                            │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────┐       ┌─────────────────────┐
-│    contacts     │       │ channel_identities  │
-├─────────────────┤       ├─────────────────────┤
-│ id (PK)         │───┐   │ id (PK)             │
-│ name            │   │   │ contact_id (FK)     │───┐
-│ phone           │   │   │ channel             │   │
-│ email           │   │   │ external_id         │   │
-│ company         │   │   │ channel_data (JSONB)│   │
-│ notes           │   │   └─────────────────────┘   │
-│ created_at      │   │                             │
-│ updated_at      │   │   UNIQUE(channel, external_id)
-└─────────────────┘   │
-        │ 1:N         │
-        ▼             │
-┌─────────────────┐   │
-│     leads       │   │
-├─────────────────┤   │
-│ id (PK)         │   │
-│ contact_id (FK) │───┘
-│ public_number   │
-│ source          │
-│ status          │
-│ utm_source      │
-│ utm_campaign    │
-│ created_at      │
-│ updated_at      │
-└────────┬────────┘
-         │
-    ┌────┴────┐
-    │         │
-    ▼         ▼
-┌─────────────────┐       ┌─────────────────┐
-│    messages     │       │ qualifications  │
-├─────────────────┤       ├─────────────────┤
-│ id (PK)         │       │ id (PK)         │
-│ lead_id (FK)    │       │ lead_id (FK)    │
-│ channel         │       │ lead_type       │
-│ direction       │       │ interest        │
-│ content         │       │ priority        │
-│ created_at      │       │ confidence      │
-└─────────────────┘       │ ...             │
-                          └─────────────────┘
-
-┌─────────────────┐       ┌─────────────────┐
-│    crm_sync     │       │      logs       │
-├─────────────────┤       ├─────────────────┤
-│ id (PK)         │       │ id (PK)         │
-│ lead_id (FK)    │       │ lead_id (FK)    │
-│ kommo_lead_id   │       │ event_type      │
-│ kommo_pipeline  │       │ event_data      │
-│ kommo_status    │       │ status          │
-│ crm_synced_at   │       │ created_at      │
-└─────────────────┘       └─────────────────┘
+```mermaid
+erDiagram
+    contacts ||--o{ leads : "has"
+    contacts ||--o{ channel_identities : "has"
+    leads ||--o{ messages : "has"
+    leads ||--o{ qualifications : "has"
+    leads ||--o{ crm_sync : "has"
+    leads ||--o{ logs : "has"
+    
+    contacts {
+        UUID id PK
+        VARCHAR name
+        VARCHAR phone
+        VARCHAR email
+        VARCHAR company
+        TEXT notes
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+    
+    channel_identities {
+        UUID id PK
+        UUID contact_id FK
+        VARCHAR channel
+        VARCHAR external_id
+        JSONB channel_data
+    }
+    
+    leads {
+        UUID id PK
+        UUID contact_id FK
+        VARCHAR public_number
+        VARCHAR source
+        VARCHAR status
+        VARCHAR utm_source
+        VARCHAR utm_campaign
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+    
+    messages {
+        UUID id PK
+        UUID lead_id FK
+        VARCHAR channel
+        VARCHAR direction
+        TEXT content
+        TIMESTAMP created_at
+    }
+    
+    qualifications {
+        UUID id PK
+        UUID lead_id FK
+        VARCHAR lead_type
+        VARCHAR interest
+        VARCHAR priority
+        DECIMAL confidence
+        TEXT summary
+        TIMESTAMP processed_at
+    }
+    
+    crm_sync {
+        UUID id PK
+        UUID lead_id FK
+        BIGINT kommo_lead_id
+        BIGINT kommo_pipeline_id
+        VARCHAR kommo_pipeline_name
+        BIGINT kommo_status_id
+        VARCHAR kommo_status_name
+        TIMESTAMP crm_synced_at
+    }
+    
+    logs {
+        UUID id PK
+        UUID lead_id FK
+        VARCHAR event_type
+        JSONB event_data
+        VARCHAR status
+        TIMESTAMP created_at
+    }
 ```
 
 ### 4.2 Таблицы
@@ -674,15 +684,16 @@ services:
 
 ### 6.2 Сетевая архитектура
 
-```
-Internet
-    │
-    ▼
-Traefik (external, /opt/n8n/dynamic.yml)
-    │
-    ├──▶ lead-qual.alex-n8n.site/        → Client UI
-    ├──▶ lead-qual.alex-n8n.site/webhook → n8n
-    └──▶ lead-qual-admin.alex-n8n.site/ → Admin UI + Admin API
+```mermaid
+flowchart TB
+    Internet["Internet"]
+    Traefik["Traefik (external)<br/>/opt/n8n/dynamic.yml"]
+    
+    Internet --> Traefik
+    
+    Traefik -->|lead-qual.alex-n8n.site/| ClientUI["Client UI"]
+    Traefik -->|lead-qual.alex-n8n.site/webhook| N8N["n8n"]
+    Traefik -->|lead-qual-admin.alex-n8n.site/| AdminUI["Admin UI + Admin API"]
 ```
 
 ### 6.3 Volumes
