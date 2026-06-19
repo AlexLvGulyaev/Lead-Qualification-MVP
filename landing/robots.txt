@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://lead-qual-demo.alex-n8n.site/sitemap.xml

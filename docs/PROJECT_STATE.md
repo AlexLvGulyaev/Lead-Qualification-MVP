@@ -4,11 +4,11 @@
 
 **Lead Qualification MVP** — демонстрационная система автоматической квалификации входящих лидов с AI-классификацией и интеграцией в Kommo CRM. Решает проблему ручной обработки обращений, обеспечивая 24/7 доступность, консистентную квалификацию и мгновенный отклик на входящие лиды.
 
-**GitHub:** Готов к публикации
+**GitHub:** https://github.com/AlexLvGulyaev/Lead-Qualification-MVP
 
 ## Current Status
 
-**MVP Complete** — Все компоненты Full MVP реализованы и протестированы.
+**Published to GitHub** — MVP Complete, репозиторий опубликован, документация упакована.
 
 **Архитектурное решение:**
 ```
@@ -55,7 +55,7 @@ Admin UI Monitoring (snapshot view, link to Kommo)
 | Phase 007 | Follow-up | ✅ Complete | Initial Task Creation |
 | Phase 008 | Admin Console | ✅ Complete | Dashboard + Lead Queue + Details |
 
-**Статус:** **MVP Complete — Ready for GitHub Publication**
+**Статус:** **Published to GitHub**
 
 ## Market Validation
 
@@ -219,12 +219,18 @@ Admin UI Monitoring (snapshot view, link to Kommo)
 - ✅ AI_QUALIFICATION.md — создан
 
 ### Before GitHub Publication
-1. Создать реальный `docs/screenshots/` directory
-2. Добавить скриншоты
-3. Проверить все ссылки
-4. Финальный аудит документации
+1. ✅ Создать реальный `docs/screenshots/` directory — DONE
+2. ✅ Добавить скриншоты — DONE (37 files)
+3. ✅ Проверить все ссылки — DONE (all valid)
+4. ✅ Финальный аудит документации — DONE (2026-06-18)
 
-### Future Enhancements
+### Documentation Status
+
+- ✅ Screenshots directory created and populated (37 files)
+- ✅ Cross-document links verified (all valid)
+- ✅ Final documentation audit completed (2026-06-18)
+
+### Future Enhancements (Post-MVP)
 1. Event Chaining — мгновенная классификация
 2. Bitrix24 Integration
 3. Multi-language support
@@ -249,3 +255,4 @@ Admin UI Monitoring (snapshot view, link to Kommo)
 | 2026-06-15 | Architecture Review | Clean architecture confirmed |
 | 2026-06-16 | **MVP Complete** | **All components implemented and documented** |
 | 2026-06-16 | **Documentation Packaging** | **RF+ quality documentation package** |
+| 2026-06-19 | **Published to GitHub** | **Repository published, project archived** |

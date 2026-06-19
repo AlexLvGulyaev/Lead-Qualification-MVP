@@ -1,0 +1,358 @@
+- generic [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "Lead Qual" [ref=e4] [cursor=pointer]:
+        - /url: "#"
+        - img [ref=e6]
+        - generic [ref=e9]: Lead Qual
+      - generic [ref=e10]:
+        - link "Возможности" [active] [ref=e11] [cursor=pointer]:
+          - /url: "#features"
+        - link "Продукт" [ref=e12] [cursor=pointer]:
+          - /url: "#product"
+        - link "Контакты" [ref=e13] [cursor=pointer]:
+          - /url: "#contact"
+      - generic [ref=e14]:
+        - link "Обсудить проект" [ref=e15] [cursor=pointer]:
+          - /url: "#contact"
+        - button "Получить демо" [ref=e17] [cursor=pointer]:
+          - text: Получить демо
+          - img [ref=e18]
+  - generic [ref=e23]:
+    - generic [ref=e24]:
+      - img [ref=e26]
+      - generic [ref=e29]: n8n + AI + CRM
+    - heading "Автоматическая AI-квалификация входящих лидов" [level=1] [ref=e30]:
+      - generic [ref=e31]: Автоматическая
+      - generic [ref=e32]: AI-квалификация
+      - generic [ref=e33]: входящих лидов
+    - paragraph [ref=e34]: Сократите время обработки заявок с часов до секунд. Передавайте менеджерам только качественные лиды с готовой оценкой.
+    - generic [ref=e35]:
+      - link "Получить демо" [ref=e36] [cursor=pointer]:
+        - /url: "#demo"
+        - text: Получить демо
+        - img [ref=e37]
+      - link "Обсудить проект" [ref=e39] [cursor=pointer]:
+        - /url: "#contact"
+    - generic [ref=e40]:
+      - generic [ref=e41]:
+        - generic [ref=e42]: <5с
+        - generic [ref=e43]: время обработки лида
+      - generic [ref=e45]:
+        - generic [ref=e46]: 24/7
+        - generic [ref=e47]: автоматическая работа
+      - generic [ref=e49]:
+        - generic [ref=e50]: Сквозное
+        - generic [ref=e51]: логирование операций
+  - generic [ref=e53]:
+    - generic [ref=e54]:
+      - generic [ref=e55]: Проблема
+      - heading "Ручная обработка лидов — потеря времени и денег" [level=2] [ref=e56]:
+        - text: Ручная обработка лидов —
+        - text: потеря времени и денег
+    - generic [ref=e57]:
+      - generic [ref=e58]:
+        - img [ref=e60]
+        - heading "Медленный отклик" [level=3] [ref=e63]
+        - paragraph [ref=e64]: Лиды теряются, пока менеджер добирается до заявки. Клиент уходит к конкурентам за часы.
+      - generic [ref=e65]:
+        - img [ref=e67]
+        - heading "Неконсистентная оценка" [level=3] [ref=e71]
+        - paragraph [ref=e72]: Разные менеджеры по-разному оценивают одних и тех же клиентов. Нет стандартов.
+      - generic [ref=e73]:
+        - img [ref=e75]
+        - heading "Потеря приоритетов" [level=3] [ref=e78]
+        - paragraph [ref=e79]: Горячие лиды теряются в потоке. Нет автоматической сортировки по важности.
+      - generic [ref=e80]:
+        - img [ref=e82]
+        - heading "Нет 24/7" [level=3] [ref=e85]
+        - paragraph [ref=e86]: Ночные и выходные заявки остаются без внимания. Упущенные возможности.
+      - generic [ref=e87]:
+        - img [ref=e89]
+        - heading "Перегрузка менеджеров" [level=3] [ref=e91]
+        - paragraph [ref=e92]: Сотрудники тратят часы на первичный отсев вместо работы с качественными клиентами.
+      - generic [ref=e93]:
+        - img [ref=e95]
+        - heading "Хаос в процессах" [level=3] [ref=e100]
+        - paragraph [ref=e101]: Нет прозрачности. Кто когда ответил. Какой статус. Всё в голове или в разных системах.
+  - generic [ref=e103]:
+    - generic [ref=e104]:
+      - generic [ref=e105]: Решение
+      - heading "Автоматический конвейер квалификации лидов" [level=2] [ref=e106]:
+        - text: Автоматический конвейер
+        - text: квалификации лидов
+    - generic [ref=e107]:
+      - generic [ref=e108]:
+        - generic [ref=e109]:
+          - img [ref=e111]
+          - generic [ref=e114]: Лид
+        - generic [ref=e115]: Входящее обращение с сайта или из Telegram
+      - img [ref=e117]
+      - generic [ref=e119]:
+        - generic [ref=e120]:
+          - img [ref=e122]
+          - generic [ref=e124]: n8n
+        - generic [ref=e125]: Автоматический workflow обработки
+      - img [ref=e127]
+      - generic [ref=e129]:
+        - generic [ref=e130]:
+          - img [ref=e132]
+          - generic [ref=e135]: AI-анализ
+        - generic [ref=e136]: Классификация по типу, интересу, приоритету
+      - img [ref=e138]
+      - generic [ref=e140]:
+        - generic [ref=e141]:
+          - img [ref=e143]
+          - generic [ref=e146]: Lead Score
+        - generic [ref=e147]: Автоматическая оценка качества лида
+      - img [ref=e149]
+      - generic [ref=e151]:
+        - generic [ref=e152]:
+          - img [ref=e154]
+          - generic [ref=e158]: CRM
+        - generic [ref=e159]: Запись результата, задача и уведомление менеджера
+    - generic [ref=e161]:
+      - img [ref=e163]
+      - generic [ref=e166]:
+        - heading "Менеджер получает квалифицированного лида" [level=3] [ref=e167]
+        - paragraph [ref=e168]: С готовой оценкой, приоритетом и кратким описанием. Без ручной обработки.
+  - generic [ref=e170]:
+    - generic [ref=e171]:
+      - generic [ref=e172]: Возможности
+      - heading "Автоматизация квалификации и передачи лидов" [level=2] [ref=e173]:
+        - text: Автоматизация квалификации
+        - text: и передачи лидов
+    - generic [ref=e174]:
+      - generic [ref=e175]:
+        - img [ref=e177]
+        - heading "AI Qualification" [level=3] [ref=e181]
+        - paragraph [ref=e182]: Автоматическая классификация по типу, интересу и приоритету. Настраиваемые критерии под ваш бизнес.
+      - generic [ref=e183]:
+        - img [ref=e185]
+        - heading "Lead Scoring" [level=3] [ref=e189]
+        - paragraph [ref=e190]: Количественная оценка качества лида. Confidence score для каждого результата классификации.
+      - generic [ref=e191]:
+        - img [ref=e193]
+        - heading "CRM Integration" [level=3] [ref=e198]
+        - paragraph [ref=e199]: Интеграция с Kommo CRM. Автоматическое создание сделки, заполнение полей квалификации и постановка задачи менеджеру.
+      - generic [ref=e200]:
+        - img [ref=e202]
+        - heading "Workflow Automation" [level=3] [ref=e205]
+        - paragraph [ref=e206]: n8n workflow для полной кастомизации. Добавляйте условия, ветвления, интеграции.
+      - generic [ref=e207]:
+        - img [ref=e209]
+        - heading "Manager Alerts" [level=3] [ref=e213]
+        - paragraph [ref=e214]: Быстрая передача лидов в работу менеджерам. Приоритетные обращения попадают к ответственным сотрудникам без задержек.
+      - generic [ref=e215]:
+        - img [ref=e217]
+        - heading "Analytics" [level=3] [ref=e222]
+        - paragraph [ref=e223]: Статистика классификации, контроль обработки лидов. Логирование операций и аудит действий.
+  - generic [ref=e225]:
+    - generic [ref=e226]:
+      - generic [ref=e227]: Результат
+      - heading "Что получает менеджер" [level=2] [ref=e228]
+      - paragraph [ref=e229]: Автоматизация даёт менеджеру готового к работе лида без ручной обработки.
+    - generic [ref=e230]:
+      - generic [ref=e231]:
+        - generic [ref=e232]: "1"
+        - generic [ref=e233]:
+          - heading "Приоритет" [level=4] [ref=e234]
+          - paragraph [ref=e235]: "Лид уже ранжирован: hot / warm / cold. Менеджер видит приоритет сразу."
+      - generic [ref=e236]:
+        - generic [ref=e237]: "2"
+        - generic [ref=e238]:
+          - heading "Классификация" [level=4] [ref=e239]
+          - paragraph [ref=e240]: Тип обращения, уровень интереса, категория — все данные в карточке.
+      - generic [ref=e241]:
+        - generic [ref=e242]: "3"
+        - generic [ref=e243]:
+          - heading "AI-резюме" [level=4] [ref=e244]
+          - paragraph [ref=e245]: Краткое описание обращения, сформированное автоматически.
+      - generic [ref=e246]:
+        - generic [ref=e247]: "4"
+        - generic [ref=e248]:
+          - heading "Запись в CRM" [level=4] [ref=e249]
+          - paragraph [ref=e250]: Все результаты квалификации автоматически записаны в карточку лида.
+      - generic [ref=e251]:
+        - generic [ref=e252]: "5"
+        - generic [ref=e253]:
+          - heading "Уведомление и задача" [level=4] [ref=e254]
+          - paragraph [ref=e255]: Менеджер получает уведомление и готовую задачу для работы.
+  - generic [ref=e257]:
+    - generic [ref=e258]:
+      - generic [ref=e259]: Интеграции
+      - heading "Подключение к вашей инфраструктуре" [level=2] [ref=e260]:
+        - text: Подключение к вашей
+        - text: инфраструктуре
+      - paragraph [ref=e261]: Подключение CRM, каналов поступления лидов и расширяемой автоматизации.
+    - generic [ref=e262]:
+      - generic [ref=e263]:
+        - img [ref=e265]
+        - heading "Kommo CRM" [level=4] [ref=e268]
+        - paragraph [ref=e269]: API-интеграция с автоматическим созданием сделки, заполнением полей и постановкой задачи менеджеру.
+      - generic [ref=e270]:
+        - img [ref=e272]
+        - heading "Telegram Bot" [level=4] [ref=e275]
+        - paragraph [ref=e276]: Приём обращений через Telegram-бот с автоматической квалификацией лидов.
+      - generic [ref=e277]:
+        - img [ref=e279]
+        - heading "Webhook API" [level=4] [ref=e282]
+        - paragraph [ref=e283]: Подключение внешних источников лидов через API.
+      - generic [ref=e284]:
+        - img [ref=e286]
+        - heading "n8n Workflow" [level=4] [ref=e291]
+        - paragraph [ref=e292]: Расширяемая логика автоматизации для собственных сценариев и интеграций.
+  - generic [ref=e294]:
+    - generic [ref=e295]:
+      - generic [ref=e296]: Интерфейс
+      - heading "Консоль квалификации лидов" [level=2] [ref=e297]:
+        - text: Консоль квалификации
+        - text: лидов
+      - paragraph [ref=e298]: Вся информация по лиду, результаты AI-квалификации, CRM-статус и история обработки — в одном интерфейсе.
+    - generic [ref=e300]:
+      - generic [ref=e301]:
+        - generic [ref=e302]: Консоль квалификации лидов
+        - generic [ref=e304]:
+          - button "Все лиды" [ref=e305] [cursor=pointer]
+          - button "Горячие" [ref=e306] [cursor=pointer]
+          - button "Telegram" [ref=e307] [cursor=pointer]
+      - generic [ref=e308]:
+        - generic [ref=e309]:
+          - generic [ref=e310]:
+            - generic [ref=e311]: "0"
+            - generic [ref=e312]: Горячих лидов
+            - generic [ref=e313]: Приоритетные
+          - generic [ref=e314]:
+            - generic [ref=e315]: "0"
+            - generic [ref=e316]: Из Telegram
+            - generic [ref=e317]: Канал лидов
+          - generic [ref=e318]:
+            - generic [ref=e319]: "0"
+            - generic [ref=e320]: Время квалификации
+            - generic [ref=e321]: Демо-сценарий
+          - generic [ref=e322]:
+            - generic [ref=e323]: "0"
+            - generic [ref=e324]: История обработки
+            - generic [ref=e325]: Все действия фиксируются
+        - generic [ref=e326]:
+          - generic [ref=e327]:
+            - generic [ref=e328]: Поток лидов
+            - generic [ref=e329]: Обновлено несколько секунд назад
+          - generic [ref=e330]:
+            - generic [ref=e331]:
+              - generic [ref=e332]:
+                - text: Входящие
+                - generic [ref=e334]: "12"
+              - generic [ref=e335]:
+                - generic [ref=e336]:
+                  - generic [ref=e337]:
+                    - generic [ref=e338]: Алексей М.
+                    - generic [ref=e339]: 2 мин назад
+                  - generic [ref=e340]: Здравствуйте! Интересует подключение к сервису...
+                  - generic [ref=e341]: Website
+                - generic [ref=e342]:
+                  - generic [ref=e343]:
+                    - generic [ref=e344]: Мария С.
+                    - generic [ref=e345]: 5 мин назад
+                  - generic [ref=e346]: Хочу узнать условия для корпоративных клиентов
+                  - generic [ref=e347]: Telegram
+            - generic [ref=e348]:
+              - generic [ref=e349]:
+                - text: В обработке
+                - generic [ref=e351]: "3"
+              - generic [ref=e490]:
+                - generic [ref=e491]:
+                  - generic [ref=e492]: Сергей М.
+                  - generic [ref=e493]: обработка
+                - generic [ref=e494]: Нужна консультация по корпоративному пакету
+            - generic [ref=e360]:
+              - generic [ref=e361]:
+                - text: Квалифицированы
+                - generic [ref=e363]: "8"
+              - generic [ref=e364]:
+                - generic [ref=e497]:
+                  - generic [ref=e498]:
+                    - generic [ref=e499]: Виктор Р.
+                    - generic [ref=e500]: ГОРЯЧИЙ
+                  - generic [ref=e501]:
+                    - generic [ref=e502]: "Score:"
+                    - generic [ref=e503]: "0.96"
+                  - generic [ref=e504]:
+                    - generic [ref=e505]:
+                      - generic [ref=e506]: "Приоритет:"
+                      - generic [ref=e507]: Высокий
+                    - generic [ref=e508]:
+                      - generic [ref=e509]: "Рекомендация:"
+                      - generic [ref=e510]: Позвонить
+                  - generic [ref=e511]:
+                    - generic [ref=e512]: → Позвонить в течение 1 часа
+                    - img [ref=e513]
+                - generic [ref=e515]:
+                  - generic [ref=e516]:
+                    - generic [ref=e517]: Артём Д.
+                    - generic [ref=e518]: ХОЛОДНЫЙ
+                  - generic [ref=e519]:
+                    - generic [ref=e520]: "Score:"
+                    - generic [ref=e521]: "0.85"
+                  - generic [ref=e522]:
+                    - generic [ref=e523]:
+                      - generic [ref=e524]: "Приоритет:"
+                      - generic [ref=e525]: Низкий
+                    - generic [ref=e526]:
+                      - generic [ref=e527]: "Рекомендация:"
+                      - generic [ref=e528]: Архивировать
+                  - generic [ref=e529]:
+                    - generic [ref=e530]: → Без срочных действий
+                    - img [ref=e531]
+  - generic [ref=e403]:
+    - heading "Готовы автоматизировать квалификацию лидов?" [level=2] [ref=e404]:
+      - text: Готовы автоматизировать
+      - text: квалификацию лидов?
+    - paragraph [ref=e405]: Получите демо-версию под ваш бизнес или обсудите детали интеграции.
+    - generic [ref=e406]:
+      - link "Получить демо" [ref=e407] [cursor=pointer]:
+        - /url: "#demo"
+        - text: Получить демо
+        - img [ref=e408]
+      - link "Обсудить проект" [ref=e410] [cursor=pointer]:
+        - /url: mailto:contact@example.com
+  - generic [ref=e413]:
+    - generic [ref=e414]: Демонстрационный проект
+    - heading "AI Automation Portfolio Lab" [level=2] [ref=e415]
+    - paragraph [ref=e416]: n8n Lead Qualification Assistant — демонстрационный кейс из портфолио AI Automation Portfolio Lab. Показывает подход к автоматизации обработки входящих лидов с использованием n8n и AI.
+    - paragraph [ref=e417]: "Решение может быть адаптировано под конкретного заказчика: другие CRM, другие критерии классификации, другие каналы поступления лидов."
+  - contentinfo [ref=e418]:
+    - generic [ref=e419]:
+      - generic [ref=e420]:
+        - generic [ref=e421]:
+          - link "Lead Qual" [ref=e422] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=e424]
+            - generic [ref=e427]: Lead Qual
+          - paragraph [ref=e428]: Автоматическая AI-квалификация лидов
+        - generic [ref=e429]:
+          - generic [ref=e430]:
+            - heading "Продукт" [level=4] [ref=e431]
+            - link "Возможности" [ref=e432] [cursor=pointer]:
+              - /url: "#features"
+            - link "Интерфейс" [ref=e433] [cursor=pointer]:
+              - /url: "#product"
+            - link "Интеграции" [ref=e434] [cursor=pointer]:
+              - /url: "#integrations"
+          - generic [ref=e435]:
+            - heading "Интеграции" [level=4] [ref=e436]
+            - link "Kommo CRM" [ref=e437] [cursor=pointer]:
+              - /url: "#"
+            - link "Telegram" [ref=e438] [cursor=pointer]:
+              - /url: "#"
+            - link "Webhook API" [ref=e439] [cursor=pointer]:
+              - /url: "#"
+          - generic [ref=e440]:
+            - heading "Контакты" [level=4] [ref=e441]
+            - link "contact@example.com" [ref=e442] [cursor=pointer]:
+              - /url: mailto:contact@example.com
+            - link "Telegram" [ref=e443] [cursor=pointer]:
+              - /url: "#"
+      - generic [ref=e444]:
+        - paragraph [ref=e445]: © 2026 AI Automation Portfolio Lab. Все права защищены.
+        - paragraph [ref=e446]: n8n Lead Qualification Assistant — демонстрационный кейс.

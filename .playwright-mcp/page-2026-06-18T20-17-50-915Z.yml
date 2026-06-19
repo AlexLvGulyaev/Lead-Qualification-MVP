@@ -1,0 +1,28 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]: This XML file does not appear to have any style information associated with it. The document tree is shown below.
+  - generic [ref=e4]:
+    - generic [ref=e7]:
+      - text: <urlset
+      - generic [ref=e8]: xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      - text: ">"
+    - generic [ref=e10]:
+      - generic [ref=e13]: <url>
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: <loc>
+          - text: https://lead-qual-demo.alex-n8n.site/
+          - generic [ref=e17]: </loc>
+        - generic [ref=e18]:
+          - generic [ref=e19]: <lastmod>
+          - text: 2026-06-18
+          - generic [ref=e20]: </lastmod>
+        - generic [ref=e21]:
+          - generic [ref=e22]: <changefreq>
+          - text: weekly
+          - generic [ref=e23]: </changefreq>
+        - generic [ref=e24]:
+          - generic [ref=e25]: <priority>
+          - text: "1.0"
+          - generic [ref=e26]: </priority>
+      - generic [ref=e28]: </url>
+    - generic [ref=e30]: </urlset>

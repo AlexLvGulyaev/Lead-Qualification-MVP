@@ -3,13 +3,6 @@
  * Landing Page JavaScript
  */
 
-document.addEventListener('DOMContentLoaded', () => {
-    initScrollReveal();
-    initDashboardAnimation();
-    initStatCounters();
-    initSmoothScroll();
-});
-
 /**
  * Scroll Reveal Animation
  * Animates elements as they come into view
@@ -300,20 +293,61 @@ function animateValue(element) {
 function initSmoothScroll() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
-            e.preventDefault();
             const targetId = this.getAttribute('href');
-            if (targetId === '#') return;
+
+            // Skip empty hash
+            if (!targetId || targetId === '#') return;
+
+            // Handle #demo specially - open the demo popover
+            if (targetId === '#demo') {
+                e.preventDefault();
+                e.stopPropagation(); // Prevent document click from closing popover
+
+                const demoDropdown = document.querySelector('.demo-dropdown');
+                const demoTrigger = document.getElementById('demoTrigger');
+
+                if (demoDropdown && demoTrigger) {
+                    // Toggle popover
+                    demoDropdown.classList.toggle('active');
+
+                    // Scroll to CTA section if popover opened
+                    if (demoDropdown.classList.contains('active')) {
+                        const ctaSection = document.getElementById('contact');
+                        if (ctaSection) {
+                            const navHeight = document.querySelector('.nav').offsetHeight;
+                            const targetPosition = ctaSection.offsetTop - navHeight - 20;
+                            window.scrollTo({
+                                top: targetPosition,
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                }
+                return;
+            }
 
             const targetElement = document.querySelector(targetId);
-            if (targetElement) {
-                const navHeight = document.querySelector('.nav').offsetHeight;
-                const targetPosition = targetElement.offsetTop - navHeight - 20;
 
-                window.scrollTo({
-                    top: targetPosition,
-                    behavior: 'smooth'
-                });
+            // If target doesn't exist, let default behavior handle it (or ignore)
+            if (!targetElement) {
+                e.preventDefault();
+                console.warn(`Navigation target not found: ${targetId}`);
+                return;
             }
+
+            // Prevent default only if we have a valid target
+            e.preventDefault();
+
+            const navHeight = document.querySelector('.nav').offsetHeight;
+            const targetPosition = targetElement.offsetTop - navHeight - 20;
+
+            // Update hash before scrolling for proper history
+            history.pushState(null, '', targetId);
+
+            window.scrollTo({
+                top: targetPosition,
+                behavior: 'smooth'
+            });
         });
     });
 }
@@ -406,5 +440,9 @@ function initDemoPopover() {
 
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
+    initScrollReveal();
+    initDashboardAnimation();
+    initStatCounters();
+    initSmoothScroll();
     initDemoPopover();
 });
