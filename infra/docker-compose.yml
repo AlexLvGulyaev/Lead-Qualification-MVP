@@ -3,6 +3,7 @@
 # Version: 1.1
 # Architecture: Separate databases for n8n internal and business data
 
+name: lead-qualification
 services:
   # ============================================================================
   # PostgreSQL - Primary database server
@@ -25,7 +26,7 @@ services:
       - ./sql/00-init-databases.sh:/docker-entrypoint-initdb.d/00-init-databases.sh:ro
       - ./sql/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
     ports:
-      - "${POSTGRES_PORT:-15432}:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-15432}:5432"
     networks:
       - lead-qualification-network
     healthcheck:
@@ -49,6 +50,7 @@ services:
       - N8N_HOST=${N8N_HOST:-0.0.0.0}
       - N8N_PORT=${N8N_PORT:-5678}
       - N8N_PROTOCOL=${N8N_PROTOCOL:-http}
+      - N8N_EDITOR_BASE_URL=${N8N_EDITOR_BASE_URL:-}
       - WEBHOOK_URL=${WEBHOOK_URL:-}
       - NODE_ENV=${NODE_ENV:-production}
 
