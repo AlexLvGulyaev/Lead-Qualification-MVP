@@ -122,6 +122,10 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
       - KOMMO_ACCESS_TOKEN=${KOMMO_ACCESS_TOKEN:-}
+      # Токены входа в админ-консоль (канон RF: admin + demo). Не заданы —
+      # авторизация выключена (dev-режим).
+      - ADMIN_TOKEN=${LQ_ADMIN_TOKEN:-}
+      - ADMIN_DEMO_TOKEN=${LQ_ADMIN_DEMO_TOKEN:-}
     networks:
       - lead-qualification-network
       - traefik

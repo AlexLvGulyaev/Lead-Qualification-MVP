@@ -7,81 +7,124 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=22">
+    <script>
+        /* Тема применяется до отрисовки (без вспышки): ключ `ai-theme`
+           — общий стандарт консолей APL (RF/AIC/RAR/MAB/PR/LQ). */
+        (function () {
+            try {
+                var t = localStorage.getItem('ai-theme');
+                if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+            } catch (e) { /* localStorage недоступен */ }
+        })();
+    </script>
 </head>
 <body>
+    <!-- Форма входа по токену (канон AIC Login / RF companyAuth): показывается,
+         пока нет валидной сессии; успешный вход пишется в аудит (console_login). -->
+    <div id="login-page" class="login-page" hidden>
+        <div class="card login-card">
+            <div class="login-card__icon">🧲</div>
+            <h1 class="login-card__title">Lead Qualification Admin Console</h1>
+            <p class="login-card__subtitle">Введите Bearer token для доступа к панели управления.</p>
+            <form id="login-form" novalidate>
+                <label class="login-card__label" for="login-token"
+                       title="Полный доступ к панели управления — по токену.">Bearer token</label>
+                <input type="password" id="login-token" class="audit-input login-card__input"
+                       placeholder="Вставьте токен..." autocomplete="current-password">
+                <div class="login-card__error" id="login-error" hidden></div>
+                <button type="submit" class="login-card__btn">Войти</button>
+                <button type="button" class="login-card__btn login-card__btn--outline" id="login-demo" hidden
+                        title="Демо-режим: посмотрите консоль без прав изменения (read-only).">Войти в демо-режим (только просмотр)</button>
+                <button type="button" class="login-card__btn login-card__btn--outline login-card__btn--home" id="login-return"
+                        title="Вернуться на страницу проекта в витрине AIP.">К проекту</button>
+            </form>
+        </div>
+    </div>
+
     <div class="app">
         <div class="app-layout">
             <!-- Sidebar - Full Height -->
             <aside class="sidebar">
                 <div class="sidebar-brand">
-                    <svg class="sidebar-logo" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M16 4l-12 8v16h24v-16l-12-8z"/>
-                        <path d="M16 12v8"/>
-                        <circle cx="16" cy="16" r="2"/>
-                    </svg>
+                    <span class="sidebar-brand__icon" aria-hidden="true">🧲</span>
                     <div class="sidebar-brand-text">
                         <div class="sidebar-brand-title">Lead Qualification</div>
                     </div>
                 </div>
+                <!-- Демо-бейдж — канон RF .op-sidebar-demo / AIC / MAB: под брендом,
+                     виден только в демо-сессии (роль demo, read-only). -->
+                <div class="sidebar-demo-badge" id="demo-badge" hidden>🔒 Демо-режим: только просмотр</div>
                 <nav class="sidebar-nav">
+                    <!-- Меню-канон APL: Система → Операции → Аналитика → Наблюдаемость → Справка -->
                     <div class="nav-section">
-                        <div class="nav-section-title">Обзор</div>
-                        <a href="#dashboard" class="nav-item active" data-page="dashboard">
-                            <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <rect x="3" y="3" width="7" height="7" rx="1"/>
-                                <rect x="10" y="3" width="7" height="7" rx="1"/>
-                                <rect x="3" y="10" width="7" height="7" rx="1"/>
-                                <rect x="10" y="10" width="7" height="7" rx="1"/>
-                            </svg>
-                            Dashboard
-                        </a>
-                        <a href="#leads" class="nav-item" data-page="leads">
-                            <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path d="M9 2H5a2 2 0 00-2 2v4a2 2 0 002 2h4a2 2 0 002-2V4a2 2 0 00-2-2z"/>
-                                <path d="M15 2h-2a2 2 0 00-2 2v4a2 2 0 002 2h2a2 2 0 002-2V4a2 2 0 00-2-2z"/>
-                                <path d="M9 12H5a2 2 0 00-2 2v4a2 2 0 002 2h4a2 2 0 002-2v-4a2 2 0 00-2-2z"/>
-                                <path d="M15 12h-2a2 2 0 00-2 2v4a2 2 0 002 2h2a2 2 0 002-2v-4a2 2 0 00-2-2z"/>
-                            </svg>
-                            Очередь лидов
-                        </a>
+                        <div class="nav-section-title">Система</div>
+                        <div class="nav-items">
+                            <a href="#system" class="nav-item" data-page="system">
+                                <span class="nav-icon">🩺</span>
+                                Панель состояния
+                            </a>
+                        </div>
+                    </div>
+                    <div class="nav-section">
+                        <div class="nav-section-title">Операции</div>
+                        <div class="nav-items">
+                            <a href="#leads" class="nav-item" data-page="leads">
+                                <span class="nav-icon">📥</span>
+                                Очередь лидов
+                            </a>
+                        </div>
                     </div>
                     <div class="nav-section">
                         <div class="nav-section-title">Аналитика</div>
-                        <a href="#monitoring" class="nav-item" data-page="monitoring">
-                            <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path d="M2 16l4-8 4 4 4-6 4 8"/>
-                                <path d="M2 18h16"/>
-                            </svg>
-                            Monitoring
-                        </a>
-                        <a href="#system" class="nav-item" data-page="system">
-                            <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <circle cx="10" cy="10" r="3"/>
-                                <path d="M10 2v2"/>
-                                <path d="M10 16v2"/>
-                                <path d="M2 10h2"/>
-                                <path d="M16 10h2"/>
-                                <path d="M4.93 4.93l1.41 1.41"/>
-                                <path d="M13.66 13.66l1.41 1.41"/>
-                                <path d="M4.93 15.07l1.41-1.41"/>
-                                <path d="M13.66 6.34l1.41-1.41"/>
-                            </svg>
-                            System Status
-                        </a>
+                        <div class="nav-items">
+                            <a href="#dashboard" class="nav-item active" data-page="dashboard">
+                                <span class="nav-icon">📊</span>
+                                Дашборд
+                            </a>
+                        </div>
+                    </div>
+                    <div class="nav-section">
+                        <div class="nav-section-title">Наблюдаемость</div>
+                        <div class="nav-items">
+                            <a href="#monitoring" class="nav-item" data-page="monitoring">
+                                <span class="nav-icon">📜</span>
+                                Логи
+                            </a>
+                            <a href="#audit" class="nav-item" data-page="audit">
+                                <span class="nav-icon">📋</span>
+                                Журнал аудита
+                            </a>
+                        </div>
+                    </div>
+                    <div class="nav-section">
+                        <div class="nav-section-title">Справка</div>
+                        <div class="nav-items">
+                            <a href="#legend" class="nav-item" data-page="legend">
+                                <span class="nav-icon">🗺️</span>
+                                Обозначения
+                            </a>
+                        </div>
                     </div>
                 </nav>
-                <a href="https://lead-qual-demo.alex-n8n.site" class="sidebar-back">
-                    <svg class="sidebar-back-icon" viewBox="0 0 20 20" fill="none">
-                        <path d="M15 10H5M5 10L10 5M5 10L10 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <span>← К демо</span>
-                </a>
                 <div class="sidebar-footer">
                     <div class="system-status">
                         <div class="status-indicator" id="system-status-indicator"></div>
                         <span class="status-text" id="system-status-text">System Online</span>
                     </div>
+                    <!-- Канон AIC/RF (консоль с авторизацией): тема и Выйти —
+                         полноширинные кнопки внизу сайдбара (иконка + текст);
+                         «К проекту» остаётся на логинформе. -->
+                    <button type="button" class="sidebar-footer__btn" id="theme-toggle"
+                            title="Переключить светлую/тёмную тему (запоминается в браузере)">
+                        <span id="theme-toggle__icon">☀️</span>
+                        <span id="theme-toggle__label">Светлая тема</span>
+                    </button>
+                    <button type="button" class="sidebar-footer__btn" id="logout-btn"
+                            title="Завершить сессию и вернуться на форму входа.">
+                        <span aria-hidden="true">🚪</span>
+                        <span>Выйти</span>
+                    </button>
                 </div>
             </aside>
 
@@ -100,8 +143,14 @@
 
                 <!-- Workspace Header -->
                 <div class="workspace-header" id="workspace-header">
-                    <h1 class="workspace-title" id="workspace-title">Dashboard</h1>
-                    <p class="workspace-subtitle" id="workspace-subtitle">Обзор показателей системы</p>
+                    <div class="ws-header__text">
+                        <h1 class="workspace-title" id="workspace-title">Dashboard</h1>
+                        <p class="workspace-subtitle" id="workspace-subtitle">Обзор показателей системы</p>
+                    </div>
+                    <div class="ws-actions" id="ws-actions" hidden>
+                        <button type="button" class="ws-action-btn" id="audit-export" title="Скачать журнал в CSV">Экспорт CSV</button>
+                        <button type="button" class="ws-action-btn" id="audit-refresh" title="Перечитать журнал">Обновить</button>
+                    </div>
                 </div>
 
                 <div class="workspace-divider"></div>
@@ -253,28 +302,26 @@
                                     </select>
                                     <select class="filter-select" id="filter-source">
                                         <option value="">Все источники</option>
-                                        <option value="telegram">Telegram</option>
-                                        <option value="website">Website</option>
-                                        <option value="social_media">Social Media</option>
+                                        <option value="telegram">✈️ Telegram</option>
+                                        <option value="website">🌐 Website</option>
+                                        <option value="social_media">👥 Social Media</option>
                                     </select>
                                 </div>
                                 <!-- Search -->
                                 <div class="search-bar">
                                     <input type="text" class="search-input" id="search-input" placeholder="Поиск по имени, телефону, email...">
                                 </div>
-                                <!-- Pagination -->
-                                <div class="pagination-bar">
-                                    <span class="pagination-meta">Страница <span id="pagination-page">1</span> · Всего: <span id="pagination-total">0</span> · Показано: <span id="pagination-shown">0</span></span>
-                                    <div class="pagination-controls">
-                                        <button class="pagination-btn" id="pagination-prev" disabled>←</button>
-                                        <button class="pagination-btn" id="pagination-next">→</button>
-                                    </div>
+                                <!-- Pagination — канон RF: «← Назад» · «Страница N из M» · «Вперёд →» + «Всего N» -->
+                                <div class="page-controls">
+                                    <button type="button" class="page-btn" id="pagination-prev" disabled>← Назад</button>
+                                    <span class="page-info">Страница <span id="pagination-page">0</span> из <span id="pagination-pages">0</span></span>
+                                    <button type="button" class="page-btn" id="pagination-next">Вперёд →</button>
                                 </div>
+                                <div class="page-meta"><span>Всего: <span id="pagination-total">0</span></span></div>
                                 <!-- List -->
                                 <div class="list-container" id="leads-list">
                                     <div class="loading-state">
-                                        <div class="spinner"></div>
-                                        <div class="loading-text">Загрузка...</div>
+                                        <p class="loading-text">Загрузка…</p>
                                     </div>
                                 </div>
                             </div>
@@ -282,12 +329,7 @@
                             <!-- Right Macropanel -->
                             <div class="right-macropanel" id="lead-detail">
                                 <div class="empty-state">
-                                    <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
-                                        <rect x="9" y="3" width="6" height="4" rx="1"/>
-                                    </svg>
-                                    <h3 class="empty-title">Выберите лид</h3>
-                                    <p class="empty-text">Кликните на элемент в списке</p>
+                                    <p class="empty-text">Выберите лид</p>
                                 </div>
                             </div>
                         </div>
@@ -298,40 +340,37 @@
                         <div class="operational-workspace">
                             <div class="left-macropanel">
                                 <div class="filters-bar">
+                                    <select class="filter-select" id="monitoring-window" title="Окно времени (канон RF)">
+                                        <option value="24">24h</option>
+                                        <option value="168">7d</option>
+                                        <option value="720">30d</option>
+                                        <option value="">все</option>
+                                    </select>
                                     <select class="filter-select" id="monitoring-type">
-                                        <option value="">Все события</option>
-                                        <option value="lead">Новые лиды</option>
-                                        <option value="qualification">Квалификации</option>
-                                        <option value="crm_sync">CRM синхронизации</option>
-                                        <option value="error">Ошибки</option>
+                                        <option value="">Все статусы</option>
+                                        <option value="ok">✔︎ успешно</option>
+                                        <option value="error">❌ ошибка</option>
+                                        <option value="pending">🔄 ожидание</option>
                                     </select>
                                 </div>
                                 <div class="search-bar">
-                                    <input type="text" class="search-input" id="monitoring-search" placeholder="Поиск по ID события...">
+                                    <input type="text" class="search-input" id="monitoring-search" placeholder="Поиск по номеру лида...">
                                 </div>
-                                <div class="pagination-bar">
-                                    <span class="pagination-meta">Страница <span id="monitoring-pagination-page">1</span> · Всего: <span id="monitoring-pagination-total">0</span> · Показано: <span id="monitoring-pagination-shown">0</span></span>
-                                    <div class="pagination-controls">
-                                        <button class="pagination-btn" id="monitoring-pagination-prev" disabled>←</button>
-                                        <button class="pagination-btn" id="monitoring-pagination-next">→</button>
-                                    </div>
+                                <div class="page-controls">
+                                    <button type="button" class="page-btn" id="monitoring-pagination-prev" disabled>← Назад</button>
+                                    <span class="page-info">Страница <span id="monitoring-pagination-page">0</span> из <span id="monitoring-pagination-pages">0</span></span>
+                                    <button type="button" class="page-btn" id="monitoring-pagination-next">Вперёд →</button>
                                 </div>
+                                <div class="page-meta"><span>Всего: <span id="monitoring-pagination-total">0</span></span></div>
                                 <div class="list-container" id="monitoring-list">
                                     <div class="loading-state">
-                                        <div class="spinner"></div>
-                                        <div class="loading-text">Загрузка событий...</div>
+                                        <p class="loading-text">Загрузка…</p>
                                     </div>
                                 </div>
                             </div>
                             <div class="right-macropanel" id="event-detail">
                                 <div class="empty-state">
-                                    <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                        <circle cx="12" cy="12" r="10"/>
-                                        <path d="M12 8v4"/>
-                                        <path d="M12 16h.01"/>
-                                    </svg>
-                                    <h3 class="empty-title">Выберите событие</h3>
-                                    <p class="empty-text">Кликните на событие в списке</p>
+                                    <p class="empty-text">Выберите событие</p>
                                 </div>
                             </div>
                         </div>
@@ -343,11 +382,152 @@
                             <div class="metrics-row" id="system-metrics"></div>
                         </div>
                     </div>
+
+                    <!-- Обозначения: канон RF LegendWorkspace — 3 панели,
+                         строка = эмодзи-чип (icon-lg) + лейбл + пояснение
+                         без цветного фона; «?»-хэлп «где используется». -->
+                    <div id="legend-page" class="page">
+                        <p class="legend-intro">Единый значковый контракт консоли: один эмодзи — одно понятие на всех экранах.</p>
+                        <div class="legend-grid">
+                            <div class="legend-panel">
+                                <div class="legend-panel__head">
+                                    <div class="legend-panel__title">Квалификация</div>
+                                    <span class="legend-help"><button type="button" class="legend-help__btn" aria-label="Где используется">?</button>
+                                        <span class="legend-help__pop" role="tooltip">Чипы в очереди лидов, паспорте лида и распределении на Dashboard</span></span>
+                                </div>
+                                <div class="legend-row"><span class="ai-status ai-status--emoji ai-status--icon-lg">🔥</span><span class="legend-row__label">Горячий</span><span class="legend-row__note">Готов к звонку — связаться в первую очередь</span></div>
+                                <div class="legend-row"><span class="ai-status ai-status--emoji ai-status--icon-lg">🌡️</span><span class="legend-row__label">Тёплый</span><span class="legend-row__note">Есть интерес, требуется прогрев</span></div>
+                                <div class="legend-row"><span class="ai-status ai-status--emoji ai-status--icon-lg">❄️</span><span class="legend-row__label">Холодный</span><span class="legend-row__note">Низкая заинтересованность</span></div>
+                                <div class="legend-row"><span class="ai-status ai-status--emoji ai-status--icon-lg">🗑️</span><span class="legend-row__label">Спам</span><span class="legend-row__note">Нецелевое обращение</span></div>
+                                <div class="legend-row"><span class="ai-status ai-status--emoji ai-status--icon-lg">⚡</span><span class="legend-row__label">Высокий</span><span class="legend-row__note">Приоритет обработки лида</span></div>
+                                <div class="legend-row"><span class="ai-status ai-status--emoji ai-status--icon-lg">➤</span><span class="legend-row__label">Средний</span><span class="legend-row__note">Приоритет обработки лида</span></div>
+                                <div class="legend-row"><span class="ai-status ai-status--emoji ai-status--icon-lg">○</span><span class="legend-row__label">Низкий</span><span class="legend-row__note">Приоритет обработки лида</span></div>
+                            </div>
+                            <div class="legend-panel">
+                                <div class="legend-panel__head">
+                                    <div class="legend-panel__title">Жизненный цикл</div>
+                                    <span class="legend-help"><button type="button" class="legend-help__btn" aria-label="Где используется">?</button>
+                                        <span class="legend-help__pop" role="tooltip">Статус в паспорте лида и колонка статуса в очереди</span></span>
+                                </div>
+                                <div class="legend-row"><span class="ai-status ai-status--emoji ai-status--icon-lg">⏳</span><span class="legend-row__label">Получен</span><span class="legend-row__note">Обращение принято, ожидает квалификации</span></div>
+                                <div class="legend-row"><span class="ai-status ai-status--emoji ai-status--icon-lg">✅</span><span class="legend-row__label">Квалифицирован</span><span class="legend-row__note">AI определил тип и приоритет</span></div>
+                                <div class="legend-row"><span class="ai-status ai-status--emoji ai-status--icon-lg">🚀</span><span class="legend-row__label">Передан в CRM</span><span class="legend-row__note">Сделка создана в Kommo</span></div>
+                                <div class="legend-row"><span class="ai-status ai-status--emoji ai-status--icon-lg">📦</span><span class="legend-row__label">В архиве</span><span class="legend-row__note">Обработка завершена</span></div>
+                                <div class="legend-row"><span class="ai-status ai-status--emoji ai-status--icon-lg">✅</span><span class="legend-row__label">CRM: успешно</span><span class="legend-row__note">Сделка создана в CRM</span></div>
+                                <div class="legend-row"><span class="ai-status ai-status--emoji ai-status--icon-lg">⏳</span><span class="legend-row__label">CRM: в очереди</span><span class="legend-row__note">Ожидает синхронизации</span></div>
+                                <div class="legend-row"><span class="ai-status ai-status--emoji ai-status--icon-lg">❌</span><span class="legend-row__label">CRM: ошибка</span><span class="legend-row__note">Синхронизация не удалась</span></div>
+                            </div>
+                            <div class="legend-panel">
+                                <div class="legend-panel__head">
+                                    <div class="legend-panel__title">Источники</div>
+                                    <span class="legend-help"><button type="button" class="legend-help__btn" aria-label="Где используется">?</button>
+                                        <span class="legend-help__pop" role="tooltip">Фильтр источников, паспорт лида и мониторинг событий</span></span>
+                                </div>
+                                <div class="legend-row"><span class="ai-status ai-status--emoji ai-status--icon-lg">✈️</span><span class="legend-row__label">Telegram</span><span class="legend-row__note">Обращение из Telegram-бота</span></div>
+                                <div class="legend-row"><span class="ai-status ai-status--emoji ai-status--icon-lg">🌐</span><span class="legend-row__label">Website</span><span class="legend-row__note">Веб-форма на сайте</span></div>
+                                <div class="legend-row"><span class="ai-status ai-status--emoji ai-status--icon-lg">👥</span><span class="legend-row__label">Social</span><span class="legend-row__note">Социальные сети</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Журнал аудита: активность консоли (канон RF AuditWorkspace:
+                         слева карточка фильтров/пагинации/списка, справа детализация;
+                         «Экспорт CSV»/«Обновить» — в шапке воркспейса). -->
+                    <div id="audit-page" class="page">
+                        <div class="audit-layout">
+                            <div class="card audit-card">
+                                <div class="audit-filters">
+                                    <select id="audit-window" class="audit-input" title="Окно времени">
+                                        <option value="24">24h</option>
+                                        <option value="168" selected>7d</option>
+                                        <option value="720">30d</option>
+                                        <option value="">все</option>
+                                    </select>
+                                    <select id="audit-role" class="audit-input" title="Роль">
+                                        <option value="">все роли</option>
+                                        <option value="admin">Администратор</option>
+                                        <option value="demo">Демо</option>
+                                    </select>
+                                    <select id="audit-resource" class="audit-input" title="Тип ресурса">
+                                        <option value="">все ресурсы</option>
+                                        <option value="dashboard">Дашборд</option>
+                                        <option value="lead">Лиды</option>
+                                        <option value="logs">Логи</option>
+                                        <option value="system">Система</option>
+                                        <option value="auth">Авторизация</option>
+                                    </select>
+                                    <input type="text" id="audit-action" class="audit-input" placeholder="Действие (action)…" title="Фильтр по действию">
+                                </div>
+                                <div class="page-controls">
+                                    <button type="button" class="page-btn" id="audit-prev" disabled>← Назад</button>
+                                    <span class="page-info">Страница <span id="audit-page-num">0</span> из <span id="audit-pages-num">0</span></span>
+                                    <button type="button" class="page-btn" id="audit-next">Вперёд →</button>
+                                </div>
+                                <div class="audit-card__meta">
+                                    <span class="audit-total" id="audit-total">Всего —</span>
+                                    <button type="button" class="audit-reset" id="audit-reset" disabled>Сброс</button>
+                                </div>
+                                <div class="audit-list" id="audit-list"></div>
+                            </div>
+                            <div class="card audit-detail" id="audit-detail">
+                                <div class="audit-detail__empty">Выберите событие слева, чтобы увидеть детализацию.</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </main>
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <!-- Возврат на страницу проекта (канон RAR/AIC/RF/HRA/PR): из витрины
+         (живой window.opener) — фокус исходной вкладки и закрытие вкладки
+         консоли; при прямом заходе — переход в той же вкладке. Скрипт
+         инлайн (не в app.js) — урок HRA: интерактивность не должна жить
+         в кэше. -->
+    <script>
+        /* Возврат на страницу проекта — кнопка на форме входа (в футере сайдбара
+           теперь «Выйти», канон AIC/RF для консоли с авторизацией). */
+        function goProject() {
+            try {
+                if (window.opener && !window.opener.closed) {
+                    window.opener.focus();
+                    window.close();
+                    return;
+                }
+            } catch (e) { /* opener недоступен — обычный переход */ }
+            window.location.href = 'https://ai.alex-n8n.site/cases/lead-qualification.html';
+        }
+        (function () {
+            'use strict';
+            var loginBtn = document.getElementById('login-return');
+            if (loginBtn) loginBtn.addEventListener('click', goProject);
+        })();
+        /* День/ночь: кнопка в footer сайдбара (канон AIC/RF), ключ `ai-theme`
+           — общий стандарт консолей APL; выбор сохраняется в localStorage. */
+        (function () {
+            var btn = document.getElementById('theme-toggle');
+            if (!btn) return;
+            var icon = document.getElementById('theme-toggle__icon');
+            var label = document.getElementById('theme-toggle__label');
+            function current() {
+                return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+            }
+            function render() {
+                var light = current() === 'light';
+                if (icon) icon.textContent = light ? '🌙' : '☀️';
+                if (label) label.textContent = light ? 'Тёмная тема' : 'Светлая тема';
+                btn.setAttribute('aria-label', light ? 'Включить тёмную тему' : 'Включить светлую тему');
+            }
+            btn.addEventListener('click', function () {
+                var next = current() === 'light' ? 'dark' : 'light';
+                if (next === 'light') document.documentElement.setAttribute('data-theme', 'light');
+                else document.documentElement.removeAttribute('data-theme');
+                try { localStorage.setItem('ai-theme', next); } catch (e) { /* нет доступа */ }
+                render();
+            });
+            render();
+        })();
+    </script>
+    <script src="app.js?v=22"></script>
 </body>
 </html>

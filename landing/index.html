@@ -8,7 +8,6 @@
 
     <!-- Favicon -->
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
-    <link rel="alternate icon" href="favicon.ico">
 
     <!-- Canonical -->
     <link rel="canonical" href="https://lead-qual-demo.alex-n8n.site/">
@@ -30,7 +29,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=2026-09-01-h">
+
+    <!-- Two-tone theme (APL standard): dark default, light override.
+         Applied before first paint to avoid flash. -->
+    <script>
+    (function () {
+        var t = 'dark';
+        try {
+            var saved = localStorage.getItem('lq-theme');
+            if (saved === 'light' || saved === 'dark') t = saved;
+        } catch (e) { /* storage unavailable — default dark */ }
+        document.documentElement.setAttribute('data-theme', t);
+    })();
+    </script>
 </head>
 <body>
     <!-- Header -->
@@ -53,41 +65,12 @@
                 <a href="#contact">Контакты</a>
             </div>
             <div class="nav-cta">
-                <a href="#contact" class="btn btn-secondary">Обсудить проект</a>
-                <div class="demo-dropdown">
-                    <button class="btn btn-primary demo-trigger" id="demoTrigger">
-                        Получить демо
-                        <svg class="btn-arrow" viewBox="0 0 20 20" fill="none">
-                            <path d="M5 8L10 13L15 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </button>
-                    <div class="demo-popover" id="demoPopover">
-                        <div class="demo-popover-header">Доступ к демонстрации</div>
-                        <div class="demo-popover-content">
-                            <a class="demo-card" data-href="https://lead-qual.alex-n8n.site" role="button" tabindex="0">
-                                <div class="demo-card-icon">🌐</div>
-                                <div class="demo-card-content">
-                                    <div class="demo-card-title">Web-сайт</div>
-                                    <div class="demo-card-desc">Форма заявки и public demo</div>
-                                </div>
-                            </a>
-                            <a class="demo-card" data-href="https://t.me/OptimusLeadQualificationBot" role="button" tabindex="0">
-                                <div class="demo-card-icon">✈</div>
-                                <div class="demo-card-content">
-                                    <div class="demo-card-title">Telegram Bot</div>
-                                    <div class="demo-card-desc">@OptimusLeadQualificationBot</div>
-                                </div>
-                            </a>
-                            <a class="demo-card" data-href="https://lead-qual-admin.alex-n8n.site" role="button" tabindex="0">
-                                <div class="demo-card-icon">🛡</div>
-                                <div class="demo-card-content">
-                                    <div class="demo-card-title">Админ-консоль</div>
-                                    <div class="demo-card-desc">Мониторинг и управление</div>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                <button class="theme-toggle" id="themeToggle" type="button" aria-label="Переключить тему" title="Переключить тему">
+                    <span class="icon-sun" aria-hidden="true">☀️</span>
+                    <span class="icon-moon" aria-hidden="true">🌙</span>
+                </button>
+                <a href="https://ai.alex-n8n.site/contacts.html" class="btn btn-secondary">Обсудить проект</a>
+                <a href="https://ai.alex-n8n.site/cases/lead-qualification.html" class="btn btn-primary js-return-project">К проекту</a>
             </div>
         </div>
     </nav>
@@ -120,13 +103,13 @@
                 Сократите время обработки заявок с часов до секунд. Передавайте менеджерам только качественные лиды с готовой оценкой.
             </p>
             <div class="hero-cta">
-                <a href="#demo" class="btn btn-primary btn-lg">
-                    Получить демо
+                <a href="https://ai.alex-n8n.site/cases/lead-qualification.html" class="btn btn-primary btn-lg js-return-project">
+                    К проекту
                     <svg class="btn-arrow" viewBox="0 0 20 20" fill="none">
                         <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </a>
-                <a href="#contact" class="btn btn-ghost btn-lg">Обсудить проект</a>
+                <a href="https://ai.alex-n8n.site/contacts.html" class="btn btn-ghost btn-lg">Обсудить проект</a>
             </div>
             <div class="hero-metrics">
                 <div class="metric">
@@ -688,13 +671,13 @@
                 <h2 class="cta-title">Готовы автоматизировать<br>квалификацию лидов?</h2>
                 <p class="cta-desc">Получите демо-версию под ваш бизнес или обсудите детали интеграции.</p>
                 <div class="cta-buttons">
-                    <a href="#demo" class="btn btn-primary btn-lg">
-                        Получить демо
+                    <a href="https://ai.alex-n8n.site/cases/lead-qualification.html" class="btn btn-primary btn-lg js-return-project">
+                        К проекту
                         <svg class="btn-arrow" viewBox="0 0 20 20" fill="none">
                             <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </a>
-                    <a href="mailto:sbs.gulyaev.al@gmail.com" class="btn btn-ghost btn-lg">Обсудить проект</a>
+                    <a href="https://ai.alex-n8n.site/contacts.html" class="btn btn-ghost btn-lg">Обсудить проект</a>
                 </div>
             </div>
         </div>
@@ -761,6 +744,28 @@
         </div>
     </footer>
 
-    <script src="script.js?v=2026-06-18-b"></script>
+    <script src="script.js?v=2026-09-01-h"></script>
+    <script>
+        /* Возврат на страницу проекта в витрине AIP (канон RAR/AIC/RF/HRA/PR):
+           из витрины (живой window.opener) — фокус исходной вкладки и закрытие
+           вкладки лендинга; при прямом заходе — обычный переход по href в той
+           же вкладке. Скрипт инлайн (не в script.js) — урок HRA: интерактивность
+           не должна жить в кэше. */
+        (function () {
+            'use strict';
+            var links = document.querySelectorAll('.js-return-project');
+            for (var i = 0; i < links.length; i++) {
+                links[i].addEventListener('click', function (e) {
+                    try {
+                        if (window.opener && !window.opener.closed) {
+                            e.preventDefault();
+                            window.opener.focus();
+                            window.close();
+                        }
+                    } catch (err) { /* opener недоступен — обычный переход */ }
+                });
+            }
+        })();
+    </script>
 </body>
 </html>

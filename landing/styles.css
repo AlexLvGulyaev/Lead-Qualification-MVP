@@ -47,6 +47,11 @@
     --border-default: rgba(255, 255, 255, 0.1);
     --border-strong: rgba(255, 255, 255, 0.15);
 
+    /* Telegram stat accent / fixed nav backdrop */
+    --telegram-primary: #0ea5e9;
+    --nav-bg: rgba(10, 10, 15, 0.8);
+    --nav-bg-scrolled: rgba(10, 10, 15, 0.95);
+
     /* Shadows */
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
@@ -222,9 +227,13 @@ p {
     left: 0;
     right: 0;
     z-index: 1000;
-    background: rgba(10, 10, 15, 0.8);
+    background: var(--nav-bg);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border-subtle);
+}
+
+.nav.scrolled {
+    background: var(--nav-bg-scrolled);
 }
 
 .nav-content {
@@ -857,7 +866,7 @@ section {
 
 .stat-card.stat-card-telegram {
     border-color: rgba(14, 165, 233, 0.35);
-    box-shadow: inset 3px 0 0 #0ea5e9;
+    box-shadow: inset 3px 0 0 var(--telegram-primary);
 }
 
 .stat-value {
@@ -873,7 +882,7 @@ section {
 }
 
 .stat-value.stat-telegram {
-    color: #0ea5e9;
+    color: var(--telegram-primary);
 }
 
 .stat-label {
@@ -1034,7 +1043,7 @@ section {
 }
 
 .lead-source.source-telegram {
-    color: #0ea5e9;
+    color: var(--telegram-primary);
     background: rgba(14, 165, 233, 0.12);
 }
 
@@ -1525,7 +1534,7 @@ section {
 
 /* LQ landing adjustments */
 .integration-logo.telegram {
-    color: #0ea5e9;
+    color: var(--telegram-primary);
 }
 
 /* ========================================
@@ -1686,4 +1695,97 @@ section {
         font-size: 0.75rem;
     }
 }
+
+/* ========================================
+   Two-tone theme (APL standard)
+   Dark is the untouched default above.
+   Light = token override on [data-theme='light'].
+   ======================================== */
+
+:root[data-theme='light'] {
+    /* Light Theme: preserves dark's depth order —
+       wells recessed (primary), body/cards mid (secondary),
+       inner panels raised white (tertiary). Blue-tinted grays. */
+    --bg-primary: #d9e2ee;
+    --bg-secondary: #ecf2f9;
+    --bg-tertiary: #ffffff;
+    --bg-elevated: #ffffff;
+    --bg-hover: #d3dfee;
+
+    --text-primary: #17181c;
+    --text-secondary: #494f5a;
+    --text-tertiary: #6b7280;
+    --text-muted: #9aa1ac;
+
+    /* Accent - Teal, darkened for light background contrast */
+    --accent-primary: #0d9488;
+    --accent-secondary: #0f766e;
+    --accent-glow: rgba(13, 148, 136, 0.12);
+    --accent-border: rgba(13, 148, 136, 0.35);
+
+    /* Semantic accents, darkened for light background */
+    --hot-primary: #dc2626;
+    --hot-secondary: #b91c1c;
+    --hot-glow: rgba(220, 38, 38, 0.12);
+
+    --warm-primary: #d97706;
+    --warm-secondary: #b45309;
+    --warm-glow: rgba(217, 119, 6, 0.12);
+
+    --cold-primary: #3b82f6;
+    --cold-glow: rgba(59, 130, 246, 0.12);
+
+    --success: #16a34a;
+    --success-glow: rgba(22, 163, 74, 0.12);
+
+    /* Borders - strong enough to read on white (dark theme reads on black) */
+    --border-subtle: rgba(15, 23, 42, 0.14);
+    --border-default: rgba(15, 23, 42, 0.2);
+    --border-strong: rgba(15, 23, 42, 0.34);
+
+    /* Telegram stat accent / fixed nav backdrop */
+    --telegram-primary: #0284c7;
+    --nav-bg: rgba(255, 255, 255, 0.8);
+    --nav-bg-scrolled: rgba(255, 255, 255, 0.95);
+
+    /* Shadows - near photo-strength, dark theme uses 0.3/0.4/0.5 */
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.1);
+    --shadow-md: 0 4px 16px rgba(15, 23, 42, 0.16);
+    --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.24);
+    --shadow-glow: 0 0 40px var(--accent-glow);
 }
+
+/* Theme toggle (nav) */
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-default);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 1.05rem;
+    line-height: 1;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.theme-toggle:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-strong);
+}
+
+.theme-toggle:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+}
+
+/* Dark default: show sun (click switches to light) */
+.theme-toggle .icon-sun { display: inline; }
+.theme-toggle .icon-moon { display: none; }
+
+/* Light theme: show moon (click switches to dark) */
+:root[data-theme='light'] .theme-toggle .icon-sun { display: none; }
+:root[data-theme='light'] .theme-toggle .icon-moon { display: inline; }

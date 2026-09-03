@@ -758,13 +758,7 @@ ORDER BY created_at DESC;
 
 ## 9. Roadmap / Future Work
 
-| Направление | Статус | Описание |
-|-------------|--------|----------|
-| Event Chaining | Planned | Мгновенная классификация после ingestion |
-| Bitrix24 Integration | Planned | Вторая CRM-интеграция |
-| Multi-language | Planned | Поддержка ES, EN |
-| Semantic Fallback | Planned | Embeddings для fallback |
-| Real-time Dashboard | Planned | WebSocket updates |
+> **SSOT роадмапа кейса** — [`PROJECT_STATE.md`](PROJECT_STATE.md) → раздел **Future Enhancements (Post-MVP)**: Event Chaining, Bitrix24 Integration, Multi-language support, Semantic Fallback, Mock-сервер Kommo API на VPS. Здесь дубликат не ведётся во избежание расхождений (решение владельца 03.09.2026).
 
 ---
 

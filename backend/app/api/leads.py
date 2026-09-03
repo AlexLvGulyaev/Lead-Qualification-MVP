@@ -153,6 +153,15 @@ async def get_lead(lead_id: str) -> Dict[str, Any]:
         (lead_id,)
     )
 
+    # Raw event journal (аналог RF detail.operational_logs — блок «Технические данные»)
+    logs = query_db(
+        """
+        SELECT id, event_type, status, event_data, error_message, created_at
+        FROM logs WHERE lead_id = %s::uuid ORDER BY created_at
+        """,
+        (lead_id,)
+    )
+
     # Get CRM sync snapshot (monitoring only - tasks are in Kommo)
     crm_sync = query_one(
         """
@@ -241,7 +250,18 @@ async def get_lead(lead_id: str) -> Dict[str, Any]:
 
             # Kommo URL (generated for UI)
             "kommo_url": get_kommo_deal_url(crm_sync["kommo_lead_id"] if crm_sync else None)
-        } if crm_sync else None
+        } if crm_sync else None,
+        "operational_logs": [
+            {
+                "id": str(log["id"]),
+                "event_type": log["event_type"],
+                "status": log["status"],
+                "event_data": log["event_data"],
+                "error_message": log["error_message"],
+                "created_at": log["created_at"].isoformat() if log["created_at"] else None
+            }
+            for log in logs
+        ] if logs else []
     }
 
     return result

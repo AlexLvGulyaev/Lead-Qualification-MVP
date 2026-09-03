@@ -566,6 +566,9 @@ KOMMO_RESPONSIBLE_USER_ID=<ID_ПОЛЬЗОВАТЕЛЯ>
 
 # Timezone
 TIMEZONE=Europe/Moscow
+
+# Админ-консоль (вход по токену)
+LQ_ADMIN_TOKEN=<ВАШ_ТОКЕН>
 ```
 
 ---
@@ -630,11 +633,101 @@ N8N_API_KEY=<ваш_надёжный_api_ключ>
 
 ---
 
+### 5.6. LQ_ADMIN_TOKEN / LQ_ADMIN_DEMO_TOKEN — вход в админ-консоль
+
+**5.6.1. Токен администратора**
+
+| Параметр | Значение |
+|----------|----------|
+| **Переменная** | `LQ_ADMIN_TOKEN` |
+| **Обязательно** | ✅ Да (рекомендуется; без токена авторизация выключена) |
+| **Назначение** | Bearer-токен входа в админ-консоль (`lead-qual-admin`) |
+| **Как получить** | Сгенерировать самостоятельно |
+
+**Действие:**
+
+Сгенерировать токен и добавить в `.env`:
+
+```bash
+# Отредактировать .env
+nano .env
+```
+
+Найти строку:
+```bash
+LQ_ADMIN_TOKEN=
+```
+
+Заменить на сгенерированное значение:
+```bash
+LQ_ADMIN_TOKEN=<ваш_сгенерированный_токен>
+```
+
+**Генерация токена** (любой из способов):
+
+```bash
+python3 -c "import secrets; print(secrets.token_urlsafe(32))"
+# или
+openssl rand -base64 32
+```
+
+**Примечание:**
+- Все защищённые эндпоинты Admin API (`/api/admin/dashboard`, `/api/admin/leads`, `/api/admin/logs`, `/api/admin/audit` и др.) требуют заголовок `Authorization: Bearer <LQ_ADMIN_TOKEN>`.
+- Открыты только `GET /api/admin/health` (healthcheck контейнера), `GET /api/admin/auth/whoami` (проверка токена на форме входа) и `GET /api/admin/auth/demo-config` (публичная точка демо-входа).
+- Если `LQ_ADMIN_TOKEN` не задан, авторизация выключается (dev-режим): API отвечает без токена. Для любого публичного развёртывания токен обязателен.
+- Вход в консоль: открыть админ-URL, вставить токен в форму входа, нажать «Войти». Сессия сохраняется в браузере; при смене/отзыве токена консоль снова запросит вход.
+
+**Проверка:**
+
+```bash
+# Без токена — 401
+curl -s -o /dev/null -w '%{http_code}\n' http://localhost:8000/api/admin/dashboard
+
+# С токеном — 200 и метрики
+curl -s -H "Authorization: Bearer ${LQ_ADMIN_TOKEN}" http://localhost:8000/api/admin/auth/whoami
+# Ожидаемый результат: {"role":"admin"}
+```
+
+**5.6.2. Демо-токен (read-only вход)**
+
+| Параметр | Значение |
+|----------|----------|
+| **Переменная** | `LQ_ADMIN_DEMO_TOKEN` |
+| **Обязательно** | ❌ Нет (пусто — кнопка демо-входа скрыта) |
+| **Назначение** | Демо-вход в консоль без ввода токена (роль `demo`) |
+| **Как получить** | Сгенерировать тем же способом |
+
+**Действие:**
+
+```bash
+LQ_ADMIN_DEMO_TOKEN=<сгенерированный_токен>
+```
+
+**Примечание:**
+- Кнопка «Войти в демо-режим (только просмотр)» на форме входа появляется, только если `LQ_ADMIN_DEMO_TOKEN` настроен (проверяется публичным `GET /api/admin/auth/demo-config`).
+- Демо-токен публичный по замыслу (канон RF: демо-токен зашивается в собранный frontend в открытом виде) — он даёт доступ только к просмотру данных консоли. Не используйте его как админский токен.
+- Все действия демо-сессии пишутся в журнал аудита с ролью `demo` (чип 🎭 «Демо»).
+
+**Проверка:**
+
+```bash
+curl -s http://localhost:8000/api/admin/auth/demo-config
+# Ожидаемый результат: {"enabled":true,"token":"<демо-токен>","role":"demo"}
+# (если LQ_ADMIN_DEMO_TOKEN пуст: {"enabled":false})
+```
+
+### Критерий успешного завершения
+
+- Без токена защищённые эндпоинты отвечают `401`, с неверным токеном — `403`.
+- `whoami` с корректным токеном возвращает `{"role":"admin"}`, с демо-токеном — `{"role":"demo"}`.
+
+---
+
 ## 6. Database Initialization
 
 ### 6.1. Обзор SQL-файлов
 
-**База данных инициализируется 6 SQL-файлами в строгом порядке:**
+**База данных инициализируется 7 SQL-файлами в строгом порядке:**
 
 | Порядок | Файл | Назначение |
 |---------|------|------------|
@@ -644,6 +737,7 @@ N8N_API_KEY=<ваш_надёжный_api_ключ>
 | 4 | `03-runtime-objects.sql` | Runtime: sequence, public_number, функция generate_public_number() |
 | 5 | `04-crm-snapshot.sql` | CRM sync extension: kommo_* поля, функции мониторинга |
 | 6 | `05-telegram-sessions.sql` | Telegram sessions: таблица, функции диалогов |
+| 7 | `06-audit.sql` | Журнал аудита консоли: таблица audit_logs, sequence |
 
 **Важно:** Файлы применяются автоматически при первом запуске Docker Compose через `docker-entrypoint-initdb.d`.
 
@@ -705,16 +799,20 @@ docker compose exec postgres psql -U n8n -d lead_qualification -c "\dt"
 
 ### Критерий успешного завершения
 
-Вывод содержит 8 таблиц:
+Вывод содержит 12 таблиц:
 
 ```
                      List of relations
  Schema |            Name             | Type  | Owner
 --------+-----------------------------+-------+-------
+ public | audit_logs                  | table | n8n
  public | channel_identities          | table | n8n
  public | contacts                    | table | n8n
  public | crm_sync                    | table | n8n
+ public | follow_ups                  | table | n8n
  public | leads                       | table | n8n
+ public | leads_with_contacts         | view   | n8n
+ public | leads_with_crm_snapshot     | view   | n8n
  public | logs                        | table | n8n
  public | messages                    | table | n8n
  public | qualifications              | table | n8n
@@ -1498,15 +1596,19 @@ docker compose exec postgres psql -U n8n -d lead_qualification -c "\dt"
 curl -s -H "X-N8N-API-KEY: ${N8N_API_KEY}" http://localhost:5678/api/v1/workflows | jq '.[].name'
 
 # 4. Проверить Admin API
-curl -s http://localhost:8000/api/admin/dashboard | jq '.'
+# Замените ${LQ_ADMIN_TOKEN} на значение из .env (см. раздел 5.6)
+curl -s -H "Authorization: Bearer ${LQ_ADMIN_TOKEN}" http://localhost:8000/api/admin/auth/whoami
+# Ожидается: {"role":"admin"}
+
+curl -s -H "Authorization: Bearer ${LQ_ADMIN_TOKEN}" http://localhost:8000/api/admin/dashboard | jq '.total_leads'
 ```
 
 ### Критерий успешного завершения
 
 - Все 5 сервисов running (healthy)
-- БД содержит 8 таблиц
+- БД содержит 12 таблиц (включая audit_logs)
 - 5 workflows активны
-- Dashboard API возвращает метрики
+- whoami с токеном возвращает `{"role":"admin"}`, Dashboard API возвращает метрики
 
 ---
 
@@ -1741,7 +1843,7 @@ cat backup_20260616.sql | docker compose exec -T postgres psql -U n8n lead_quali
 
 После прохождения всех шагов у вас должна работать система:
 
-- ✅ PostgreSQL с 8 таблицами
+- ✅ PostgreSQL с 12 таблицами
 - ✅ n8n с 5 активными workflows
 - ✅ 4 credentials созданы
 - ✅ Kommo custom fields созданы
@@ -1750,9 +1852,11 @@ cat backup_20260616.sql | docker compose exec -T postgres psql -U n8n lead_quali
 - ✅ AI classification работает
 - ✅ CRM sync работает
 - ✅ Admin Console отображает лиды
+- ✅ Вход в Admin Console по Bearer-токену (LQ_ADMIN_TOKEN)
 
 ---
 
 **Документ подготовлен:** 2026-06-18
-**Версия:** 2.0
+**Версия:** 2.6
 **На основе:** Deployment Inventory, Gap Analysis, исходный код проекта
+**2.6 (2026-09-02):** авторизация админ-консоли по токену (LQ_ADMIN_TOKEN + демо-токен LQ_ADMIN_DEMO_TOKEN, раздел 5.6), журнал аудита консоли (06-audit.sql), Smoke Test с Bearer-токеном

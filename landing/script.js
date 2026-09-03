@@ -298,34 +298,6 @@ function initSmoothScroll() {
             // Skip empty hash
             if (!targetId || targetId === '#') return;
 
-            // Handle #demo specially - open the demo popover
-            if (targetId === '#demo') {
-                e.preventDefault();
-                e.stopPropagation(); // Prevent document click from closing popover
-
-                const demoDropdown = document.querySelector('.demo-dropdown');
-                const demoTrigger = document.getElementById('demoTrigger');
-
-                if (demoDropdown && demoTrigger) {
-                    // Toggle popover
-                    demoDropdown.classList.toggle('active');
-
-                    // Scroll to CTA section if popover opened
-                    if (demoDropdown.classList.contains('active')) {
-                        const ctaSection = document.getElementById('contact');
-                        if (ctaSection) {
-                            const navHeight = document.querySelector('.nav').offsetHeight;
-                            const targetPosition = ctaSection.offsetTop - navHeight - 20;
-                            window.scrollTo({
-                                top: targetPosition,
-                                behavior: 'smooth'
-                            });
-                        }
-                    }
-                }
-                return;
-            }
-
             const targetElement = document.querySelector(targetId);
 
             // If target doesn't exist, let default behavior handle it (or ignore)
@@ -358,9 +330,9 @@ function initSmoothScroll() {
 window.addEventListener('scroll', () => {
     const nav = document.querySelector('.nav');
     if (window.scrollY > 50) {
-        nav.style.background = 'rgba(10, 10, 15, 0.95)';
+        nav.classList.add('scrolled');
     } else {
-        nav.style.background = 'rgba(10, 10, 15, 0.8)';
+        nav.classList.remove('scrolled');
     }
 });
 
@@ -381,68 +353,25 @@ function updateFlowTime() {
 
 setInterval(updateFlowTime, 10000);
 
-/**
- * Demo Access Popover
- * Handles popover toggle for demo access cards
- */
-function initDemoPopover() {
-    const demoTrigger = document.getElementById('demoTrigger');
-    const demoDropdown = document.querySelector('.demo-dropdown');
-
-    if (!demoTrigger || !demoDropdown) return;
-
-    // Toggle popover on click
-    demoTrigger.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        demoDropdown.classList.toggle('active');
-    });
-
-    // Close popover when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!demoDropdown.contains(e.target) && !demoTrigger.contains(e.target)) {
-            demoDropdown.classList.remove('active');
-        }
-    });
-
-    // Close popover on escape key
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            demoDropdown.classList.remove('active');
-        }
-    });
-
-    // Handle demo card clicks - open in new tab without showing URL in status bar
-    const demoCards = document.querySelectorAll('.demo-card');
-    demoCards.forEach(card => {
-        card.addEventListener('click', (e) => {
-            e.preventDefault();
-            const url = card.dataset.href;
-            if (url) {
-                window.open(url, '_blank', 'noopener,noreferrer');
-            }
-            demoDropdown.classList.remove('active');
-        });
-
-        // Handle keyboard navigation (Enter key)
-        card.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                const url = card.dataset.href;
-                if (url) {
-                    window.open(url, '_blank', 'noopener,noreferrer');
-                }
-                demoDropdown.classList.remove('active');
-            }
-        });
-    });
-}
-
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
     initScrollReveal();
     initDashboardAnimation();
     initStatCounters();
     initSmoothScroll();
-    initDemoPopover();
 });
+// ========================================
+// Two-tone theme (APL standard)
+// Dark is the default; choice persists in localStorage ('lq-theme').
+// The pre-paint script in <head> applies the saved theme.
+// ========================================
+(function () {
+    var btn = document.getElementById('themeToggle');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+        var root = document.documentElement;
+        var next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('lq-theme', next); } catch (e) { /* non-persistent */ }
+    });
+})();
