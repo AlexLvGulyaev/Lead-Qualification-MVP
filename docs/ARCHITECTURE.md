@@ -130,9 +130,9 @@ flowchart TB
 |----------|---------|------------|--------|
 | **Lead Ingestion V2** | Webhook POST | Приём лидов с Website | ✅ Active |
 | **Lead Ingestion Telegram** | Telegram Trigger | Приём лидов из Telegram | ✅ Active |
-| **Lead Classification MVP** | Schedule (5 min) | AI-классификация с fallback | ✅ Active |
-| **Lead CRM Sync - Kommo Writer** | Webhook | Создание сделок и задач в Kommo | ✅ Active |
-| **CRM Status Sync MVP** | Schedule (15 min) | Синхронизация snapshot из Kommo | ✅ Active |
+| **Lead Classification MVP** | Schedule (1 min) | AI-классификация с fallback | ✅ Active |
+| **Lead CRM Sync - Kommo Writer** | Schedule (1 min) | Создание сделок и задач в Kommo | ✅ Active |
+| **CRM Status Sync MVP** | Schedule (1 min) | Синхронизация snapshot из Kommo | ✅ Active |
 
 ---
 
@@ -346,7 +346,7 @@ const RULES = {
 
 ### 3.4 Workflow: Lead CRM Sync - Kommo Writer
 
-**Триггер:** Webhook от Classification workflow
+**Триггер:** Schedule (1 min) — забирает квалифицированные лиды из БД
 
 **Поток данных:**
 

@@ -63,7 +63,7 @@ Lead Ingestion (Web/Telegram)
 
 **AI Confidence:** Обычно 0.85–0.98
 
-**CRM Status:** Hot Lead
+**CRM Status:** Первичный контакт (статус по lead_type, настраивается через env)
 
 **Задача менеджеру:** +15 минут
 
@@ -89,7 +89,7 @@ Lead Ingestion (Web/Telegram)
 
 **AI Confidence:** Обычно 0.70–0.90
 
-**CRM Status:** Warm Lead
+**CRM Status:** Переговоры (статус по lead_type, настраивается через env)
 
 **Задача менеджеру:** +24 часа
 
@@ -115,7 +115,7 @@ Lead Ingestion (Web/Telegram)
 
 **AI Confidence:** Обычно 0.60–0.80
 
-**CRM Status:** Cold Lead
+**CRM Status:** Принимается решение (статус по lead_type, настраивается через env)
 
 **Задача менеджеру:** +7 дней
 
@@ -154,10 +154,9 @@ Lead Ingestion (Web/Telegram)
 ### 3.1. High Priority
 
 **Условия:**
-- lead_type = hot
-- ИЛИ confidence > 0.9
+- lead_type = hot (приоритет также записывается в поле сделки)
 
-**SLA:** Обработка в течение 15 минут
+**SLA:** Обработка в течение 15 минут (срок задачи)
 
 **Действие:** Немедленный звонок менеджера
 
@@ -166,10 +165,9 @@ Lead Ingestion (Web/Telegram)
 ### 3.2. Medium Priority
 
 **Условия:**
-- lead_type = warm
-- ИЛИ confidence 0.7–0.9
+- lead_type = warm (приоритет также записывается в поле сделки)
 
-**SLA:** Обработка в течение 24 часов
+**SLA:** Обработка в течение 24 часов (срок задачи)
 
 **Действие:** Звонок или email в течение дня
 
@@ -178,10 +176,9 @@ Lead Ingestion (Web/Telegram)
 ### 3.3. Low Priority
 
 **Условия:**
-- lead_type = cold
-- ИЛИ confidence < 0.7
+- lead_type = cold (приоритет также записывается в поле сделки)
 
-**SLA:** Обработка в течение 7 дней
+**SLA:** Обработка в течение 7 дней (срок задачи)
 
 **Действие:** Follow-up через неделю
 
@@ -196,7 +193,7 @@ Lead Ingestion (Web/Telegram)
 | **Высокая** | 0.80–1.00 | Классификация надёжна, можно действовать автоматически |
 | **Средняя** | 0.60–0.80 | Классификация вероятна, рекомендуется проверка |
 | **Низкая** | 0.40–0.60 | Классификация неуверенная, нужен manual review |
-| **Fallback** | 0.00–0.40 | AI не использовался, rule-based классификация |
+| **Fallback** | 0.40–0.85 (по правилу: spam 0.85, hot 0.65, warm 0.60, cold 0.55) | AI не использовался, rule-based классификация |
 
 ### 4.2. Факторы, влияющие на confidence
 
@@ -210,9 +207,8 @@ Lead Ingestion (Web/Telegram)
 ### 4.3. Использование confidence
 
 **В системе:**
-- Confidence > 0.8 → автоматическое создание задачи с правильным сроком
-- Confidence 0.6–0.8 → задача создаётся, менеджер проверяет
-- Confidence < 0.6 → пометка "needs review"
+- Создание задачи определяется lead_type (hot/warm/cold — задача; spam — без задачи); confidence хранится в поле сделки и Admin Console
+- Confidence < 0.5 → автоматический fallback на rule-based классификацию
 
 **В Admin Console:**
 - Confidence отображается цветом (зелёный/жёлтый/красный)
@@ -339,11 +335,11 @@ AI предоставляет краткое обоснование класси
 
 | Условие | Действие |
 |---------|----------|
-| OpenAI timeout (> 10s) | Fallback |
+| OpenAI timeout (30 с) | Fallback |
 | OpenAI rate limit (429) | Fallback |
 | OpenAI error (500, 502, 503) | Fallback |
 | Invalid JSON в ответе | Fallback |
-| Confidence < 0.4 | Fallback |
+| Confidence < 0.5 | Fallback (source: low_confidence) |
 
 ### 7.2. Rule-based классификация
 
@@ -445,9 +441,9 @@ function fallbackClassify(message) {
 
 | Параметр | Значение |
 |----------|----------|
-| **Polling interval** | 5 минут |
-| **Максимальная задержка** | 5 минут + время AI |
-| **OpenAI timeout** | 10 секунд |
+| **Polling interval** | 1 минута |
+| **Максимальная задержка** | 1 минута + время AI |
+| **OpenAI timeout** | 30 секунд |
 | **Среднее время AI** | 1–3 секунды |
 | **Fallback time** | < 100 мс |
 
