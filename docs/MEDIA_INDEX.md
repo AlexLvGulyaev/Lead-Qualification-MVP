@@ -21,23 +21,23 @@
 | `LQ_portfolio_light.png` | Витринный hero светлой темы (README, `<picture>`) |
 | `LQ_portfolio_dark.png` | Витринный hero тёмной темы (README, `<picture>`) |
 
-### Основные скриншоты (используются в README и документах)
+### Основные скриншоты (используются в документах)
 
 | Файл | Назначение | Где используется |
 |------|------------|------------------|
-| `dashboard-overview.png` | Главный экран системы | README.md, SYSTEM_DEMO.md |
-| `optimus-bp.png` | Визуализация бизнес-процесса | README.md, SYSTEM_DEMO.md |
+| `dashboard-overview.png` | Главный экран системы | SYSTEM_DEMO.md |
+| `optimus-bp.png` | Визуализация бизнес-процесса | SYSTEM_DEMO.md |
 | `landing-LQ-console.png` | Продуктовый экран | BUSINESS_VALUE.md |
 | `landing-problems.png` | Проблемы бизнеса | BUSINESS_VALUE.md |
 | `landing-solution.png` | Решение и ценность | BUSINESS_VALUE.md |
-| `website-form-success.png` | Успешная отправка Website | README.md, SYSTEM_DEMO.md |
-| `telegram-lead-hot.png` | Telegram горячий лид | README.md, SYSTEM_DEMO.md |
-| `workflow-lead-ingestion-v2.png` | Workflow приёма лидов | README.md, SYSTEM_DEMO.md |
-| `workflow-lead-classification-mvp.png` | Workflow AI-классификации | README.md, SYSTEM_DEMO.md |
-| `workflow-kommo-writer-mvp.png` | Workflow CRM-интеграции | README.md, SYSTEM_DEMO.md |
-| `kommo-deal-list.png` | Список сделок в CRM | README.md, SYSTEM_DEMO.md |
-| `kommo-deal-hot.png` | Горячий лид в CRM | README.md, SYSTEM_DEMO.md |
-| `lead-queue-hot.png` | Очередь горячих лидов | README.md, SYSTEM_DEMO.md |
+| `website-form-success.png` | Успешная отправка Website | SYSTEM_DEMO.md |
+| `telegram-lead-hot.png` | Telegram горячий лид | SYSTEM_DEMO.md |
+| `workflow-lead-ingestion-v2.png` | Workflow приёма лидов | SYSTEM_DEMO.md |
+| `workflow-lead-classification-mvp.png` | Workflow AI-классификации | SYSTEM_DEMO.md |
+| `workflow-kommo-writer-mvp.png` | Workflow CRM-интеграции | SYSTEM_DEMO.md |
+| `kommo-deal-list.png` | Список сделок в CRM | SYSTEM_DEMO.md |
+| `kommo-deal-hot.png` | Горячий лид в CRM | SYSTEM_DEMO.md |
+| `lead-queue-hot.png` | Очередь горячих лидов | SYSTEM_DEMO.md |
 | `landing-link-web.png` | Вход в Web-форму с лендинга | USER_GUIDE.md |
 | `landing-link-telegram.png` | Вход в Telegram-бота с лендинга | USER_GUIDE.md |
 | `website-form-spam.png` | Нецелевое обращение (сценарий Spam) | E2E_SCENARIOS.md |
@@ -117,7 +117,7 @@
 
 - **Что показано**: подтверждение успешной отправки
 - **Роль в системе**: финал клиентского сценария
-- **Статус**: Основной (README.md, SYSTEM_DEMO.md)
+- **Статус**: Основной (SYSTEM_DEMO.md)
 
 ### Website: Filled Form
 
@@ -149,7 +149,7 @@
 
 - **Что показано**: Telegram-бот, классификация как Hot Lead
 - **Роль в системе**: альтернативный канал входа лидов
-- **Статус**: Основной (README.md, SYSTEM_DEMO.md)
+- **Статус**: Основной (SYSTEM_DEMO.md)
 
 ---
 
@@ -161,7 +161,7 @@
 
 - **Что показано**: главная страница Admin Console с метриками
 - **Роль в системе**: оперативный мониторинг системы
-- **Статус**: Основной (README.md, SYSTEM_DEMO.md)
+- **Статус**: Основной (SYSTEM_DEMO.md)
 
 ---
 
@@ -173,7 +173,7 @@
 
 - **Что показано**: список лидов с фильтром по Hot
 - **Роль в системе**: рабочее место менеджера
-- **Статус**: Основной (README.md, SYSTEM_DEMO.md)
+- **Статус**: Основной (SYSTEM_DEMO.md)
 
 ### Lead Queue: Warm
 
@@ -209,7 +209,7 @@
 
 - **Что показано**: workflow приёма лидов из Website
 - **Роль в системе**: точка входа данных
-- **Статус**: Основной (README.md, SYSTEM_DEMO.md)
+- **Статус**: Основной (SYSTEM_DEMO.md)
 
 ### Workflow: Telegram Lead Ingestion
 
@@ -223,7 +223,7 @@
 
 - **Что показано**: AI-классификация с OpenAI и fallback
 - **Роль в системе**: ядро квалификации
-- **Статус**: Основной (README.md, SYSTEM_DEMO.md)
+- **Статус**: Основной (SYSTEM_DEMO.md)
 
 ### Workflow: Kommo Writer MVP
 
@@ -231,7 +231,7 @@
 
 - **Что показано**: создание сделок и задач в Kommo
 - **Роль в системе**: CRM-интеграция
-- **Статус**: Основной (README.md, SYSTEM_DEMO.md)
+- **Статус**: Основной (SYSTEM_DEMO.md)
 
 ### Workflow: CRM Status Sync MVP
 
@@ -249,14 +249,14 @@
 
 - **Что показано**: список сделок в Kommo
 - **Роль в системе**: результат CRM Writer
-- **Статус**: Основной (README.md, SYSTEM_DEMO.md)
+- **Статус**: Основной (SYSTEM_DEMO.md)
 
 ### Kommo: Deal Hot
 
 ![Kommo: Deal Hot](screenshots/kommo-deal-hot.png)
 
 - **Что показано**: сделка типа Hot в Kanban
-- **Статус**: Основной (README.md, SYSTEM_DEMO.md)
+- **Статус**: Основной (SYSTEM_DEMO.md)
 
 ### Kommo: Deal Warm
 
@@ -286,7 +286,7 @@
 
 - **Что показано**: визуализация ключевого бизнес-процесса
 - **Роль в системе**: объяснение потока лидов
-- **Статус**: Основной (README.md, SYSTEM_DEMO.md)
+- **Статус**: Основной (SYSTEM_DEMO.md)
 
 ---
 
@@ -311,7 +311,7 @@
 
 | Документ | Скриншоты |
 |----------|-----------|
-| [README.md](../README.md) | LQ_portfolio_light/dark (hero), dashboard-overview, optimus-bp, website-form-success, telegram-lead-hot, workflow-*, kommo-deal-list/hot, lead-queue-hot |
+| [README.md](../README.md) | LQ_portfolio_light/dark (hero) — единственные изображения README; схемы — Mermaid |
 | [BUSINESS_VALUE.md](BUSINESS_VALUE.md) | landing-LQ-console, landing-problems, landing-solution, landing-features, landing-manager, landing-STA |
 | [SYSTEM_DEMO.md](SYSTEM_DEMO.md) | optimus-bp, website-form-success, telegram-lead-hot, workflow-*, kommo-deal-list/hot, lead-queue-hot, dashboard-overview |
 | [USER_GUIDE.md](USER_GUIDE.md) | landing-link-web, landing-link-telegram, website-form-empty/filled/request/success, telegram-lead-hot |

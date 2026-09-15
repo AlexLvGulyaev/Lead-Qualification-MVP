@@ -5,29 +5,75 @@
   <img src="docs/screenshots/LQ_portfolio_light.png" alt="Lead Qualification — витрина кейса: веб-форма, Telegram-бот, AI-классификация и админ-консоль">
 </picture>
 
-**Мгновенная квалификация входящих лидов. Автоматическая обработка 24/7. Готовый результат в CRM.**
+⚡ **Мгновенная квалификация входящих лидов. Автоматическая обработка 24/7. Готовый результат в CRM.**
 
-Система автоматически принимает обращения из Website и Telegram, классифицирует с помощью AI, создаёт сделки в Kommo и ставит задачи менеджеру — горячие лиды через 15 минут, тёплые через 24 часа.
+Lead Qualification MVP — автоматизация обработки лидов на n8n: система принимает обращения из веб-формы и Telegram, классифицирует с помощью AI, создаёт сделки в Kommo CRM и ставит задачи менеджеру — горячие лиды через 15 минут, тёплые через 24 часа.
 
-**Результат для бизнеса:**
+- Клиент оставляет заявку на сайте или в Telegram-боте — и сразу получает подтверждение с номером обращения.
+- Менеджер получает приоритизированную очередь в CRM: сделка, срок задачи и все данные классификации готовы к работе.
+- Руководитель видит метрики и статус CRM-синхронизации в единой консоли мониторинга.
 
-- ⚡ **Мгновенная реакция** — AI-классификация за секунды, не часы
-- 🔄 **24/7 режим** — ночные и выходные лиды не теряются
-- 📊 **Автоматическая приоритизация** — hot/warm/cold/spam
-- ✅ **CRM-интеграция** — сделки и задачи создаются автоматически
-- 👁️ **Прозрачность** — единая консоль мониторинга для руководителя
+Система не скрывает, как квалифицирован лид: тип, приоритет и confidence сохраняются с обращением и видны в консоли.
 
----
-
-![Dashboard: Overview](docs/screenshots/dashboard-overview.png)
+[▶️ Попробовать live demo](https://lead-qual.alex-n8n.site) · [💼 Бизнес-ценность](docs/BUSINESS_VALUE.md) · [🎬 Как это работает](docs/SYSTEM_DEMO.md)
 
 ---
 
-## Ключевой бизнес-процесс
+## ▶️ Live Demo
 
-![Бизнес-процесс](docs/screenshots/optimus-bp.png)
+🌐 **Веб-форма:** [lead-qual.alex-n8n.site](https://lead-qual.alex-n8n.site)
 
-**Полный путь лида:**
+Оставьте обращение — три шага (контакты → описание запроса → источник) — и получите подтверждение с номером заявки.
+
+🤖 **Telegram-бот:** [@OptimusLeadQualificationBot](https://t.me/OptimusLeadQualificationBot)
+
+Диалог с ботом: имя, телефон, e-mail, описание задачи — и мгновенное подтверждение регистрации заявки.
+
+👁️ **Админ-консоль:** [lead-qual-admin.alex-n8n.site](https://lead-qual-admin.alex-n8n.site)
+
+Нажмите **«Войти в демо-режиме»** (read-only) — найдите свою заявку и посмотрите карточку: тип и приоритет (hot / warm / cold / spam), confidence, источник. Полный доступ — только с админ-токеном.
+
+Маршрут проверки демо за 4 шага — [`docs/DEMO_ROUTE.md`](docs/DEMO_ROUTE.md); скриншот-тур и типовой сценарий — [`docs/SYSTEM_DEMO.md`](docs/SYSTEM_DEMO.md).
+
+---
+
+## ❓ Зачем нужен Lead Qualification
+
+Входящие лиды теряются и обрабатываются неравномерно:
+
+| Проблема | Решение |
+|----------|---------|
+| **Потеря лидов** | Автоматический приём 24/7 — ночные и выходные обращения не пропадают |
+| **Медленная реакция** | AI-классификация за секунды, а не часы |
+| **Нет приоритизации** | Автоматическая квалификация hot / warm / cold / spam |
+| **Неконсистентность** | Единые правила обработки для всех лидов |
+| **Нет контроля** | Централизованная консоль мониторинга для руководителя |
+
+Подробно — в [`docs/BUSINESS_VALUE.md`](docs/BUSINESS_VALUE.md).
+
+---
+
+## 🎯 Для кого
+
+- Отделы продаж и малый бизнес, которым нужна реакция на каждый лид без круглосуточного дежурства менеджеров.
+- Команды, использующие Kommo CRM и желающие автоматизировать создание сделок и задач.
+- Руководители, которым нужен единый экран контроля обработки лидов и CRM-синхронизации.
+- Интеграторы: кейс — рабочий референс связки n8n + AI-классификация + CRM.
+
+---
+
+## ✨ Ключевые возможности
+
+- **Приём обращений 24/7** — веб-форма и Telegram-бот с валидацией и мгновенным подтверждением (номер заявки).
+- **AI-классификация** — hot / warm / cold / spam с confidence; при недоступности AI — fallback по ключевым словам.
+- **CRM-автоматизация** — сделка и задача менеджеру создаются в Kommo по срокам SLA: hot +15 мин, warm +24 ч, cold +7 дней; spam закрывается без задачи.
+- **Синхронизация статусов** — snapshot статусов Kommo обновляется в консоли каждые 15 минут.
+- **Admin Console** — метрики, очередь лидов с фильтрами, карточка с полной квалификацией и ссылкой на сделку.
+- **Безопасность** — Bearer-токены, демо-вход read-only, журнал аудита входов.
+
+---
+
+## 🏗️ Ключевой бизнес-процесс
 
 ```mermaid
 flowchart TB
@@ -58,140 +104,108 @@ flowchart TB
 
 ---
 
-## Демонстрация системы
+## 🌐 Публичные точки входа
 
-### Шаг 1. Клиент оставляет заявку
+| Роль | Сервис | Адрес | Назначение |
+|------|--------|-------|-----------|
+| Клиент | Веб-форма | [lead-qual.alex-n8n.site](https://lead-qual.alex-n8n.site) | оставить обращение |
+| Клиент | Telegram-бот | [@OptimusLeadQualificationBot](https://t.me/OptimusLeadQualificationBot) | заявка в диалоге |
+| Руководитель | Админ-консоль | [lead-qual-admin.alex-n8n.site](https://lead-qual-admin.alex-n8n.site) | метрики, очередь лидов |
+| Демо-лендинг | Витрина кейса | [lead-qual-demo.alex-n8n.site](https://lead-qual-demo.alex-n8n.site) | вход во все сервисы |
+| Разработчик | Repository | [GitHub — Lead-Qualification-MVP](https://github.com/AlexLvGulyaev/Lead-Qualification-MVP) | исходный код кейса |
 
-**Вариант 1: Website**
-
-![Website: Успешная отправка](docs/screenshots/website-form-success.png)
-
-Клиент заполняет форму на сайте, получает подтверждение с номером заявки.
-
-**Вариант 2: Telegram**
-
-![Telegram: Hot Lead](docs/screenshots/telegram-lead-hot.png)
-
-Клиент пишет боту, получает мгновенную классификацию.
+> 🔓 **Вход в консоль:** по Bearer-токену (`LQ_ADMIN_TOKEN`); публичный демо-вход — кнопка «Войти в демо-режиме» (`LQ_ADMIN_DEMO_TOKEN`), read-only. Роли и поведение авторизации — [`docs/ADMIN_GUIDE.md`](docs/ADMIN_GUIDE.md).
 
 ---
 
-### Шаг 2. Автоматическая обработка
-
-Четыре workflow обрабатывают обращение как единый конвейер (ingestion, classification, CRM-синхронизация, Status Sync):
-
-**Lead Ingestion** — приём из Website/Telegram, валидация, сохранение в БД
-
-![Workflow: Lead Ingestion](docs/screenshots/workflow-lead-ingestion-v2.png)
-
-**AI Classification** — классификация через OpenAI, fallback при ошибке
-
-![Workflow: AI Classification](docs/screenshots/workflow-lead-classification-mvp.png)
-
-**Kommo Writer** — создание сделки и задачи в CRM
-
-![Workflow: Kommo Writer](docs/screenshots/workflow-kommo-writer-mvp.png)
-
----
-
-### Шаг 3. Передача результата в CRM
-
-**Список сделок в Kommo**
-
-![Kommo: Deal List](docs/screenshots/kommo-deal-list.png)
-
-**Горячий лид в CRM**
-
-![Kommo: Hot Deal](docs/screenshots/kommo-deal-hot.png)
-
-Сделка автоматически получает:
-- Статус воронки по lead_type (Первичный контакт / Переговоры / Принимается решение / Закрыто и не реализовано)
-- Задачу менеджеру с нужным сроком (hot/warm/cold; spam — без задачи)
-- Все данные классификации в примечании
-
----
-
-### Шаг 4. Контроль процесса
-
-**Очередь лидов для менеджера**
-
-![Lead Queue: Hot](docs/screenshots/lead-queue-hot.png)
-
-**Dashboard для руководителя**
-
-![Dashboard: Overview](docs/screenshots/dashboard-overview.png)
-
-Результат полного цикла:
-- **Менеджер** получает приоритизированную очередь с готовыми данными
-- **Руководитель** видит метрики в реальном времени
-- **Клиент** получает быстрый отклик
-
----
-
-## Ценность для бизнеса
-
-### Проблемы, которые решает система
-
-| Проблема | Решение |
-|----------|---------|
-| **Потеря лидов** | Автоматический приём 24/7 |
-| **Медленная реакция** | AI-классификация за секунды |
-| **Нет приоритизации** | Автоматическая квалификация hot/warm/cold |
-| **Неконсистентность** | Единые правила для всех лидов |
-| **Нет контроля** | Централизованная консоль мониторинга |
-
-Подробно: [Ценность для бизнеса](docs/BUSINESS_VALUE.md)
-
----
-
-## Документация
+## 📚 Документация
 
 ### Для заказчика
 
 | Документ | Назначение |
 |----------|------------|
-| [BUSINESS_VALUE.md](docs/BUSINESS_VALUE.md) | Ценность для бизнеса |
-| [SYSTEM_DEMO.md](docs/SYSTEM_DEMO.md) | Демонстрация системы |
-| [E2E_SCENARIOS.md](docs/E2E_SCENARIOS.md) | Сквозные сценарии |
+| [💼 `docs/BUSINESS_VALUE.md`](docs/BUSINESS_VALUE.md) | Ценность для бизнеса |
+| [🎬 `docs/SYSTEM_DEMO.md`](docs/SYSTEM_DEMO.md) | Демонстрация системы |
+| [🧪 `docs/E2E_SCENARIOS.md`](docs/E2E_SCENARIOS.md) | Сквозные сценарии |
 
 ### Для пользователя
 
 | Документ | Назначение |
 |----------|------------|
-| [USER_GUIDE.md](docs/USER_GUIDE.md) | Руководство клиента |
-| [MANAGER_GUIDE.md](docs/MANAGER_GUIDE.md) | Руководство менеджера |
-| [ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md) | Руководство администратора |
-| [DEMO_ROUTE.md](docs/DEMO_ROUTE.md) | Быстрая проверка демо |
-| [MEDIA_INDEX.md](docs/MEDIA_INDEX.md) | Реестр скриншотов |
+| [📝 `docs/USER_GUIDE.md`](docs/USER_GUIDE.md) | Руководство клиента |
+| [🤝 `docs/MANAGER_GUIDE.md`](docs/MANAGER_GUIDE.md) | Руководство менеджера |
+| [🛡️ `docs/ADMIN_GUIDE.md`](docs/ADMIN_GUIDE.md) | Руководство администратора |
+| [🧭 `docs/DEMO_ROUTE.md`](docs/DEMO_ROUTE.md) | Быстрая проверка демо |
+| [🖼️ `docs/MEDIA_INDEX.md`](docs/MEDIA_INDEX.md) | Реестр скриншотов |
 
 ### Для инженера
 
 | Документ | Назначение |
 |----------|------------|
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Архитектура, стек |
-| [PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) | Карта репозитория |
-| [AI_QUALIFICATION.md](docs/AI_QUALIFICATION.md) | Логика AI-классификации |
-| [SPEC.md](docs/SPEC.md) | Продуктовая спецификация |
-| [IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) | План реализации |
-| [PROJECT_HISTORY.md](docs/PROJECT_HISTORY.md) | История развития кейса |
-| [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) | Развёртывание (Source of Truth) |
+| [🏛️ `docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Архитектура, стек |
+| [📂 `docs/PROJECT_STRUCTURE.md`](docs/PROJECT_STRUCTURE.md) | Карта репозитория |
+| [🧠 `docs/AI_QUALIFICATION.md`](docs/AI_QUALIFICATION.md) | Логика AI-классификации |
+| [📘 `docs/SPEC.md`](docs/SPEC.md) | Продуктовая спецификация |
+| [📋 `docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md) | План реализации |
+| [📜 `docs/PROJECT_HISTORY.md`](docs/PROJECT_HISTORY.md) | История развития кейса |
+| [🚀 `docs/DEPLOYMENT_GUIDE.md`](docs/DEPLOYMENT_GUIDE.md) | Развёртывание (Source of Truth) |
 
 ---
 
-## Рыночное подтверждение
+## ✅ Статус проекта
 
-Система закрывает критический дефицит n8n-компетенций в портфолио: анализ реальных заказов на фриланс-площадках показывает устойчивый спрос на n8n-автоматизацию с AI-классификацией и интеграцией CRM (детали — [SPEC.md](docs/SPEC.md) §4).
+Реализованы все компоненты MVP: приём из Website и Telegram, AI-классификация с fallback, хранение в PostgreSQL, интеграция с Kommo (сделки, задачи, статусы), Admin Console, публичный клиентский UI. Живой инстанс работает как витрина (демо-вход read-only).
 
----
-
-## Лицензия
-
-MIT License — для демонстрационных целей.
+История развития кейса — в [`docs/PROJECT_HISTORY.md`](docs/PROJECT_HISTORY.md); рыночное подтверждение — в [`docs/SPEC.md`](docs/SPEC.md) §4.
 
 ---
 
-## Контакты
+## 🛠️ Технологии
 
-- **Public Demo**: https://lead-qual.alex-n8n.site/
-- **Admin Demo**: https://lead-qual-admin.alex-n8n.site/
-- **Repository**: [GitHub — Lead-Qualification-MVP](https://github.com/AlexLvGulyaev/Lead-Qualification-MVP)
+- **Workflow Engine** — n8n (self-hosted), Docker Compose.
+- **AI-провайдер** — OpenAI API (gpt-4o-mini).
+- **CRM** — Kommo (API v4).
+- **База данных** — PostgreSQL 14+.
+- **Admin Backend** — FastAPI (Python 3.12).
+- **Frontends** — статические HTML/JS (клиентская форма, админ-консоль, демо-лендинг).
+- **Reverse Proxy** — Traefik (SSL termination, routing).
+
+---
+
+## 🚀 Быстрый запуск
+
+**Требования:** Docker 24.0+, Docker Compose 2.20+, 4 GB RAM.
+
+```bash
+git clone https://github.com/AlexLvGulyaev/Lead-Qualification-MVP.git
+cd Lead-Qualification-MVP/infra
+cp .env.example .env    # заполнить переменные — см. DEPLOYMENT_GUIDE §5
+docker compose up -d    # БД инициализируется автоматически при первом запуске
+```
+
+| Сервис | URL |
+|--------|-----|
+| Client UI | http://localhost:5180 |
+| Admin UI | http://localhost:8080 |
+| Admin API | http://localhost:8000/docs |
+| n8n UI | http://localhost:5678 |
+
+После запуска импортируйте 5 n8n workflows ([DEPLOYMENT_GUIDE §8](docs/DEPLOYMENT_GUIDE.md)) и настройте Telegram-вебхук и поля Kommo по гайдам в `docs/`. Полный процесс развёртывания — [🚀 `docs/DEPLOYMENT_GUIDE.md`](docs/DEPLOYMENT_GUIDE.md) (Source of Truth воспроизводимости).
+
+---
+
+## ⚠️ Ограничения демо
+
+- **Классификация по расписанию** — polling каждые 5 минут, до 5 минут задержки (event chaining — в планах).
+- **Single language** — только русский язык обращений.
+- **Single CRM** — интеграция только с Kommo (Bitrix24 — в планах).
+- **Keyword fallback** — при недоступности AI классификация упрощается до ключевых слов.
+- Демо-вход в консоль — только чтение; перед production требуются корпоративная аутентификация, мониторинг и бэкапы.
+
+---
+
+## 📁 Структура проекта
+
+Полная карта каталогов и файлов — в [📂 `docs/PROJECT_STRUCTURE.md`](docs/PROJECT_STRUCTURE.md).
+
+> **Примечание:** внутренние материалы AI Automation Portfolio Lab (например, `task_history/`, черновики архитектурных решений) хранятся вне публичного репозитория и не входят в поставку.

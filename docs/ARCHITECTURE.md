@@ -1,5 +1,7 @@
 # 🏛️ Архитектура Lead Qualification MVP
 
+![Lead Qualification: интерфейс системы](screenshots/LQ_portfolio_dark.png)
+
 **Дата:** 2026-09-15
 **Статус:** Реализованная архитектура (as-is): контуры, workflows, модель данных, интеграции, развёртывание + roadmap.
 
