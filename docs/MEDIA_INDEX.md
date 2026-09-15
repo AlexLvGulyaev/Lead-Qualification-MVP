@@ -1,10 +1,25 @@
-# Галерея экранов Lead Qualification MVP
+# 🖼️ Галерея экранов Lead Qualification MVP
 
-Все изображения — реальные скриншоты из каталога [`docs/screenshots/`](screenshots/).
+**Дата:** 2026-09-15
+**Статус:** Реестр всех изображений кейса — назначение, использование, категории. Фактическое содержимое каталога [`docs/screenshots/`](screenshots/) — 37 файлов, все зарегистрированы.
+
+## 👁️ 1. Визуальный контракт
+
+- **Hero самодостаточен** — витринные изображения (`LQ_portfolio_*`) не требуют подписей: смысл передаёт само изображение; alt-текст описывает содержимое для доступности.
+- **Hero светлая/тёмная тема** — README подключает пару `LQ_portfolio_light.png` / `LQ_portfolio_dark.png` через `<picture>` по `prefers-color-scheme`.
+- **Скриншоты продукта подписаны** — заголовок над изображением называет экран; alt не дублирует подпись.
+- **Скриншоты — подтверждение, не замена схемы:** архитектурные связи описываются mermaid-диаграммами, изображения иллюстрируют фактические экраны.
 
 ---
 
-## Инвентаризация скриншотов
+## 🗂️ 2. Инвентаризация скриншотов
+
+### Витринные hero (README)
+
+| Файл | Назначение |
+|------|------------|
+| `LQ_portfolio_light.png` | Витринный hero светлой темы (README, `<picture>`) |
+| `LQ_portfolio_dark.png` | Витринный hero тёмной темы (README, `<picture>`) |
 
 ### Основные скриншоты (используются в README и документах)
 
@@ -20,9 +35,17 @@
 | `workflow-lead-ingestion-v2.png` | Workflow приёма лидов | README.md, SYSTEM_DEMO.md |
 | `workflow-lead-classification-mvp.png` | Workflow AI-классификации | README.md, SYSTEM_DEMO.md |
 | `workflow-kommo-writer-mvp.png` | Workflow CRM-интеграции | README.md, SYSTEM_DEMO.md |
-| `commo-deal-list.png` | Список сделок в CRM | README.md, SYSTEM_DEMO.md |
-| `commo-deal-hot.png` | Горячий лид в CRM | README.md, SYSTEM_DEMO.md |
+| `kommo-deal-list.png` | Список сделок в CRM | README.md, SYSTEM_DEMO.md |
+| `kommo-deal-hot.png` | Горячий лид в CRM | README.md, SYSTEM_DEMO.md |
 | `lead-queue-hot.png` | Очередь горячих лидов | README.md, SYSTEM_DEMO.md |
+| `landing-link-web.png` | Вход в Web-форму с лендинга | USER_GUIDE.md |
+| `landing-link-telegram.png` | Вход в Telegram-бота с лендинга | USER_GUIDE.md |
+| `website-form-spam.png` | Нецелевое обращение (сценарий Spam) | E2E_SCENARIOS.md |
+| `kommo-deal-spam.png` | Сделка типа Spam в CRM | E2E_SCENARIOS.md |
+| `dashboard-overview-spam.png` | Dashboard со спам-статистикой | E2E_SCENARIOS.md |
+| `kommo-deal-warm.png` | Сделка типа Warm в CRM | E2E_SCENARIOS.md |
+| `website-form-empty.png` | Пустая форма (шаг «открыть форму») | USER_GUIDE.md |
+| `lead-queue-spam.png` | Очередь с пометкой Spam | E2E_SCENARIOS.md |
 
 ### Резервные скриншоты
 
@@ -42,18 +65,15 @@
 
 | Файл | Причина |
 |------|---------|
-| `website-form-empty.png` | Пустая форма не показывает ценность |
 | `lead-queue-cold.png` | Дублирует структуру hot/warm |
-| `lead-queue-spam.png` | Дублирует структуру hot/warm |
 | `lead-queue-warm.png` | Дублирует структуру hot/warm |
-| `commo-deal-warm.png` | Дублирует структуру hot |
-| `commo-deal-cold.png` | Дублирует структуру hot |
-| `commo-deal-change-status.png` | Операционный скриншот |
 | `lead-queue-hot-change-crm-status.png` | Операционный скриншот |
+| `kommo-deal-cold.png` | Дублирует структуру hot/warm |
+| `kommo-deal-change-status.png` | Операционный скриншот |
 
 ---
 
-## 1) Клиентский контур — Website (Landing)
+## 🌐 3. Клиентский контур — Website (Landing)
 
 ### Landing: Hero
 
@@ -89,7 +109,7 @@
 
 ---
 
-## 2) Клиентский контур — Website (Form)
+## 🌐 4. Клиентский контур — Website (Form)
 
 ### Website: Success
 
@@ -121,7 +141,7 @@
 
 ---
 
-## 3) Клиентский контур — Telegram
+## 💬 5. Клиентский контур — Telegram
 
 ### Telegram: Hot Lead
 
@@ -133,7 +153,7 @@
 
 ---
 
-## 4) Admin Console — Dashboard
+## 🖥️ 6. Admin Console — Dashboard
 
 ### Dashboard: Overview
 
@@ -145,7 +165,7 @@
 
 ---
 
-## 5) Admin Console — Lead Queue
+## 🖥️ 7. Admin Console — Lead Queue
 
 ### Lead Queue: Hot
 
@@ -181,7 +201,7 @@
 
 ---
 
-## 6) n8n Workflows
+## ⚙️ 8. n8n Workflows
 
 ### Workflow: Lead Ingestion V2
 
@@ -221,11 +241,11 @@
 
 ---
 
-## 7) Kommo CRM
+## 🏷️ 9. Kommo CRM
 
 ### Kommo: Deal List
 
-![Kommo: Deal List](screenshots/commo-deal-list.png)
+![Kommo: Deal List](screenshots/kommo-deal-list.png)
 
 - **Что показано**: список сделок в Kommo
 - **Роль в системе**: результат CRM Writer
@@ -233,32 +253,32 @@
 
 ### Kommo: Deal Hot
 
-![Kommo: Deal Hot](screenshots/commo-deal-hot.png)
+![Kommo: Deal Hot](screenshots/kommo-deal-hot.png)
 
 - **Что показано**: сделка типа Hot в Kanban
 - **Статус**: Основной (README.md, SYSTEM_DEMO.md)
 
 ### Kommo: Deal Warm
 
-![Kommo: Deal Warm](screenshots/commo-deal-warm.png)
+![Kommo: Deal Warm](screenshots/kommo-deal-warm.png)
 
 - **Статус**: Резерв (дублирует структуру hot)
 
 ### Kommo: Deal Cold
 
-![Kommo: Deal Cold](screenshots/commo-deal-cold.png)
+![Kommo: Deal Cold](screenshots/kommo-deal-cold.png)
 
 - **Статус**: Резерв (дублирует структуру hot)
 
 ### Kommo: Change Status
 
-![Kommo: Change Status](screenshots/commo-deal-change-status.png)
+![Kommo: Change Status](screenshots/kommo-deal-change-status.png)
 
 - **Статус**: Резерв
 
 ---
 
-## 8) Бизнес-процесс
+## 🗺️ 10. Бизнес-процесс
 
 ### Optimus BP
 
@@ -270,29 +290,30 @@
 
 ---
 
-## Сводная таблица скриншотов
+## 📊 11. Сводная таблица скриншотов
 
-| Категория | Основные | Резерв | Итого |
-|-----------|----------|--------|-------|
-| Landing | 3 | 5 | 8 |
-| Website Form | 1 | 2 | 3 |
-| Telegram | 1 | 0 | 1 |
-| Dashboard | 1 | 0 | 1 |
-| Lead Queue | 1 | 4 | 5 |
-| Workflows | 3 | 2 | 5 |
-| Kommo CRM | 2 | 3 | 5 |
-| Бизнес-процесс | 1 | 0 | 1 |
-| **Итого** | **13** | **16** | **29** |
+| Категория | Hero | Основные | Резерв | Не использовать | Итого |
+|-----------|------|----------|--------|-----------------|-------|
+| Витринные hero | 2 | — | — | — | 2 |
+| Landing | — | 5 | 5 | — | 10 |
+| Website Form | — | 3 | 2 | — | 5 |
+| Telegram | — | 1 | — | — | 1 |
+| Dashboard | — | 2 | — | — | 2 |
+| Lead Queue | — | 2 | — | 3 | 5 |
+| Workflows | — | 3 | 2 | — | 5 |
+| Kommo CRM | — | 4 | — | 2 | 6 |
+| Бизнес-процесс | — | 1 | — | — | 1 |
+| **Итого** | **2** | **21** | **9** | **5** | **37** |
 
 ---
 
-## Использование в документации
+## 🔗 12. Использование в документации
 
 | Документ | Скриншоты |
 |----------|-----------|
-| [README.md](../README.md) | dashboard-overview, optimus-bp, website-form-success, telegram-lead-hot, workflow-*, commo-deal-*, lead-queue-hot |
-| [BUSINESS_VALUE.md](BUSINESS_VALUE.md) | landing-LQ-console, landing-problems, landing-solution |
-| [SYSTEM_DEMO.md](SYSTEM_DEMO.md) | optimus-bp, website-form-success, telegram-lead-hot, workflow-*, commo-deal-*, lead-queue-hot, dashboard-overview |
-| [USER_GUIDE.md](USER_GUIDE.md) | Все основные + резервные |
-| [E2E_SCENARIOS.md](E2E_SCENARIOS.md) | Все основные + резервные |
+| [README.md](../README.md) | LQ_portfolio_light/dark (hero), dashboard-overview, optimus-bp, website-form-success, telegram-lead-hot, workflow-*, kommo-deal-list/hot, lead-queue-hot |
+| [BUSINESS_VALUE.md](BUSINESS_VALUE.md) | landing-LQ-console, landing-problems, landing-solution, landing-features, landing-manager, landing-STA |
+| [SYSTEM_DEMO.md](SYSTEM_DEMO.md) | optimus-bp, website-form-success, telegram-lead-hot, workflow-*, kommo-deal-list/hot, lead-queue-hot, dashboard-overview |
+| [USER_GUIDE.md](USER_GUIDE.md) | landing-link-web, landing-link-telegram, website-form-empty/filled/request/success, telegram-lead-hot |
+| [E2E_SCENARIOS.md](E2E_SCENARIOS.md) | website-form-success/spam, telegram-lead-hot, kommo-deal-warm/hot/spam, lead-queue-spam, dashboard-overview/spam |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | workflow-*, dashboard-overview |

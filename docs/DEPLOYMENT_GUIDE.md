@@ -1,10 +1,13 @@
-# Руководство по развёртыванию Lead Qualification MVP
+# 🚀 Руководство по развёртыванию Lead Qualification MVP
+
+**Дата:** 2026-09-02
+**Статус:** Source of Truth воспроизводимости (v2.6)
 
 Этот документ — пошаговый протокол развёртывания. Пройдите его последовательно от начала до конца. После каждого шага есть проверка и критерий успешного завершения.
 
 ---
 
-## 1. Purpose
+## 🎯 1. Purpose
 
 ### Что разворачивается
 
@@ -29,7 +32,7 @@ Lead Qualification MVP — система автоматической квал�
 
 ---
 
-## 2. Deployment Models
+## 🧭 2. Deployment Models
 
 ### 2.1. Local Deployment (Разработка)
 
@@ -144,7 +147,7 @@ flowchart TB
 
 ---
 
-## 3. Architecture Overview
+## 🏛️ 3. Architecture Overview
 
 ### Схема данных
 
@@ -219,7 +222,7 @@ erDiagram
 
 ---
 
-## 4. Prerequisites
+## ✅ 4. Prerequisites
 
 ### 4.1. Требования к серверу
 
@@ -247,7 +250,7 @@ erDiagram
 
 ---
 
-## 5. Environment Variables
+## 🔑 5. Environment Variables
 
 ### 5.1. Создание .env файла
 
@@ -516,7 +519,7 @@ TELEGRAM_BOT_TOKEN=1234567890:ABCdefGHIjklMNOpqrsTUVwxyz
 
 **Как создать поля в Kommo:**
 
-См. раздел [10. Kommo Custom Fields Setup](#10-kommo-custom-fields-setup).
+См. раздел [10. Kommo Custom Fields Setup](-10-kommo-custom-fields-setup).
 
 ---
 
@@ -723,7 +726,7 @@ curl -s http://localhost:8000/api/admin/auth/demo-config
 
 ---
 
-## 6. Database Initialization
+## 🗄️ 6. Database Initialization
 
 ### 6.1. Обзор SQL-файлов
 
@@ -821,7 +824,7 @@ docker compose exec postgres psql -U n8n -d lead_qualification -c "\dt"
 
 ---
 
-## 7. Service Startup
+## ▶️ 7. Service Startup
 
 ### 7.1. Запуск всех сервисов
 
@@ -977,7 +980,7 @@ HTTP статус `200`.
 
 ---
 
-## 8. Workflow Import
+## 📥 8. Workflow Import
 
 ### 8.1. Обзор workflows
 
@@ -1124,7 +1127,7 @@ Workflow отображается в списке workflows.
 
 ---
 
-## 9. Credentials Setup
+## 🔐 9. Credentials Setup
 
 ### 9.1. Обзор credentials
 
@@ -1309,7 +1312,7 @@ curl -s -H "X-N8N-API-KEY: ${N8N_API_KEY}" http://localhost:5678/api/v1/workflow
 
 ---
 
-## 10. Kommo Custom Fields Setup
+## 🏷️ 10. Kommo Custom Fields Setup
 
 ### 10.1. Создание полей в Kommo
 
@@ -1419,7 +1422,7 @@ KOMMO_PUBLIC_NUMBER_FIELD_ID=<ID_ПОЛЯ_PUBLIC_NUMBER>
 
 ---
 
-## 11. Smoke Test
+## 💨 11. Smoke Test
 
 ### 11.1. Тест Website Lead Ingestion
 
@@ -1612,7 +1615,7 @@ curl -s -H "Authorization: Bearer ${LQ_ADMIN_TOKEN}" http://localhost:8000/api/a
 
 ---
 
-## 12. Troubleshooting
+## 🛠️ 12. Troubleshooting
 
 ### 12.1. PostgreSQL не запускается
 
@@ -1737,7 +1740,7 @@ docker compose logs admin-ui --tail 50
 
 ---
 
-## 13. Production Notes
+## 📦 13. Production Notes
 
 ### 13.1. Отличия Demo от Production
 
@@ -1813,7 +1816,7 @@ cat backup_20260616.sql | docker compose exec -T postgres psql -U n8n lead_quali
 
 ---
 
-## 14. Appendix
+## 📎 14. Appendix
 
 ### 14.1. Полный список ENV переменных
 
@@ -1839,7 +1842,7 @@ cat backup_20260616.sql | docker compose exec -T postgres psql -U n8n lead_quali
 
 ---
 
-## Заключение
+## ✅ Заключение
 
 После прохождения всех шагов у вас должна работать система:
 
@@ -1858,5 +1861,5 @@ cat backup_20260616.sql | docker compose exec -T postgres psql -U n8n lead_quali
 
 **Документ подготовлен:** 2026-06-18
 **Версия:** 2.6
-**На основе:** Deployment Inventory, Gap Analysis, исходный код проекта
+**На основе:** исходный код проекта и фактический процесс развёртывания на VPS
 **2.6 (2026-09-02):** авторизация админ-консоли по токену (LQ_ADMIN_TOKEN + демо-токен LQ_ADMIN_DEMO_TOKEN, раздел 5.6), журнал аудита консоли (06-audit.sql), Smoke Test с Bearer-токеном

@@ -1,5 +1,4 @@
-# IMPLEMENTATION PLAN
-## n8n Lead Qualification Assistant
+# 📋 Implementation Plan — n8n Lead Qualification Assistant
 
 **Версия:** 1.2
 **Дата:** 2026-06-16
@@ -9,7 +8,7 @@
 
 ---
 
-## Состояние реализации
+## 📍 Состояние реализации
 
 ### ✅ Completed MVP Scope
 
@@ -56,22 +55,22 @@
 
 ---
 
-## Содержание
+## 📑 Содержание
 
-1. [MVP Boundaries](#1-mvp-boundaries)
-2. [Target Architecture](#2-target-architecture)
-3. [n8n Workflows](#3-n8n-workflows)
-4. [Data Model](#4-data-model)
-5. [API and Integration Contracts](#5-api-and-integration-contracts)
-6. [Classification Logic](#6-classification-logic)
-7. [Error Handling and Observability](#7-error-handling-and-observability)
-8. [Implementation Phases](#8-implementation-phases)
-9. [Acceptance Criteria](#9-acceptance-criteria)
-10. [Risks and Decisions](#10-risks-and-decisions)
+1. [MVP Boundaries](-1-mvp-boundaries)
+2. [Target Architecture](-2-target-architecture)
+3. [n8n Workflows](-3-n8n-workflows)
+4. [Data Model](-4-data-model)
+5. [API and Integration Contracts](-5-api-and-integration-contracts)
+6. [Classification Logic](-6-classification-logic)
+7. [Error Handling and Observability](-7-error-handling-and-observability)
+8. [Implementation Phases](-8-implementation-phases)
+9. [Acceptance Criteria](-9-acceptance-criteria)
+10. [Risks and Decisions](-10-risks-and-decisions)
 
 ---
 
-## 1. MVP Boundaries
+## 📦 1. MVP Boundaries
 
 ### 1.1. Входит в MVP (In Scope)
 
@@ -116,7 +115,7 @@
 
 ---
 
-## 2. Target Architecture
+## 🏛️ 2. Target Architecture
 
 ### 2.1. Общая архитектура
 
@@ -242,7 +241,7 @@ flowchart TB
 
 ---
 
-## 3. n8n Workflows
+## ⚙️ 3. n8n Workflows
 
 ### 3.1. Workflow: Lead Ingestion
 
@@ -499,7 +498,7 @@ function fallbackClassification(message) {
 
 ---
 
-## 4. Data Model
+## 🗄️ 4. Data Model
 
 ### 4.1. ER-диаграмма (Target Model v2 — Implemented ✅)
 
@@ -753,7 +752,7 @@ erDiagram
 
 ---
 
-## 5. API and Integration Contracts
+## 🔌 5. API and Integration Contracts
 
 ### 5.1. Web-form Webhook
 
@@ -964,7 +963,7 @@ POST /rest/1/{{webhook}}/crm.lead.add
 
 ---
 
-## 6. Classification Logic
+## 🧠 6. Classification Logic
 
 ### 6.1. Input Fields for Classification
 
@@ -1092,7 +1091,7 @@ function fallbackClassify(message) {
 
 ---
 
-## 7. Error Handling and Observability
+## 🛡️ 7. Error Handling and Observability
 
 ### 7.1. Retry Logic
 
@@ -1200,7 +1199,7 @@ ORDER BY date;
 
 ---
 
-## 8. Implementation Phases
+## 🛠️ 8. Implementation Phases
 
 ### 8.1. Этап 1: Infrastructure (День 1)
 
@@ -1501,7 +1500,7 @@ Last CRM Sync: 2026-06-15 09:45
 
 ---
 
-## 9. Acceptance Criteria
+## ✅ 9. Acceptance Criteria
 
 ### 9.1. MVP Acceptance Criteria
 
@@ -1560,7 +1559,7 @@ Last CRM Sync: 2026-06-15 09:45
 
 ---
 
-## 10. Risks and Decisions
+## ⚖️ 10. Risks and Decisions
 
 ### 10.1. Technical Risks
 
@@ -1605,7 +1604,7 @@ Last CRM Sync: 2026-06-15 09:45
 
 ---
 
-## Приложение A: Environment Variables
+## 📎 Приложение A: Environment Variables
 
 ```bash
 # PostgreSQL
@@ -1642,7 +1641,7 @@ LOG_LEVEL=info
 
 ---
 
-## Приложение B: Test Leads Dataset
+## 📎 Приложение B: Test Leads Dataset
 
 ```json
 [

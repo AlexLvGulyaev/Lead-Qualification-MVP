@@ -1,4 +1,9 @@
-# Lead Qualification MVP
+# ⚡ Lead Qualification MVP
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/LQ_portfolio_dark.png">
+  <img src="docs/screenshots/LQ_portfolio_light.png" alt="Lead Qualification — витрина кейса: веб-форма, Telegram-бот, AI-классификация и админ-консоль">
+</picture>
 
 **Мгновенная квалификация входящих лидов. Автоматическая обработка 24/7. Готовый результат в CRM.**
 
@@ -18,29 +23,6 @@
 
 ---
 
-## Быстрая навигация
-
-### Для заказчика
-
-- [Ценность для бизнеса](docs/BUSINESS_VALUE.md) — что получает бизнес после внедрения
-- [Демонстрация системы](docs/SYSTEM_DEMO.md) — путь лида через систему
-- [Сквозные сценарии](docs/E2E_SCENARIOS.md) — пошаговые сценарии работы
-
-### Для пользователя
-
-- [Руководство клиента](docs/USER_GUIDE.md) — как оставить заявку
-- [Руководство менеджера](docs/MANAGER_GUIDE.md) — работа с лидами в Kommo
-- [Руководство администратора](docs/ADMIN_GUIDE.md) — мониторинг и управление
-
-### Для инженера
-
-- [Архитектура](docs/ARCHITECTURE.md) — как устроена система, стек, структура проекта
-- [AI-классификация](docs/AI_QUALIFICATION.md) — логика квалификации, категории лидов
-- [План реализации](docs/IMPLEMENTATION_PLAN.md) — этапы разработки
-- [Развёртывание](docs/DEPLOYMENT_GUIDE.md) — как запустить
-
----
-
 ## Ключевой бизнес-процесс
 
 ![Бизнес-процесс](docs/screenshots/optimus-bp.png)
@@ -48,13 +30,21 @@
 **Полный путь лида:**
 
 ```mermaid
-flowchart LR
-    Клиент --> Заявка
-    Заявка --> Автоматическая_обработка
-    Автоматическая_обработка --> AI
-    AI --> CRM
-    CRM --> Менеджер
-    Менеджер --> Контроль
+flowchart TB
+    subgraph row1[" "]
+        direction LR
+        A[Клиент] --> B[Заявка<br>Web / Telegram]
+        B --> C[Автоматическая<br>обработка]
+        C --> D[AI-классификация<br>hot / warm / cold / spam]
+    end
+    subgraph row2[" "]
+        direction LR
+        E[Сделка в CRM<br>Kommo] --> F[Задача<br>менеджеру] --> G[Контроль<br>Admin Console]
+    end
+    row1 --> row2
+
+    style row1 fill:none,stroke:none
+    style row2 fill:none,stroke:none
 ```
 
 1. **Клиент** оставляет заявку через Website или Telegram
@@ -108,11 +98,11 @@ flowchart LR
 
 **Список сделок в Kommo**
 
-![Kommo: Deal List](docs/screenshots/commo-deal-list.png)
+![Kommo: Deal List](docs/screenshots/kommo-deal-list.png)
 
 **Горячий лид в CRM**
 
-![Kommo: Hot Deal](docs/screenshots/commo-deal-hot.png)
+![Kommo: Hot Deal](docs/screenshots/kommo-deal-hot.png)
 
 Сделка автоматически получает:
 - Статус воронки по lead_type (Первичный контакт / Переговоры / Принимается решение / Закрыто и не реализовано)
@@ -171,23 +161,26 @@ flowchart LR
 | [USER_GUIDE.md](docs/USER_GUIDE.md) | Руководство клиента |
 | [MANAGER_GUIDE.md](docs/MANAGER_GUIDE.md) | Руководство менеджера |
 | [ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md) | Руководство администратора |
+| [DEMO_ROUTE.md](docs/DEMO_ROUTE.md) | Быстрая проверка демо |
+| [MEDIA_INDEX.md](docs/MEDIA_INDEX.md) | Реестр скриншотов |
 
 ### Для инженера
 
 | Документ | Назначение |
 |----------|------------|
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Архитектура, стек, структура проекта |
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Архитектура, стек |
+| [PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) | Карта репозитория |
 | [AI_QUALIFICATION.md](docs/AI_QUALIFICATION.md) | Логика AI-классификации |
+| [SPEC.md](docs/SPEC.md) | Продуктовая спецификация |
 | [IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) | План реализации |
-| [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) | Развёртывание |
+| [PROJECT_HISTORY.md](docs/PROJECT_HISTORY.md) | История развития кейса |
+| [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) | Развёртывание (Source of Truth) |
 
 ---
 
 ## Рыночное подтверждение
 
-Система закрывает критический дефицит n8n-компетенций в портфолио (33% заказов упоминают n8n).
-
-Подробности: [Состояние проекта](docs/PROJECT_STATE.md)
+Система закрывает критический дефицит n8n-компетенций в портфолио: анализ реальных заказов на фриланс-площадках показывает устойчивый спрос на n8n-автоматизацию с AI-классификацией и интеграцией CRM (детали — [SPEC.md](docs/SPEC.md) §4).
 
 ---
 
@@ -201,4 +194,4 @@ MIT License — для демонстрационных целей.
 
 - **Public Demo**: https://lead-qual.alex-n8n.site/
 - **Admin Demo**: https://lead-qual-admin.alex-n8n.site/
-- **Repository**: GitHub (публикация планируется)
+- **Repository**: [GitHub — Lead-Qualification-MVP](https://github.com/AlexLvGulyaev/Lead-Qualification-MVP)

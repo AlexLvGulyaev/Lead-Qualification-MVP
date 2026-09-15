@@ -1,4 +1,7 @@
-# Архитектура Lead Qualification MVP
+# 🏛️ Архитектура Lead Qualification MVP
+
+**Дата:** 2026-09-15
+**Статус:** Реализованная архитектура (as-is): контуры, workflows, модель данных, интеграции, развёртывание + roadmap.
 
 Документ описывает **реализованную архитектуру** Lead Qualification MVP, а также отделяет:
 
@@ -6,11 +9,11 @@
 - **target (описано в планах, но может быть не реализовано)**;
 - **roadmap/future work**.
 
-Нормативные источники: [SPEC.md](SPEC.md), [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md), [PROJECT_STATE.md](PROJECT_STATE.md).
+Нормативные источники: [SPEC.md](SPEC.md), [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md).
 
 ---
 
-## Визуальная архитектура
+## 🌐 Визуальная архитектура
 
 ### Общая схема
 
@@ -52,7 +55,7 @@ flowchart LR
 
 ---
 
-## 1. Общая схема системы (as-is)
+## 🗺️ 1. Общая схема системы (as-is)
 
 ```mermaid
 flowchart TB
@@ -88,7 +91,7 @@ flowchart TB
 
 ---
 
-## 2. Контуры и компоненты
+## 🧭 2. Контуры и компоненты
 
 ### 2.1 Клиентский контур (Public)
 
@@ -190,7 +193,7 @@ flowchart TB
 
 ---
 
-## 3. n8n Workflows (as-is)
+## ⚙️ 3. n8n Workflows (as-is)
 
 ### 3.1 Workflow: Lead Ingestion V2 (Website)
 
@@ -228,7 +231,7 @@ flowchart LR
 {
   "success": true,
   "lead_id": "uuid",
-  "public_number": "LQ-000001",
+  "public_number": "LQ-100001",
   "message": "Lead received successfully"
 }
 ```
@@ -246,16 +249,10 @@ flowchart LR
 **Поток данных:**
 
 ```mermaid
-flowchart TB
-    Telegram["Telegram Trigger"]
-    Parse["Parse Message"]
-    IsCommand{"Is Command?"}
-    SendWelcome["Send Welcome Message"]
-    ProcessLead["Process Lead"]
-    
-    Telegram --> Parse --> IsCommand
-    IsCommand -->|Yes| SendWelcome
-    IsCommand -->|No| ProcessLead
+flowchart LR
+    Telegram["Telegram Trigger"] --> Parse["Parse Message"] --> IsCommand{"Is Command?"}
+    IsCommand -->|Yes| SendWelcome["Send Welcome Message"]
+    IsCommand -->|No| ProcessLead["Process Lead"]
 ```
 
 **Обработка команд:**
@@ -400,14 +397,18 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-    Query["Query Active CRM Syncs"]
-    ForEach["For Each: Kommo Lead"]
-    GetLead["Get Kommo Lead Data"]
-    Extract["Extract:<br/>pipeline, status, tasks"]
-    Update["Update crm_sync"]
-    Log["Log Sync Result"]
-    
-    Query --> ForEach --> GetLead --> Extract --> Update --> Log
+    subgraph row1[" "]
+        direction LR
+        Query["Query Active CRM Syncs"] --> ForEach["For Each: Kommo Lead"] --> GetLead["Get Kommo Lead Data"]
+    end
+    subgraph row2[" "]
+        direction LR
+        Extract["Extract:<br/>pipeline, status, tasks"] --> Update["Update crm_sync"] --> Log["Log Sync Result"]
+    end
+    row1 --> row2
+
+    style row1 fill:none,stroke:none
+    style row2 fill:none,stroke:none
 ```
 
 **Синхронизируемые поля:**
@@ -425,7 +426,7 @@ flowchart TB
 
 ---
 
-## 4. Data Model (as-is)
+## 🗄️ 4. Data Model (as-is)
 
 ### 4.1 ER-диаграмма
 
@@ -573,7 +574,7 @@ erDiagram
 
 ---
 
-## 5. Интеграции (as-is)
+## 🔌 5. Интеграции (as-is)
 
 ### 5.1 OpenAI API
 
@@ -645,7 +646,7 @@ erDiagram
 
 ---
 
-## 6. Модель развёртывания (as-is)
+## 🚀 6. Модель развёртывания (as-is)
 
 ### 6.1 Docker Compose Services
 
@@ -705,7 +706,7 @@ flowchart TB
 
 ---
 
-## 7. Observability (as-is)
+## 📊 7. Observability (as-is)
 
 ### 7.1 Logging
 
@@ -744,7 +745,7 @@ ORDER BY created_at DESC;
 
 ---
 
-## 8. Ограничения MVP (as-is)
+## ⚠️ 8. Ограничения MVP (as-is)
 
 | Ограничение | Причина | Влияние |
 |-------------|---------|---------|
@@ -756,13 +757,21 @@ ORDER BY created_at DESC;
 
 ---
 
-## 9. Roadmap / Future Work
+## 🛣️ 9. Roadmap / Future Work
 
-> **SSOT роадмапа кейса** — [`PROJECT_STATE.md`](PROJECT_STATE.md) → раздел **Future Enhancements (Post-MVP)**: Event Chaining, Bitrix24 Integration, Multi-language support, Semantic Fallback, Mock-сервер Kommo API на VPS. Здесь дубликат не ведётся во избежание расхождений (решение владельца 03.09.2026).
+Направления развития MVP (за пределами текущего релиза, приоритизация — за владельцем):
+
+- **Event Chaining** — событийная связка workflow вместо polling-расписаний.
+- **Bitrix24 Integration** — второй CRM-провайдер помимо Kommo.
+- **Multi-language support** — мультиязычная классификация обращений.
+- **Semantic Fallback** — семантический резерв при недоступности AI-классификатора.
+- **Mock-сервер Kommo API на VPS** — тестовый double боевого Kommo (REST-эндпоинты OAuth/сделок/контактов + вебхуки) для сквозной проверки crm_sync без боевого аккаунта.
+
+Дубликат здесь не ведётся: направления фиксируются в одном месте этого раздела и актуализируются по мере решений владельца.
 
 ---
 
-## 10. Architectural Decisions
+## ⚖️ 10. Architectural Decisions
 
 | Решение | Варианты | Выбрано | Обоснование |
 |---------|----------|---------|-------------|
@@ -775,7 +784,7 @@ ORDER BY created_at DESC;
 
 ---
 
-## 11. Технологический стек
+## 🧰 11. Технологический стек
 
 | Слой | Технология | Версия | Назначение |
 |------|------------|--------|------------|
@@ -792,60 +801,6 @@ ORDER BY created_at DESC;
 
 ---
 
-## 12. Структура проекта
+## 📂 12. Структура проекта
 
-```
-n8n-lead-qualification/
-├── README.md                    # Главное введение в проект
-├── docs/                        # Документация
-│   ├── BUSINESS_VALUE.md        # Ценность для бизнеса
-│   ├── SYSTEM_DEMO.md           # Демонстрация системы
-│   ├── ARCHITECTURE.md          # Архитектура системы (этот файл)
-│   ├── USER_GUIDE.md            # Руководство пользователя
-│   ├── DEPLOYMENT_GUIDE.md      # Руководство по развёртыванию
-│   ├── E2E_SCENARIOS.md         # Сквозные сценарии
-│   ├── AI_QUALIFICATION.md      # AI-классификация
-│   ├── PROJECT_STATE.md         # Текущее состояние
-│   ├── PROJECT_HISTORY.md       # История развития
-│   ├── IMPLEMENTATION_PLAN.md   # План реализации
-│   ├── SCREENSHOTS.md           # Галерея экранов
-│   └── TZ_COMPLIANCE_REPORT.md   # Соответствие ТЗ
-├── infra/                       # Инфраструктура
-│   ├── docker-compose.yml       # Сервисы Docker
-│   ├── sql/                      # Схема БД
-│   │   └── init-db.sql          # Инициализация БД
-│   └── docker/                   # Конфигурации Docker
-├── admin-ui/                    # Admin Console Frontend
-│   ├── index.html               # Dashboard
-│   ├── leads.html              # Lead Queue
-│   ├── lead.html                # Lead Details
-│   └── js/                      # JavaScript модули
-├── admin-backend/               # Admin Console Backend
-│   ├── main.py                  # FastAPI entry point
-│   ├── routers/                 # API routes
-│   └── models/                  # Pydantic models
-├── client-ui/                   # Клиентский UI
-│   ├── index.html               # Landing page
-│   ├── success.html             # Страница успеха
-│   └── js/                      # JavaScript модули
-├── workflow/                     # n8n workflows
-│   └── n8n/workflows/           # JSON экспорт workflows
-│       ├── lead-ingestion-v2.json
-│       ├── lead-classification-mvp.json
-│       ├── kommo-writer-mvp.json
-│       └── crm-status-sync-mvp.json
-├── task_history/                # История задач
-└── docs/screenshots/            # Скриншоты
-```
-
-### Ключевые директории
-
-| Директория | Назначение |
-|------------|------------|
-| `infra/` | Docker Compose, SQL-схемы, конфигурации |
-| `admin-ui/` | Dashboard, Lead Queue, Lead Details |
-| `admin-backend/` | FastAPI API для Admin Console |
-| `client-ui/` | Landing page и форма заявки |
-| `workflow/n8n/workflows/` | Экспортированные n8n workflows |
-| `docs/` | Вся документация проекта |
-| `task_history/` | История задач по разработке |
+Карта репозитория ведётся в специализированном документе — [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) (дерево с назначением каждого элемента кодовой базы). Здесь дубль не ведётся во избежание расхождений.

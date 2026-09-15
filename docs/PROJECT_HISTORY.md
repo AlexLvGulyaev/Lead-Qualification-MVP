@@ -1,12 +1,15 @@
-# История проекта Lead Qualification (кратко)
+# 📜 История проекта Lead Qualification (кратко)
+
+**Дата:** 2026-09-15
+**Статус:** Эволюция кейса от идеи до MVP — 7 этапов разработки, ключевые уроки, переиспользование. Не session log.
 
 Этот документ объясняет эволюцию проекта Lead Qualification MVP как демонстрационного кейса. Он не является session log и не перечисляет все внутренние итерации разработки.
 
-Нормативные источники: [SPEC.md](SPEC.md), [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md), [PROJECT_STATE.md](PROJECT_STATE.md).
+Нормативные источники: [SPEC.md](SPEC.md), [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md).
 
 ---
 
-## 1. Исходная идея и рыночная валидация
+## 💡 1. Исходная идея и рыночная валидация
 
 Проект начинался как ответ на выявленный **критический дефицит портфолио** — отсутствие компетенций по n8n, который упоминается в 33% исследованных заказов на фриланс-бирже FL.ru.
 
@@ -23,7 +26,7 @@
 
 ---
 
-## 2. Этап 1: Infrastructure Foundation
+## 🏗️ 2. Этап 1: Infrastructure Foundation
 
 **Период:** Июнь 2026
 
@@ -43,7 +46,7 @@
 
 ---
 
-## 3. Этап 2: Lead Ingestion (Webhook)
+## 📥 3. Этап 2: Lead Ingestion (Webhook)
 
 **Период:** Июнь 2026
 
@@ -62,7 +65,7 @@
 
 ---
 
-## 4. Этап 3: Data Model v2 (Contact-centric)
+## 🗄️ 4. Этап 3: Data Model v2 (Contact-centric)
 
 **Период:** Июнь 2026
 
@@ -92,7 +95,7 @@ qualifications (результаты AI)
 
 ---
 
-## 5. Этап 4: AI Classification MVP
+## 🧠 5. Этап 4: AI Classification MVP
 
 **Период:** Июнь 2026
 
@@ -118,7 +121,7 @@ qualifications (результаты AI)
 
 ---
 
-## 6. Этап 5: Input Channels (Telegram + Client UI)
+## 💬 6. Этап 5: Input Channels (Telegram + Client UI)
 
 **Период:** Июнь 2026
 
@@ -143,7 +146,7 @@ qualifications (результаты AI)
 
 ---
 
-## 7. Этап 6: CRM Integration (Kommo)
+## 🔗 7. Этап 6: CRM Integration (Kommo)
 
 **Период:** Июнь 2026
 
@@ -175,7 +178,7 @@ qualifications (результаты AI)
 
 ---
 
-## 8. Этап 7: Admin Console
+## 🖥️ 8. Этап 7: Admin Console
 
 **Период:** Июнь 2026
 
@@ -199,7 +202,7 @@ qualifications (результаты AI)
 
 ---
 
-## 9. Текущее состояние
+## 📍 9. Текущее состояние
 
 **MVP Definition:**
 
@@ -229,7 +232,7 @@ qualifications (результаты AI)
 
 ---
 
-## 10. Ключевые уроки
+## 🎓 10. Ключевые уроки
 
 ### 10.1. Архитектурные решения
 
@@ -249,7 +252,7 @@ qualifications (результаты AI)
 
 ---
 
-## 11. Переиспользование в будущих проектах
+## ♻️ 11. Переиспользование в будущих проектах
 
 **Компоненты для переиспользования:**
 

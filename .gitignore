@@ -27,6 +27,15 @@ workflow/n8n/credentials/
 task_history/
 docs/cursor_sessions
 
+# Internal APL project-state and process artifacts (kept locally, not published)
+docs/PROJECT_STATE.md
+docs/NARRATIVE_BLUEPRINT.md
+docs/TZ_COMPLIANCE_REPORT.md
+docs/sot-reconciliation-report.md
+docs/sot-full-checklist.md
+docs/apl-documentation-pattern.md
+docs/incidents/
+
 # Research and experimental directories
 research/
 
@@ -185,3 +194,4 @@ n8n-execution-data/
 
 # Local development overrides
 docker-compose.override.yml
+.playwright-mcp/

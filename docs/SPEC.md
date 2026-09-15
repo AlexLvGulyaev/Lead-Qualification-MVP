@@ -1,5 +1,4 @@
-# n8n Lead Qualification Assistant
-## Продуктовая спецификация (SPEC)
+# 📘 Продуктовая спецификация (SPEC) — n8n Lead Qualification Assistant
 
 **Версия:** 1.3
 **Дата:** 2026-06-12
@@ -8,30 +7,30 @@
 
 ---
 
-## Содержание
+## 📑 Содержание
 
-1. [Executive Summary](#1-executive-summary)
-2. [Business Problem](#2-business-problem)
-3. [Target Customers](#3-target-customers)
-4. [Market Validation](#4-market-validation)
-5. [Product Vision](#5-product-vision)
-6. [MVP Scope](#6-mvp-scope)
-7. [Out Of Scope](#7-out-of-scope)
-8. [User Journey](#8-user-journey)
-9. [Functional Requirements](#9-functional-requirements)
-10. [Architecture Concept](#10-architecture-concept)
-11. [Technology Stack](#11-technology-stack)
-12. [Reuse Strategy](#12-reuse-strategy)
-13. [Development Roadmap](#13-development-roadmap)
-14. [Portfolio Value](#14-portfolio-value)
-15. [Commercial Positioning](#15-commercial-positioning)
-16. [Recommended MVP Architecture](#16-recommended-mvp-architecture)
-17. [Приложение A: Ссылки на заказы](#приложение-a-ссылки-на-заказы)
-18. [Приложение B: Связанные кейсы лаборатории](#приложение-b-связанные-кейсы-лаборатории)
+1. [Executive Summary](-1-executive-summary)
+2. [Business Problem](-2-business-problem)
+3. [Target Customers](-3-target-customers)
+4. [Market Validation](-4-market-validation)
+5. [Product Vision](-5-product-vision)
+6. [MVP Scope](-6-mvp-scope)
+7. [Out Of Scope](-7-out-of-scope)
+8. [User Journey](-8-user-journey)
+9. [Functional Requirements](-9-functional-requirements)
+10. [Architecture Concept](-10-architecture-concept)
+11. [Technology Stack](-11-technology-stack)
+12. [Reuse Strategy](-12-reuse-strategy)
+13. [Development Roadmap](-13-development-roadmap)
+14. [Portfolio Value](-14-portfolio-value)
+15. [Commercial Positioning](-15-commercial-positioning)
+16. [Recommended MVP Architecture](-16-recommended-mvp-architecture)
+17. [Приложение A: Ссылки на заказы](-приложение-a-ссылки-на-заказы)
+18. [Приложение B: Связанные кейсы лаборатории](-приложение-b-связанные-кейсы-лаборатории)
 
 ---
 
-## 1. Executive Summary
+## 📌 1. Executive Summary
 
 **n8n Lead Qualification Assistant** — это автоматизированная система первичной квалификации входящих лидов, построенная на платформе n8n с интеграцией AI-классификации.
 
@@ -50,7 +49,7 @@
 
 ---
 
-## 2. Business Problem
+## 🧩 2. Business Problem
 
 ### 2.1. Проблема заказчика
 
@@ -90,7 +89,7 @@
 
 ---
 
-## 3. Target Customers
+## 🎯 3. Target Customers
 
 ### 3.1. Сегментация заказчиков
 
@@ -123,7 +122,7 @@
 
 ---
 
-## 4. Market Validation
+## 📊 4. Market Validation
 
 ### 4.1. Подтверждающие заказы
 
@@ -152,7 +151,7 @@ Telegram-боты с AI     ████████████████    
 
 ---
 
-## 5. Product Vision
+## 🔭 5. Product Vision
 
 ### 5.1. Видение продукта
 
@@ -183,7 +182,7 @@ Telegram-боты с AI     ████████████████    
 
 ---
 
-## 6. MVP Scope
+## 📦 6. MVP Scope
 
 ### 6.1. Что входит в MVP
 
@@ -253,7 +252,7 @@ Telegram-боты с AI     ████████████████    
 
 ---
 
-## 7. Out Of Scope
+## 🚫 7. Out Of Scope
 
 ### 7.1. Сознательно исключено из MVP
 
@@ -301,7 +300,7 @@ CRM-интеграция была реализована в Phase 006-007:
 
 ---
 
-## 8. User Journey
+## 🧭 8. User Journey
 
 ### 8.1. Путь лида — Web-форма (Happy Path)
 
@@ -447,7 +446,7 @@ CRM-интеграция была реализована в Phase 006-007:
 
 ---
 
-## 9. Functional Requirements
+## ⚙️ 9. Functional Requirements
 
 ### 9.1. FR-001: Web-форма Receiver
 
@@ -586,7 +585,7 @@ CRM-интеграция была реализована в Phase 006-007:
 
 ---
 
-## 10. Architecture Concept
+## 🏛️ 10. Architecture Concept
 
 ### 10.0. Data Model v2 (Implemented ✅)
 
@@ -711,7 +710,7 @@ CRM-интеграция была реализована в Phase 006-007:
 
 ---
 
-## 11. Technology Stack
+## 🧰 11. Technology Stack
 
 ### 11.1. Основной стек MVP
 
@@ -748,7 +747,7 @@ CRM-интеграция была реализована в Phase 006-007:
 
 ---
 
-## 12. Reuse Strategy
+## ♻️ 12. Reuse Strategy
 
 ### 12.1. Переиспользование из Assistant Flow
 
@@ -819,7 +818,7 @@ Input → Validation → AI Classification → Confidence Check → Action Routi
 
 ---
 
-## 13. Development Roadmap
+## 🛣️ 13. Development Roadmap
 
 ### 13.1. Этапы реализации
 
@@ -896,7 +895,7 @@ Input → Validation → AI Classification → Confidence Check → Action Routi
 
 ---
 
-## 14. Portfolio Value
+## 💼 14. Portfolio Value
 
 ### 14.1. Дефициты портфолио, которые закрывает кейс
 
@@ -928,7 +927,7 @@ Input → Validation → AI Classification → Confidence Check → Action Routi
 
 ---
 
-## 15. Commercial Positioning
+## 💰 15. Commercial Positioning
 
 ### 15.1. Позиционирование в откликах
 
@@ -1021,7 +1020,7 @@ Input → Validation → AI Classification → Confidence Check → Action Routi
 
 ---
 
-## 16. Recommended MVP Architecture
+## 🏗️ 16. Recommended MVP Architecture
 
 ### 16.1. Конкретная первая реализация
 
@@ -1139,27 +1138,7 @@ Input → Validation → AI Classification → Confidence Check → Action Routi
 
 ### 16.7. Файловая структура кейса
 
-```
-cases/n8n-lead-qualification/
-├── README.md                           # Описание кейса
-├── docs/
-│   ├── PROJECT_STATE.md               # Состояние проекта
-│   ├── SPEC.md                         # Эта спецификация
-│   ├── IMPLEMENTATION_PLAN.md          # План реализации
-│   ├── architecture.md                 # Детальная архитектура
-│   ├── api-contracts.md                # API CRM (Kommo, Bitrix24)
-│   └── prompts.md                      # Промпты классификации
-├── workflows/
-│   ├── lead-qualification.json          # n8n workflow
-│   └── telegram-bot.json                 # Telegram bot workflow
-├── templates/
-│   ├── kommo-webhook-setup.md          # Инструкция по Kommo
-│   └── bitrix24-webhook-setup.md       # Инструкция по Bitrix24
-├── tests/
-│   └── test-leads.json                  # Тестовые лиды
-└── task_history/
-    └── ...                               # История разработки
-```
+Актуальная структура репозитория ведётся в одном месте — [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) (древовидный план эпохи составления SPEC в этом документе не поддерживается во избежание расхождений с фактом).
 
 ### 16.8. Критерии готовности
 
@@ -1187,7 +1166,7 @@ cases/n8n-lead-qualification/
 
 ---
 
-## Приложение A: Ссылки на заказы
+## 📎 Приложение A: Ссылки на заказы
 
 | Заказ | Платформа | URL |
 |-------|-----------|-----|
@@ -1198,7 +1177,7 @@ cases/n8n-lead-qualification/
 
 ---
 
-## Приложение B: Связанные кейсы лаборатории
+## 📎 Приложение B: Связанные кейсы лаборатории
 
 | Кейс | Связь |
 |------|-------|

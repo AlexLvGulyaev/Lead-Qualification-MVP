@@ -1,5 +1,4 @@
-# CRM Integration Design
-## Phase 006 — Architectural Design
+# 🔌 CRM Integration Design (Phase 006 — Architectural Design)
 
 **Версия:** 1.0
 **Дата:** 2026-06-12
@@ -8,21 +7,21 @@
 
 ---
 
-## Содержание
+## 📑 Содержание
 
-1. [Executive Summary](#1-executive-summary)
-2. [Current State Analysis](#2-current-state-analysis)
-3. [CRM Abstraction Layer](#3-crm-abstraction-layer)
-4. [CRM Sync Model](#4-crm-sync-model)
-5. [Workflow Integration](#5-workflow-integration)
-6. [Data Flow](#6-data-flow)
-7. [Error Handling](#7-error-handling)
-8. [Idempotency & Retry](#8-idempotency--retry)
-9. [Implementation Roadmap](#9-implementation-roadmap)
+1. [Executive Summary](-1-executive-summary)
+2. [Current State Analysis](-2-current-state-analysis)
+3. [CRM Abstraction Layer](-3-crm-abstraction-layer)
+4. [CRM Sync Model](-4-crm-sync-model)
+5. [Workflow Integration](-5-workflow-integration)
+6. [Data Flow](-6-data-flow)
+7. [Error Handling](-7-error-handling)
+8. [Idempotency & Retry](-8-idempotency--retry)
+9. [Implementation Roadmap](-9-implementation-roadmap)
 
 ---
 
-## 1. Executive Summary
+## 📌 1. Executive Summary
 
 ### 1.1. Цель
 
@@ -54,7 +53,7 @@
 
 ---
 
-## 2. Current State Analysis
+## 🔍 2. Current State Analysis
 
 ### 2.1. Текущая архитектура (Input Channels MVP)
 
@@ -107,7 +106,7 @@ contacts (люди/организации)
 
 ---
 
-## 3. CRM Abstraction Layer
+## 🧩 3. CRM Abstraction Layer
 
 ### 3.1. Архитектурная концепция
 
@@ -259,7 +258,7 @@ const provider = providers[CRM_PROVIDER];
 
 ---
 
-## 4. CRM Sync Model
+## 🔄 4. CRM Sync Model
 
 ### 4.1. Таблица crm_sync (Current Schema)
 
@@ -362,7 +361,7 @@ Attempt 5: give up (max retries)
 
 ---
 
-## 5. Workflow Integration
+## ⚙️ 5. Workflow Integration
 
 ### 5.1. Integration Point
 
@@ -487,7 +486,7 @@ Complexity: Higher (workflow chaining)
 
 ---
 
-## 6. Data Flow
+## 🌊 6. Data Flow
 
 ### 6.1. End-to-End Flow
 
@@ -590,7 +589,7 @@ received ──▶ qualified ──▶ processed ──▶ archived
 
 ---
 
-## 7. Error Handling
+## 🛡️ 7. Error Handling
 
 ### 7.1. Error Categories
 
@@ -699,7 +698,7 @@ ORDER BY cs.retry_scheduled_at ASC;
 
 ---
 
-## 8. Idempotency & Retry
+## ♻️ 8. Idempotency & Retry
 
 ### 8.1. Idempotency Key
 
@@ -788,7 +787,7 @@ Max: 3 retries, then manual intervention
 
 ---
 
-## 9. Implementation Roadmap
+## 🛣️ 9. Implementation Roadmap
 
 ### 9.1. Phase 006 Stages
 
@@ -832,7 +831,7 @@ Max: 3 retries, then manual intervention
 
 ---
 
-## Приложение A: Environment Variables
+## 📎 Приложение A: Environment Variables
 
 ```bash
 # CRM Provider Selection
@@ -850,7 +849,7 @@ BITRIX24_LEAD_STATUS_NEW=NEW
 
 ---
 
-## Приложение B: Related Documents
+## 📎 Приложение B: Related Documents
 
 - `docs/crm-field-mapping.md` — Маппинг полей для Kommo и Bitrix24
 - `docs/IMPLEMENTATION_PLAN.md` — Общий план реализации

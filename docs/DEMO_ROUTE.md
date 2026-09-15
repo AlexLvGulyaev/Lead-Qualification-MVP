@@ -1,10 +1,13 @@
-# Маршрут проверки демо — Lead Qualification MVP
+# 🧭 Маршрут проверки демо — Lead Qualification MVP
+
+**Дата:** 2026-09-15
+**Статус:** Быстрая проверка работоспособности квалификации за 4 шага: форма → бот → консоль → сравнение.
 
 Как быстро убедиться, что квалификация лидов работает: оставить обращение
 в веб-форме или пройти Telegram-диалог, затем проследить заявку до
 карточки в админ-консоли.
 
-## Маршрут проверки
+## 🛤️ 1. Маршрут проверки
 
 1. **Открыть** [форму «Оставить обращение»](https://lead-qual.alex-n8n.site) →
    **пройти** три шага (контакты → описание запроса → источник) →
@@ -20,14 +23,13 @@
    срочная задача и общий вопрос) → **увидеть** разные тип, приоритет
    и confidence: квалификация действительно различает обращения.
 
-## Что ещё доступно
+## 🎁 2. Что ещё доступно
 
 - Продуктовый лендинг кейса:
   [lead-qual-demo.alex-n8n.site](https://lead-qual-demo.alex-n8n.site).
 - Workflow-логика в n8n: три процесса — приём заявки, квалификация
-  и уведомление менеджера (см.
-  [ARCHITECTURE.md](https://github.com/AlexLvGulyaev/Lead-Qualification-MVP/blob/main/docs/ARCHITECTURE.md)).
+  и уведомление менеджера (см. [ARCHITECTURE.md](ARCHITECTURE.md)).
 - Как читать карточки и приоритеты:
-  [MANAGER_GUIDE.md](https://github.com/AlexLvGulyaev/Lead-Qualification-MVP/blob/main/docs/MANAGER_GUIDE.md).
+  [MANAGER_GUIDE.md](MANAGER_GUIDE.md).
 - Полный скриншот-тур:
-  [SYSTEM_DEMO.md](https://github.com/AlexLvGulyaev/Lead-Qualification-MVP/blob/main/docs/SYSTEM_DEMO.md).
+  [SYSTEM_DEMO.md](SYSTEM_DEMO.md).

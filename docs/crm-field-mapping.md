@@ -1,5 +1,4 @@
-# CRM Field Mapping
-## Phase 006 — Data Field Mapping
+# 🗺️ CRM Field Mapping (Phase 006 — Data Field Mapping)
 
 **Версия:** 1.0
 **Дата:** 2026-06-12
@@ -8,20 +7,20 @@
 
 ---
 
-## Содержание
+## 📑 Содержание
 
-1. [Overview](#1-overview)
-2. [Unified Payload Structure](#2-unified-payload-structure)
-3. [Kommo Field Mapping](#3-kommo-field-mapping)
-4. [Bitrix24 Field Mapping](#4-bitrix24-field-mapping)
-5. [Custom Fields](#5-custom-fields)
-6. [Status Mapping](#6-status-mapping)
-7. [Notes & Comments](#7-notes--comments)
-8. [Implementation Notes](#8-implementation-notes)
+1. [Overview](-1-overview)
+2. [Unified Payload Structure](-2-unified-payload-structure)
+3. [Kommo Field Mapping](-3-kommo-field-mapping)
+4. [Bitrix24 Field Mapping](-4-bitrix24-field-mapping)
+5. [Custom Fields](-5-custom-fields)
+6. [Status Mapping](-6-status-mapping)
+7. [Notes & Comments](-7-notes--comments)
+8. [Implementation Notes](-8-implementation-notes)
 
 ---
 
-## 1. Overview
+## 📌 1. Overview
 
 ### 1.1. Цель
 
@@ -81,7 +80,7 @@
 
 ---
 
-## 2. Unified Payload Structure
+## 📦 2. Unified Payload Structure
 
 ### 2.1. Complete Schema
 
@@ -269,7 +268,7 @@
 
 ---
 
-## 3. Kommo Field Mapping
+## 🏷️ 3. Kommo Field Mapping
 
 ### 3.1. Standard Fields
 
@@ -517,7 +516,7 @@ First Message: ${payload.metadata.first_message}`;
 
 ---
 
-## 4. Bitrix24 Field Mapping
+## 🔷 4. Bitrix24 Field Mapping
 
 ### 4.1. Standard Fields
 
@@ -693,7 +692,7 @@ First Message: ${payload.metadata.first_message}`;
 
 ---
 
-## 5. Custom Fields
+## 🗂️ 5. Custom Fields
 
 ### 5.1. Kommo Custom Fields
 
@@ -751,7 +750,7 @@ First Message: ${payload.metadata.first_message}`;
 
 ---
 
-## 6. Status Mapping
+## 🔀 6. Status Mapping
 
 ### 6.1. Unified → Kommo Status
 
@@ -794,7 +793,7 @@ const KOMMO_STATUS_SPAM = process.env.KOMMO_STATUS_SPAM;
 
 ---
 
-## 7. Notes & Comments
+## 📝 7. Notes & Comments
 
 ### 7.1. Note Structure
 
@@ -837,7 +836,7 @@ First Message: {metadata.first_message}
 
 ---
 
-## 8. Implementation Notes
+## 🛠️ 8. Implementation Notes
 
 ### 8.1. Provider Factory
 
@@ -914,7 +913,7 @@ BITRIX24_WEBHOOK_URL=https://yourcompany.bitrix24.ru/rest/1***/
 
 ---
 
-## Приложение A: Field Mapping Summary
+## 📎 Приложение A: Field Mapping Summary
 
 ### A.1. Contact Fields
 

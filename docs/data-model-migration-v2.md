@@ -1,20 +1,21 @@
-# Data Model v2 Reference
+# 🗄️ Data Model v2 Reference
 
-## Target Model v2.0
+**Дата:** 2026-09-15
+**Статус:** Contact-centric модель данных v2.0 — реализована 2026-06-12: изменения, миграция, совместимость, откат.
 
-**Дата:** 2026-06-12
+## 🎯 Target Model v2.0
+
 **Статус:** ✅ Implemented
-**Дата реализации:** 2026-06-12
 
 ---
 
-## Обзор
+## 🗺️ Обзор
 
 Целевая модель данных v2 реализована и используется в production. Модель разделяет следующие сущности:
 
 ---
 
-## Обзор изменений
+## 🔀 Обзор изменений
 
 Целевая модель данных разделяет следующие сущности:
 
@@ -28,7 +29,7 @@
 
 ---
 
-## Диаграмма связей
+## 🕸️ Диаграмма связей
 
 ```
 ┌─────────────────┐       ┌─────────────────────┐
@@ -78,7 +79,7 @@
 
 ---
 
-## Реализация
+## 🛠️ Реализация
 
 Модель v2 развернута в production 2026-06-12. Все workflows обновлены для работы с contact-centric архитектурой.
 
@@ -106,7 +107,7 @@ SELECT
 
 ---
 
-## Workflow изменения
+## ⚙️ Workflow изменения
 
 ### Telegram Workflow
 
@@ -156,7 +157,7 @@ Return success
 
 ---
 
-## Helper Functions
+## 🧰 Helper Functions
 
 ### find_or_create_contact_by_telegram
 
@@ -186,7 +187,7 @@ SELECT find_or_create_contact_by_email_phone(
 
 ---
 
-## Обратная совместимость
+## ♻️ Обратная совместимость
 
 Для обратной совместимости создано представление:
 
@@ -198,7 +199,7 @@ SELECT * FROM leads_with_contacts;
 
 ---
 
-## Валидация сценариев
+## ✅ Валидация сценариев
 
 ### Сценарий 1: Telegram first message
 
@@ -245,7 +246,7 @@ SELECT * FROM leads_with_contacts;
 
 ---
 
-## Откат
+## ⏪ Откат
 
 При необходимости отката:
 
@@ -262,7 +263,7 @@ ALTER TABLE leads DROP COLUMN IF EXISTS contact_id;
 
 ---
 
-## Примечания
+## 📝 Примечания
 
 - UNIQUE constraint на `channel_identities(channel, external_id)` гарантирует отсутствие дубликатов идентификаторов
 - Helper functions упрощают логику workflow

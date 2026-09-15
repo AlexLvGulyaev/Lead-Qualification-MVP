@@ -1,12 +1,15 @@
-# Webhook Setup Guide
+# 🔗 Webhook Setup Guide
 
-## Overview
+**Дата:** 2026-09-15
+**Статус:** Настройка webhook приёма лидов в n8n: credential, импорт workflow, активация, проверка БД.
+
+## 🗺️ 1. Overview
 
 This guide explains how to set up and test the Lead Ingestion Webhook workflow.
 
 ---
 
-## Prerequisites
+## ✅ 2. Prerequisites
 
 1. Infrastructure is running (PostgreSQL + n8n)
 2. n8n is accessible at `http://localhost:5678`
@@ -14,7 +17,7 @@ This guide explains how to set up and test the Lead Ingestion Webhook workflow.
 
 ---
 
-## Step 1: Create PostgreSQL Credential
+## 🔐 Step 1: Create PostgreSQL Credential
 
 1. Open n8n UI: `http://localhost:5678`
 2. Login with credentials from `.env`:
@@ -34,7 +37,7 @@ This guide explains how to set up and test the Lead Ingestion Webhook workflow.
 
 ---
 
-## Step 2: Import Workflow
+## 📥 Step 2: Import Workflow
 
 ### Option A: Import JSON File
 
@@ -168,7 +171,7 @@ return { json: { valid: true, lead: normalizedLead } };
 
 ---
 
-## Step 3: Activate Workflow
+## ⚙️ Step 3: Activate Workflow
 
 1. Click **Save** workflow
 2. Toggle **Active** switch to ON
@@ -177,7 +180,7 @@ return { json: { valid: true, lead: normalizedLead } };
 
 ---
 
-## Step 4: Test Webhook
+## 💨 Step 4: Test Webhook
 
 ### Using curl
 
@@ -214,7 +217,7 @@ chmod +x test-commands.sh
 
 ---
 
-## Step 5: Verify Database
+## 🗄️ Step 5: Verify Database
 
 ### Check leads table
 
@@ -239,7 +242,7 @@ docker compose exec postgres psql -U n8n -d lead_qualification -c \
 
 ---
 
-## Troubleshooting
+## 🛠️ 8. Troubleshooting
 
 ### Webhook returns 404
 
@@ -266,7 +269,7 @@ docker compose exec postgres psql -U n8n -d lead_qualification -c \
 
 ---
 
-## Webhook Contract
+## 📋 9. Webhook Contract
 
 ### Endpoint
 
@@ -317,7 +320,7 @@ Content-Type: application/json
 
 ---
 
-## Related Files
+## 📂 10. Related Files
 
 - Workflow JSON: `workflow/n8n/workflows/lead-ingestion-webhook.json`
 - Test payloads: `tests/test-payloads.json`

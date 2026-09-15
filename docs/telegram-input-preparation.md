@@ -1,6 +1,9 @@
-# Telegram Input Channel — Implementation
+# 🤖 Telegram Input Channel — Implementation
 
-## Status
+**Дата:** 2026-09-15
+**Статус:** Подготовка Telegram-канала приёма: конфигурация бота, workflow, чеклист активации.
+
+## 📍 1. Status
 
 **✅ Implemented** — Telegram Bot is active and operational.
 
@@ -8,7 +11,7 @@ This document describes the Telegram integration architecture and configuration.
 
 ---
 
-## Bot Configuration
+## 🔧 2. Bot Configuration
 
 The Telegram Bot is configured via environment variable:
 
@@ -23,7 +26,7 @@ TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
 
 ---
 
-## Telegram Workflow
+## ⚙️ 3. Telegram Workflow
 
 ### Workflow: Lead Ingestion - Telegram
 
@@ -102,7 +105,7 @@ TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
 
 ---
 
-## n8n Workflow Definition (Template)
+## 📋 4. n8n Workflow Definition (Template)
 
 **File:** `workflow/n8n/workflows/lead-ingestion-telegram.json`
 
@@ -162,7 +165,7 @@ TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
 
 ---
 
-## Activation Checklist
+## ✅ 5. Activation Checklist
 
 When `TELEGRAM_BOT_TOKEN` is available:
 
@@ -198,7 +201,7 @@ When `TELEGRAM_BOT_TOKEN` is available:
 
 ---
 
-## Bot Commands (Future)
+## 🔮 6. Bot Commands (Future)
 
 | Command | Purpose |
 |---------|---------|
@@ -208,7 +211,7 @@ When `TELEGRAM_BOT_TOKEN` is available:
 
 ---
 
-## Notes
+## 📝 7. Notes
 
 - Telegram does not provide phone or email by default
 - Phone number can be requested via contact sharing (requires user action)
@@ -217,7 +220,7 @@ When `TELEGRAM_BOT_TOKEN` is available:
 
 ---
 
-## Related Files
+## 📂 8. Related Files
 
 - Workflow template: `workflow/n8n/workflows/lead-ingestion-telegram.json`
 - Test payloads: `tests/test-payloads.json`
