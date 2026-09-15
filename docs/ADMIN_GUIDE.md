@@ -106,18 +106,9 @@
 
 ### Общий путь
 
-```
-Website / Telegram
-       ↓
-   Lead Ingestion
-       ↓
-  AI Classification
-       ↓
-     Kommo CRM
-       ↓
-   CRM Status Sync
-       ↓
-   Admin Console
+```mermaid
+flowchart TB
+    A["Website / Telegram"] --> B["Lead Ingestion"] --> C["AI Classification"] --> D["Kommo CRM"] --> E["CRM Status Sync"] --> F["Admin Console"]
 ```
 
 ---

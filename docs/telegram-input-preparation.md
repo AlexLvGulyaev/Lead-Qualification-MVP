@@ -34,22 +34,20 @@ TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
 
 **Flow:**
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│ Telegram Trigger │────▶│ Parse & Validate│────▶│  Normalize      │
-│                  │     │                 │     │                 │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-                                                        │
-                                                        ▼
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│  Send Response  │◀────│ Insert Message  │◀────│  Insert Lead    │
-│  to User        │     │                 │     │                 │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-        │
-        ▼
-┌─────────────────┐
-│  Insert Log     │
-└─────────────────┘
+```mermaid
+flowchart TB
+    subgraph row1[" "]
+        direction LR
+        T["Telegram Trigger"] --> P["Parse & Validate"] --> N["Normalize"]
+    end
+    subgraph row2[" "]
+        direction LR
+        L["Insert Lead"] --> M["Insert Message"] --> R["Send Response to User"] --> G["Insert Log"]
+    end
+    row1 --> row2
+
+    style row1 fill:none,stroke:none
+    style row2 fill:none,stroke:none
 ```
 
 ### Input Contract (from Telegram API)

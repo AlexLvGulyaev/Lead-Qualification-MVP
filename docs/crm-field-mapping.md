@@ -38,44 +38,27 @@
 
 ### 1.3. Источники данных
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    Unified Payload Sources                        │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  contacts ──────────────────┐                                   │
-│       │                     │                                   │
-│       ├─ name              ──┼──▶ contact.name                   │
-│       ├─ phone             ──┼──▶ contact.phone                  │
-│       ├─ email             ──┼──▶ contact.email                  │
-│       ├─ company           ──┼──▶ contact.company               │
-│       └─ notes             ──┼──▶ contact.notes                   │
-│                             │                                   │
-│  channel_identities ───────┼──▶ channel_identities[]             │
-│       │                     │                                   │
-│       ├─ channel           ──┼──▶ .channel                        │
-│       ├─ external_id       ──┼──▶ .external_id                    │
-│       └─ channel_data      ──┼──▶ .channel_data                   │
-│                             │                                   │
-│  leads ─────────────────────┼──▶ lead_id, public_number, source │
-│       │                     │                                   │
-│       ├─ public_number     ──┼──▶ public_number                   │
-│       ├─ source            ──┼──▶ source.channel                  │
-│       ├─ utm_source        ──┼──▶ source.utm_source               │
-│       └─ utm_campaign      ──┼──▶ source.utm_campaign             │
-│                             │                                   │
-│  qualifications ───────────┼──▶ qualification                   │
-│       │                     │                                   │
-│       ├─ lead_type         ──┼──▶ .lead_type                      │
-│       ├─ interest          ──┼──▶ .interest                       │
-│       ├─ priority          ──┼──▶ .priority                       │
-│       ├─ summary           ──┼──▶ .summary                        │
-│       ├─ confidence        ──┼──▶ .confidence                      │
-│       └─ suggested_action  ──┼──▶ .suggested_action               │
-│                             │                                   │
-│  messages ──────────────────┘                                   │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph sources["Источники (PostgreSQL)"]
+        direction TB
+        C["contacts<br/>name · phone · email · company · notes"]
+        CI["channel_identities<br/>channel · external_id · channel_data"]
+        L["leads<br/>public_number · source ·<br/>utm_source · utm_campaign"]
+        Q["qualifications<br/>lead_type · interest · priority ·<br/>summary · confidence · suggested_action"]
+        M["messages"]
+    end
+    subgraph UP["Unified Payload"]
+        CT["contact.*"]
+        CH["channel_identities.*"]
+        LD["lead_id · public_number · source.*"]
+        QL["qualification.*"]
+    end
+    C --> CT
+    CI --> CH
+    L --> LD
+    Q --> QL
+    M --> CT
 ```
 
 ---

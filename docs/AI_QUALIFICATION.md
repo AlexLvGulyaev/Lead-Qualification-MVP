@@ -21,18 +21,11 @@ AI-классификация выполняет функцию **автомат
 
 ### 1.2. Место в архитектуре
 
-```
-Lead Ingestion (Web/Telegram)
-         ↓
-   PostgreSQL (lead created)
-         ↓
-   AI Classification ←── OpenAI API
-         ↓
-   Fallback (rule-based) ←── при ошибке AI
-         ↓
-   PostgreSQL (qualification saved)
-         ↓
-   CRM Writer (Kommo)
+```mermaid
+flowchart TB
+    A["Lead Ingestion<br/>(Web/Telegram)"] --> B["PostgreSQL<br/>(lead created)"] --> C["AI Classification"] --> F["Fallback<br/>(rule-based)"] --> D["PostgreSQL<br/>(qualification saved)"] --> E["CRM Writer<br/>(Kommo)"]
+    O["OpenAI API"] --> C
+    X["При ошибке AI"] --> F
 ```
 
 ### 1.3. Ключевой принцип

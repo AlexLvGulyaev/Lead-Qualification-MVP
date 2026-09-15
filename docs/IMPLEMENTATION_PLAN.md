@@ -183,49 +183,17 @@ flowchart TB
 
 ### 2.3. Поток данных (Data Flow)
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                    ПОЛНЫЙ ПУТЬ ЛИДА                               │
-└──────────────────────────────────────────────────────────────────┘
-
-1. ИСТОЧНИК
-   ├── Web-форма: HTTP POST → /webhook/lead
-   └── Telegram: Bot API → n8n Telegram Trigger
-
-2. ПРИЁМ И ВАЛИДАЦИЯ
-   ├── Парсинг входящих данных
-   ├── Валидация обязательных полей
-   └── Нормализация формата
-
-3. СОХРАНЕНИЕ (Lead Storage)
-   ├── INSERT INTO leads
-   ├── INSERT INTO messages
-   └── Статус: 'received'
-
-4. AI-КЛАССИФИКАЦИЯ
-   ├── Формирование промпта
-   ├── HTTP POST → OpenAI API
-   ├── Парсинг JSON response
-   └── INSERT INTO qualifications
-
-5. МАРШРУТИЗАЦИЯ (Action Routing)
-   ├── hot → immediate follow-up
-   ├── warm → delayed follow-up
-   ├── cold → archive
-   └── spam → reject
-
-6. CRM INTEGRATION
-   ├── Создание/обновление лида в CRM
-   ├── Добавление примечания
-   └── INSERT INTO crm_sync
-
-7. FOLLOW-UP (опционально)
-   ├── Telegram: отправка подтверждения
-   └── CRM: создание задачи менеджеру
-
-8. ЛОГИРОВАНИЕ
-   └── INSERT INTO logs
-
+```mermaid
+flowchart TB
+    S1["1. Источник<br/>Web-форма: HTTP POST → /webhook/lead<br/>Telegram: Bot API → Telegram Trigger"]
+    S2["2. Приём и валидация<br/>парсинг · валидация обязательных полей · нормализация"]
+    S3["3. Сохранение (Lead Storage)<br/>INSERT INTO leads · INSERT INTO messages<br/>статус: received"]
+    S4["4. AI-классификация<br/>формирование промпта · HTTP POST → OpenAI API<br/>парсинг JSON · INSERT INTO qualifications"]
+    S5["5. Маршрутизация (Action Routing)<br/>hot → immediate · warm → delayed<br/>cold → archive · spam → reject"]
+    S6["6. CRM-интеграция<br/>создание/обновление лида · примечание<br/>INSERT INTO crm_sync"]
+    S7["7. Follow-up (опционально)<br/>Telegram: подтверждение · CRM: задача менеджеру"]
+    S8["8. Логирование<br/>INSERT INTO logs"]
+    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8
 ```
 
 ### 2.4. Границы систем
@@ -325,17 +293,10 @@ flowchart LR
 
 **Шаги:**
 
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│    Load     │────▶│   Build     │────▶│   Call      │────▶│   Parse     │
-│    Lead     │     │   Prompt    │     │   AI API    │     │   Result    │
-└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
-                                              │
-                                              ▼
-                                        ┌─────────────┐
-                                        │  Fallback   │
-                                        │  (rule-based)│
-                                        └─────────────┘
+```mermaid
+flowchart LR
+    A[Load Lead] --> B[Build Prompt] --> C[Call AI API] --> D[Parse Result]
+    C -->|Ошибка AI| F["Fallback<br/>(rule-based)"]
 ```
 
 **Промпт классификации:**
@@ -418,44 +379,16 @@ function fallbackClassification(message) {
 
 **Шаги:**
 
-```
-┌─────────────┐
-│   Route     │
-│   by Type   │
-└──────┬──────┘
-       │
-       ├─── hot ──────▶ ┌─────────────┐     ┌─────────────┐
-       │                │ Immediate   │────▶│  CRM Task   │
-       │                │ Follow-up   │     │  + Telegram │
-       │                └─────────────┘     └─────────────┘
-       │
-       ├─── warm ─────▶ ┌─────────────┐
-       │                │ Delayed     │
-       │                │ Follow-up   │
-       │                │ (Wait 1h)   │
-       │                └─────────────┘
-       │
-       ├─── cold ─────▶ ┌─────────────┐
-       │                │ Archive     │
-       │                │ Lead        │
-       │                └─────────────┘
-       │
-       └─── spam ─────▶ ┌─────────────┐
-                        │ Reject      │
-                        │ Lead        │
-                        └─────────────┘
-                              │
-                              ▼
-                        ┌─────────────┐
-                        │   CRM       │
-                        │   Write     │
-                        └──────┬──────┘
-                               │
-                               ▼
-                        ┌─────────────┐
-                        │   Log       │
-                        │   Event     │
-                        └─────────────┘
+```mermaid
+flowchart TB
+    R["Route by Type"] -->|hot| IM["Immediate<br/>Follow-up"] --> CT["CRM Task<br/>+ Telegram"]
+    R -->|warm| DL["Delayed Follow-up<br/>(Wait 1 h)"]
+    R -->|cold| AR["Archive Lead"]
+    R -->|spam| RJ["Reject Lead"]
+    IM --> CW["CRM Write"] --> LE["Log Event"]
+    DL --> CW
+    AR --> CW
+    RJ --> CW
 ```
 
 **CRM Writer (Kommo):**
@@ -1377,47 +1310,20 @@ POST /api/v4/tasks
 
 **Шаги:**
 
-```
-┌─────────────────────┐
-│  Schedule Trigger   │
-│  (every 15 min)     │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│  Query: Get Active  │
-│  CRM Sync Records   │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│  For Each Record:   │
-│  ┌─────────────────┐│
-│  │ Kommo API       ││
-│  │ GET /leads/{id} ││
-│  └────────┬────────┘│
-│           │         │
-│           ▼         │
-│  ┌─────────────────┐│
-│  │ Extract:        ││
-│  │ - pipeline      ││
-│  │ - status        ││
-│  │ - responsible   ││
-│  │ - closest_task  ││
-│  │ - closed_at     ││
-│  └────────┬────────┘│
-│           │         │
-│           ▼         │
-│  ┌─────────────────┐│
-│  │ Update:         ││
-│  │ crm_sync table  ││
-│  └────────┬────────┘│
-└───────────┼─────────┘
-            │
-            ▼
-┌─────────────────────┐
-│  Log Sync Result    │
-└─────────────────────┘
+```mermaid
+flowchart TB
+    subgraph row1[" "]
+        direction LR
+        S["Schedule Trigger<br/>(каждые 15 мин)"] --> Q["Query Active<br/>CRM Syncs"] --> G["Kommo API<br/>GET /leads/{id}"]
+    end
+    subgraph row2[" "]
+        direction LR
+        E["Extract: pipeline · status ·<br/>responsible · closest_task · closed_at"] --> U["Update<br/>crm_sync"] --> L["Log Sync Result"]
+    end
+    row1 --> row2
+
+    style row1 fill:none,stroke:none
+    style row2 fill:none,stroke:none
 ```
 
 **Синхронизируемые поля:**

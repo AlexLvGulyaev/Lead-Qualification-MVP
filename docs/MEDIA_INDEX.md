@@ -25,19 +25,19 @@
 
 | Файл | Назначение | Где используется |
 |------|------------|------------------|
-| `dashboard-overview.png` | Главный экран системы | SYSTEM_DEMO.md |
+| `dashboard-overview.png` | Главный экран системы | SYSTEM_DEMO, ADMIN_GUIDE, E2E_SCENARIOS |
 | `optimus-bp.png` | Визуализация бизнес-процесса | SYSTEM_DEMO.md |
 | `landing-LQ-console.png` | Продуктовый экран | BUSINESS_VALUE.md |
 | `landing-problems.png` | Проблемы бизнеса | BUSINESS_VALUE.md |
 | `landing-solution.png` | Решение и ценность | BUSINESS_VALUE.md |
-| `website-form-success.png` | Успешная отправка Website | SYSTEM_DEMO.md |
-| `telegram-lead-hot.png` | Telegram горячий лид | SYSTEM_DEMO.md |
-| `workflow-lead-ingestion-v2.png` | Workflow приёма лидов | SYSTEM_DEMO.md |
-| `workflow-lead-classification-mvp.png` | Workflow AI-классификации | SYSTEM_DEMO.md |
-| `workflow-kommo-writer-mvp.png` | Workflow CRM-интеграции | SYSTEM_DEMO.md |
-| `kommo-deal-list.png` | Список сделок в CRM | SYSTEM_DEMO.md |
-| `kommo-deal-hot.png` | Горячий лид в CRM | SYSTEM_DEMO.md |
-| `lead-queue-hot.png` | Очередь горячих лидов | SYSTEM_DEMO.md |
+| `website-form-success.png` | Успешная отправка Website | SYSTEM_DEMO, USER_GUIDE, E2E_SCENARIOS |
+| `telegram-lead-hot.png` | Telegram горячий лид | SYSTEM_DEMO, USER_GUIDE, E2E_SCENARIOS |
+| `workflow-lead-ingestion-v2.png` | Workflow приёма лидов | SYSTEM_DEMO, ADMIN_GUIDE, ARCHITECTURE |
+| `workflow-lead-classification-mvp.png` | Workflow AI-классификации | SYSTEM_DEMO, ADMIN_GUIDE, ARCHITECTURE |
+| `workflow-kommo-writer-mvp.png` | Workflow CRM-интеграции | SYSTEM_DEMO, ADMIN_GUIDE, ARCHITECTURE |
+| `kommo-deal-list.png` | Список сделок в CRM | SYSTEM_DEMO, MANAGER_GUIDE |
+| `kommo-deal-hot.png` | Горячий лид в CRM | SYSTEM_DEMO, MANAGER_GUIDE, E2E_SCENARIOS |
+| `lead-queue-hot.png` | Очередь горячих лидов | SYSTEM_DEMO, ADMIN_GUIDE, MANAGER_GUIDE |
 | `landing-link-web.png` | Вход в Web-форму с лендинга | USER_GUIDE.md |
 | `landing-link-telegram.png` | Вход в Telegram-бота с лендинга | USER_GUIDE.md |
 | `website-form-spam.png` | Нецелевое обращение (сценарий Spam) | E2E_SCENARIOS.md |
@@ -53,12 +53,12 @@
 |------|--------|------------|
 | `website-form-filled.png` | Резерв | Форма с данными |
 | `website-form-request.png` | Резерв | Обработка запроса |
-| `workflow-crm-status-sync-mvp.png` | Резерв | Архитектурные документы |
-| `workflow-telegram-lead-ingestion.png` | Резерв | Архитектурные документы |
+| `workflow-crm-status-sync-mvp.png` | Workflow синхронизации статусов CRM | ARCHITECTURE.md |
+| `workflow-telegram-lead-ingestion.png` | Резерв | В публичных документах не используется |
 | `landing-integration.png` | Резерв | Лендинг |
-| `landing-manager.png` | Резерв | Лендинг |
-| `landing-features.png` | Резерв | Лендинг |
-| `landing-STA.png` | Резерв | Лендинг |
+| `landing-manager.png` | Продуктовый экран (менеджер) | BUSINESS_VALUE.md |
+| `landing-features.png` | Секция возможностей | BUSINESS_VALUE.md |
+| `landing-STA.png` | Продуктовый экран (STA) | BUSINESS_VALUE.md |
 | `landing-hero.png` | Резерв | Лендинг |
 
 ### Не использовать без обоснования
@@ -117,7 +117,7 @@
 
 - **Что показано**: подтверждение успешной отправки
 - **Роль в системе**: финал клиентского сценария
-- **Статус**: Основной (SYSTEM_DEMO.md)
+- **Статус**: Основной (SYSTEM_DEMO, USER_GUIDE, E2E_SCENARIOS)
 
 ### Website: Filled Form
 
@@ -149,7 +149,7 @@
 
 - **Что показано**: Telegram-бот, классификация как Hot Lead
 - **Роль в системе**: альтернативный канал входа лидов
-- **Статус**: Основной (SYSTEM_DEMO.md)
+- **Статус**: Основной (SYSTEM_DEMO, USER_GUIDE, E2E_SCENARIOS)
 
 ---
 
@@ -161,7 +161,7 @@
 
 - **Что показано**: главная страница Admin Console с метриками
 - **Роль в системе**: оперативный мониторинг системы
-- **Статус**: Основной (SYSTEM_DEMO.md)
+- **Статус**: Основной (SYSTEM_DEMO, ADMIN_GUIDE, E2E_SCENARIOS)
 
 ---
 
@@ -173,31 +173,31 @@
 
 - **Что показано**: список лидов с фильтром по Hot
 - **Роль в системе**: рабочее место менеджера
-- **Статус**: Основной (SYSTEM_DEMO.md)
+- **Статус**: Основной (SYSTEM_DEMO, ADMIN_GUIDE, MANAGER_GUIDE)
 
 ### Lead Queue: Warm
 
 ![Admin: Lead Queue Warm](screenshots/lead-queue-warm.png)
 
-- **Статус**: Резерв (дублирует структуру hot)
+- **Статус**: Не использовать без обоснования (дублирует структуру hot)
 
 ### Lead Queue: Cold
 
 ![Admin: Lead Queue Cold](screenshots/lead-queue-cold.png)
 
-- **Статус**: Резерв (дублирует структуру hot)
+- **Статус**: Не использовать без обоснования (дублирует структуру hot)
 
 ### Lead Queue: Spam
 
 ![Admin: Lead Queue Spam](screenshots/lead-queue-spam.png)
 
-- **Статус**: Резерв (дублирует структуру hot)
+- **Статус**: Основной (E2E_SCENARIOS)
 
 ### Lead Queue: Change CRM Status
 
 ![Admin: Lead Queue CRM Status](screenshots/lead-queue-hot-change-crm-status.png)
 
-- **Статус**: Резерв
+- **Статус**: Не использовать без обоснования (операционный скриншот)
 
 ---
 
@@ -209,13 +209,13 @@
 
 - **Что показано**: workflow приёма лидов из Website
 - **Роль в системе**: точка входа данных
-- **Статус**: Основной (SYSTEM_DEMO.md)
+- **Статус**: Основной (SYSTEM_DEMO, ADMIN_GUIDE, ARCHITECTURE)
 
 ### Workflow: Telegram Lead Ingestion
 
 ![n8n: Telegram Ingestion](screenshots/workflow-telegram-lead-ingestion.png)
 
-- **Статус**: Резерв (архитектурные документы)
+- **Статус**: Резерв (в публичных документах не используется)
 
 ### Workflow: Lead Classification MVP
 
@@ -223,7 +223,7 @@
 
 - **Что показано**: AI-классификация с OpenAI и fallback
 - **Роль в системе**: ядро квалификации
-- **Статус**: Основной (SYSTEM_DEMO.md)
+- **Статус**: Основной (SYSTEM_DEMO, ADMIN_GUIDE, ARCHITECTURE)
 
 ### Workflow: Kommo Writer MVP
 
@@ -231,13 +231,15 @@
 
 - **Что показано**: создание сделок и задач в Kommo
 - **Роль в системе**: CRM-интеграция
-- **Статус**: Основной (SYSTEM_DEMO.md)
+- **Статус**: Основной (SYSTEM_DEMO, ADMIN_GUIDE, ARCHITECTURE)
 
 ### Workflow: CRM Status Sync MVP
 
 ![n8n: CRM Sync](screenshots/workflow-crm-status-sync-mvp.png)
 
-- **Статус**: Резерв (архитектурные документы)
+- **Что показано**: snapshot статусов Kommo по расписанию
+- **Роль в системе**: обратная связь из CRM в консоль
+- **Статус**: Основной (ARCHITECTURE)
 
 ---
 
@@ -249,32 +251,33 @@
 
 - **Что показано**: список сделок в Kommo
 - **Роль в системе**: результат CRM Writer
-- **Статус**: Основной (SYSTEM_DEMO.md)
+- **Статус**: Основной (SYSTEM_DEMO, MANAGER_GUIDE)
 
 ### Kommo: Deal Hot
 
 ![Kommo: Deal Hot](screenshots/kommo-deal-hot.png)
 
 - **Что показано**: сделка типа Hot в Kanban
-- **Статус**: Основной (SYSTEM_DEMO.md)
+- **Статус**: Основной (SYSTEM_DEMO, MANAGER_GUIDE, E2E_SCENARIOS)
 
 ### Kommo: Deal Warm
 
 ![Kommo: Deal Warm](screenshots/kommo-deal-warm.png)
 
-- **Статус**: Резерв (дублирует структуру hot)
+- **Что показано**: сделка типа Warm в Kanban
+- **Статус**: Основной (E2E_SCENARIOS)
 
 ### Kommo: Deal Cold
 
 ![Kommo: Deal Cold](screenshots/kommo-deal-cold.png)
 
-- **Статус**: Резерв (дублирует структуру hot)
+- **Статус**: Не использовать без обоснования (дублирует структуру hot)
 
 ### Kommo: Change Status
 
 ![Kommo: Change Status](screenshots/kommo-deal-change-status.png)
 
-- **Статус**: Резерв
+- **Статус**: Не использовать без обоснования (операционный скриншот)
 
 ---
 
@@ -295,15 +298,15 @@
 | Категория | Hero | Основные | Резерв | Не использовать | Итого |
 |-----------|------|----------|--------|-----------------|-------|
 | Витринные hero | 2 | — | — | — | 2 |
-| Landing | — | 5 | 5 | — | 10 |
+| Landing | — | 8 | 2 | — | 10 |
 | Website Form | — | 3 | 2 | — | 5 |
 | Telegram | — | 1 | — | — | 1 |
 | Dashboard | — | 2 | — | — | 2 |
 | Lead Queue | — | 2 | — | 3 | 5 |
-| Workflows | — | 3 | 2 | — | 5 |
+| Workflows | — | 4 | 1 | — | 5 |
 | Kommo CRM | — | 4 | — | 2 | 6 |
 | Бизнес-процесс | — | 1 | — | — | 1 |
-| **Итого** | **2** | **21** | **9** | **5** | **37** |
+| **Итого** | **2** | **25** | **5** | **5** | **37** |
 
 ---
 
@@ -316,4 +319,6 @@
 | [SYSTEM_DEMO.md](SYSTEM_DEMO.md) | optimus-bp, website-form-success, telegram-lead-hot, workflow-*, kommo-deal-list/hot, lead-queue-hot, dashboard-overview |
 | [USER_GUIDE.md](USER_GUIDE.md) | landing-link-web, landing-link-telegram, website-form-empty/filled/request/success, telegram-lead-hot |
 | [E2E_SCENARIOS.md](E2E_SCENARIOS.md) | website-form-success/spam, telegram-lead-hot, kommo-deal-warm/hot/spam, lead-queue-spam, dashboard-overview/spam |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | workflow-*, dashboard-overview |
+| [MANAGER_GUIDE.md](MANAGER_GUIDE.md) | kommo-deal-list/hot, lead-queue-hot |
+| [ADMIN_GUIDE.md](ADMIN_GUIDE.md) | dashboard-overview, lead-queue-hot, workflow-lead-ingestion-v2/classification-mvp/kommo-writer-mvp |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | LQ_portfolio_dark (hero), workflow-lead-ingestion-v2/classification-mvp/kommo-writer-mvp/crm-status-sync-mvp |

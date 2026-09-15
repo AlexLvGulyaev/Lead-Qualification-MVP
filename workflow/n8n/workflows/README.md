@@ -207,26 +207,12 @@ WEBHOOK_URL: 'https://your-domain/webhook/lead'
 
 ## Integration Diagram
 
-```
-┌─────────────────┐     ┌─────────────────────────────────────┐
-│   Web Form      │────▶│  Lead Ingestion V2 - Complete      │
-│   (client-ui)   │     │  (webhook)                          │
-└─────────────────┘     │  ┌─────────────────────────────────┐│
-                        │  │ Find/Create Contact              ││
-┌─────────────────┐     │  │ Create Lead + Message + Log      ││
-│   Telegram Bot  │────▶│  └─────────────────────────────────┘│
-│   (user msg)    │     └─────────────────┬───────────────────┘
-└─────────────────┘                       │
-                                          ▼
-                        ┌─────────────────────────────────────┐
-                        │  Lead Classification MVP            │
-                        │  (schedule: every 5 min)            │
-                        │  ┌─────────────────────────────────┐│
-                        │  │ Query leads (status=received)    ││
-                        │  │ AI Classify + Fallback          ││
-                        │  │ Save qualifications              ││
-                        │  └─────────────────────────────────┘│
-                        └─────────────────────────────────────┘
+```mermaid
+flowchart TB
+    W["Web Form<br/>(client-ui)"] --> I
+    T["Telegram Bot<br/>(user msg)"] --> I
+    I["Lead Ingestion V2 - Complete<br/>(webhook)<br/>Find/Create Contact · Create Lead + Message + Log"] --> C
+    C["Lead Classification MVP<br/>(schedule: every 5 min)<br/>Query leads (status=received) · AI Classify + Fallback · Save qualifications"]
 ```
 
 ---

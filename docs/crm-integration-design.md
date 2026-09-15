@@ -57,40 +57,24 @@
 
 ### 2.1. Текущая архитектура (Input Channels MVP)
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    Input Channels MVP                            │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐   │
-│  │ Web Form     │────▶│ Lead         │────▶│ AI           │   │
-│  │ (webhook)    │     │ Ingestion    │     │ Classifier   │   │
-│  └──────────────┘     └──────────────┘     └──────────────┘   │
-│                              │                     │             │
-│                              ▼                     ▼             │
-│                       ┌──────────────┐     ┌──────────────┐   │
-│                       │ PostgreSQL   │     │ PostgreSQL   │   │
-│                       │ (leads,      │     │ (qualific.)  │   │
-│                       │  contacts)   │     │              │   │
-│                       └──────────────┘     └──────────────┘   │
-│                                                                  │
-│                       ┌──────────────┐                          │
-│                       │ logs         │                          │
-│                       └──────────────┘                          │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    W["Web Form<br/>(webhook)"] --> I["Lead Ingestion"] --> A["AI Classifier"]
+    I --> P1[("PostgreSQL<br/>leads · contacts")]
+    A --> P2[("PostgreSQL<br/>qualifications")]
+    L[("logs")]
 ```
 
 ### 2.2. Data Model v2 (Implemented)
 
-```
-contacts (люди/организации)
-    ├── channel_identities (идентификаторы в каналах)
-    │       └── telegram_user_id, email, phone
-    └── leads (обращения)
-            ├── messages (сообщения)
-            ├── qualifications (результаты AI)
-            ├── crm_sync (синхронизация с CRM) ⏳
-            └── logs (события)
+```mermaid
+flowchart TB
+    C["contacts<br/>люди/организации"] --> CI["channel_identities<br/>идентификаторы в каналах<br/>telegram_user_id · email · phone"]
+    C --> LD["leads — обращения"]
+    LD --> M["messages"]
+    LD --> Q["qualifications"]
+    LD --> S["crm_sync ⏳"]
+    LD --> G["logs"]
 ```
 
 ### 2.3. Gap Analysis
@@ -112,36 +96,15 @@ contacts (люди/организации)
 
 CRM Abstraction Layer обеспечивает единый интерфейс для работы с несколькими CRM-системами без изменения бизнес-логики workflow.
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    CRM Abstraction Layer                         │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│                      ┌──────────────┐                           │
-│                      │ CRM Writer   │                           │
-│                      │ (Workflow)   │                           │
-│                      └──────┬───────┘                           │
-│                             │                                    │
-│                             ▼                                    │
-│                     ┌───────────────┐                            │
-│                     │ Unified       │                            │
-│                     │ Payload       │                            │
-│                     └───────┬───────┘                            │
-│                             │                                    │
-│              ┌──────────────┼──────────────┐                    │
-│              │              │              │                     │
-│              ▼              ▼              ▼                     │
-│       ┌──────────┐  ┌──────────┐  ┌──────────┐                 │
-│       │ Kommo    │  │ Bitrix24 │  │ [Future] │                 │
-│       │ Provider │  │ Provider │  │ Provider │                 │
-│       └────┬─────┘  └────┬─────┘  └────┬─────┘                 │
-│            │              │              │                      │
-│            ▼              ▼              ▼                      │
-│       ┌──────────┐  ┌──────────┐  ┌──────────┐                 │
-│       │ Kommo    │  │ Bitrix24 │  │ [Other]  │                 │
-│       │ API      │  │ API      │  │ API      │                 │
-│       └──────────┘  └──────────┘  └──────────┘                 │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    W["CRM Writer<br/>(Workflow)"] --> U["Unified Payload"]
+    U --> K1["Kommo Provider"]
+    U --> B1["Bitrix24 Provider"]
+    U --> F["[Future] Provider"]
+    K1 --> K2["Kommo API"]
+    B1 --> B2["Bitrix24 API"]
+    F --> O["[Other] API"]
 ```
 
 ### 3.2. Unified Payload
@@ -307,14 +270,12 @@ ALTER TABLE crm_sync ADD COLUMN crm_response JSONB;
 
 ### 4.3. Статусы синхронизации
 
-```
-pending ──▶ in_progress ──▶ success
-    │              │
-    │              └──▶ failed ──▶ retry ──▶ in_progress
-    │                              │
-    │                              └──▶ failed (max retries)
-    │
-    └──▶ skipped (дубликат, лид уже синхронизирован)
+```mermaid
+flowchart LR
+    P[pending] --> I[in_progress] --> S[success]
+    I --> FA[failed] --> R[retry] --> I
+    FA --> FM["failed<br/>(max retries)"]
+    P --> SK["skipped<br/>(дубликат, лид уже синхронизирован)"]
 ```
 
 | Статус | Описание | Действие |
@@ -367,17 +328,9 @@ Attempt 5: give up (max retries)
 
 CRM Writer запускается **после** AI Classification:
 
-```
-Lead Ingestion (webhook/telegram)
-    │
-    ▼
-Lead Classification (schedule or trigger)
-    │
-    ▼
-CRM Writer (NEW)
-    │
-    ▼
-Follow-up (Phase 007)
+```mermaid
+flowchart LR
+    A["Lead Ingestion<br/>(webhook / telegram)"] --> B["Lead Classification<br/>(schedule or trigger)"] --> C["CRM Writer<br/>(NEW)"] --> D["Follow-up<br/>(Phase 007)"]
 ```
 
 ### 5.2. Workflow: CRM Writer
@@ -386,67 +339,18 @@ Follow-up (Phase 007)
 
 **Шаги:**
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    CRM Writer Workflow                            │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ┌──────────────┐                                               │
-│  │ Query Leads  │  SELECT * FROM leads                         │
-│  │ (status=      │  WHERE status = 'qualified'                 │
-│  │  'qualified') │  AND NOT EXISTS (                            │
-│  │              │    SELECT 1 FROM crm_sync                     │
-│  │              │    WHERE crm_sync.lead_id = leads.id          │
-│  │              │    AND sync_status = 'success'                │
-│  │              │  )                                            │
-│  └──────┬───────┘                                               │
-│         │                                                        │
-│         ▼                                                        │
-│  ┌──────────────┐                                               │
-│  │ Load Full    │  JOIN contacts, channel_identities,           │
-│  │ Lead Data    │  qualifications                               │
-│  └──────┬───────┘                                               │
-│         │                                                        │
-│         ▼                                                        │
-│  ┌──────────────┐                                               │
-│  │ Build        │  Unified Payload                               │
-│  │ Unified      │                                               │
-│  │ Payload      │                                               │
-│  └──────┬───────┘                                               │
-│         │                                                        │
-│         ▼                                                        │
-│  ┌──────────────┐                                               │
-│  │ Select       │  Based on CRM_PROVIDER env                    │
-│  │ Provider     │                                               │
-│  └──────┬───────┘                                               │
-│         │                                                        │
-│         ▼                                                        │
-│  ┌──────────────┐                                               │
-│  │ Create Lead  │  provider.createLead(payload)                 │
-│  │ in CRM       │                                               │
-│  └──────┬───────┘                                               │
-│         │                                                        │
-│         ├─────────────────┬─────────────────┐                  │
-│         │                 │                 │                    │
-│         ▼                 ▼                 ▼                    │
-│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐           │
-│  │ Success      │ │ Retry        │ │ Failed       │           │
-│  │              │ │              │ │              │           │
-│  │ INSERT       │ │ Schedule     │ │ Log error    │           │
-│  │ crm_sync     │ │ retry        │ │ Update       │           │
-│  │ status=      │ │ retry_count  │ │ crm_sync     │           │
-│  │ 'success'    │ │              │ │ status=      │           │
-│  │              │ │              │ │ 'failed'     │           │
-│  └──────┬───────┘ └──────┬───────┘ └──────┬───────┘           │
-│         │                 │                 │                    │
-│         └─────────────────┴─────────────────┘                  │
-│                                   │                              │
-│                                   ▼                              │
-│                          ┌──────────────┐                        │
-│                          │ Log Event    │                        │
-│                          │ in logs      │                        │
-│                          └──────────────┘                        │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    Q["Query Leads<br/>status = 'qualified' AND NOT synced"] --> LD["Load Full Lead Data<br/>JOIN contacts · channel_identities · qualifications"]
+    LD --> UP["Build Unified Payload"]
+    UP --> SP["Select Provider<br/>(CRM_PROVIDER env)"]
+    SP --> CL["Create Lead in CRM<br/>provider.createLead(payload)"]
+    CL -->|success| SU["INSERT crm_sync<br/>status = 'success'"]
+    CL -->|ошибка| RT["Retry<br/>retry_count++"]
+    CL -->|ошибка| FA["Log error<br/>crm_sync status = 'failed'"]
+    SU --> LG[("Log Event<br/>in logs")]
+    RT --> LG
+    FA --> LG
 ```
 
 ### 5.3. Workflow Nodes (n8n)
@@ -490,30 +394,13 @@ Complexity: Higher (workflow chaining)
 
 ### 6.1. End-to-End Flow
 
-```
-1. Lead Created (Lead Ingestion)
-   ├── INSERT INTO leads (status = 'received')
-   ├── INSERT INTO contacts
-   ├── INSERT INTO channel_identities
-   └── INSERT INTO messages
-
-2. Lead Classified (Lead Classification)
-   ├── Query leads WHERE status = 'received'
-   ├── Call OpenAI API
-   ├── INSERT INTO qualifications
-   └── UPDATE leads SET status = 'qualified'
-
-3. Lead Synced to CRM (CRM Writer) [NEW]
-   ├── Query leads WHERE status = 'qualified' AND NOT synced
-   ├── Build Unified Payload
-   ├── SELECT CRM Provider
-   ├── Call CRM API
-   ├── INSERT INTO crm_sync
-   ├── UPDATE leads SET status = 'processed'
-   └── INSERT INTO logs
-
-4. Follow-up (Phase 007) [FUTURE]
-   └── Based on qualification + CRM status
+```mermaid
+flowchart TB
+    S1["1. Lead Created (Lead Ingestion)<br/>INSERT leads · contacts ·<br/>channel_identities · messages"]
+    S2["2. Lead Classified (Lead Classification)<br/>Query received · Call OpenAI · INSERT qualifications ·<br/>UPDATE leads SET status = 'qualified'"]
+    S3["3. Lead Synced to CRM (CRM Writer)<br/>Query qualified NOT synced · Unified Payload ·<br/>CRM API · INSERT crm_sync · UPDATE processed · INSERT logs"]
+    S4["4. Follow-up (Phase 007, future)<br/>по qualification + CRM status"]
+    S1 --> S2 --> S3 --> S4
 ```
 
 ### 6.2. Unified Payload Assembly
@@ -571,12 +458,11 @@ LIMIT 1;
 
 ### 6.3. Status Transitions
 
-```
-received ──▶ qualified ──▶ processed ──▶ archived
-    │            │              │
-    │            │              └──▶ error (CRM sync failed)
-    │            │
-    └──▶ error (classification failed)
+```mermaid
+flowchart LR
+    RC[received] --> QU[qualified] --> PR[processed] --> AR[archived]
+    PR --> E1["error<br/>(CRM sync failed)"]
+    RC --> E2["error<br/>(classification failed)"]
 ```
 
 | Статус | Описание | Следующий шаг |

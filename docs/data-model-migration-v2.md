@@ -31,51 +31,58 @@
 
 ## 🕸️ Диаграмма связей
 
+```mermaid
+erDiagram
+    contacts ||--o{ leads : "1:N"
+    contacts ||--o{ channel_identities : "1:N"
+    leads ||--o{ messages : "1:N"
+    leads ||--o{ qualifications : "1:N"
+    contacts {
+        int id PK
+        string name
+        string phone
+        string email
+        string company
+        text notes
+        timestamp created_at
+        timestamp updated_at
+    }
+    channel_identities {
+        int id PK
+        int contact_id FK
+        string channel
+        string external_id
+        jsonb channel_data
+    }
+    leads {
+        int id PK
+        int contact_id FK
+        string source
+        string status
+        string utm_source
+        string utm_campaign
+        timestamp created_at
+        timestamp updated_at
+    }
+    messages {
+        int id PK
+        int lead_id FK
+        string channel
+        string direction
+        text content
+        timestamp created_at
+    }
+    qualifications {
+        int id PK
+        int lead_id FK
+        string lead_type
+        string interest
+        string priority
+        decimal confidence
+    }
 ```
-┌─────────────────┐       ┌─────────────────────┐
-│    contacts     │       │ channel_identities  │
-├─────────────────┤       ├─────────────────────┤
-│ id (PK)         │───┐   │ id (PK)             │
-│ name            │   │   │ contact_id (FK)     │───┐
-│ phone           │   │   │ channel             │   │
-│ email           │   │   │ external_id         │   │
-│ company         │   │   │ channel_data (JSONB)│   │
-│ notes           │   │   └─────────────────────┘   │
-│ created_at      │   │                             │
-│ updated_at      │   │   UNIQUE(channel, external_id)
-└─────────────────┘   │
-        │             │
-        │ 1:N         │
-        ▼             │
-┌─────────────────┐   │
-│     leads       │   │
-├─────────────────┤   │
-│ id (PK)         │   │
-│ contact_id (FK) │───┘
-│ source          │
-│ status          │
-│ utm_source      │
-│ utm_campaign    │
-│ created_at      │
-│ updated_at      │
-└────────┬────────┘
-         │
-         │ 1:N
-         ▼
-┌─────────────────┐       ┌─────────────────┐
-│    messages     │       │ qualifications  │
-├─────────────────┤       ├─────────────────┤
-│ id (PK)         │       │ id (PK)         │
-│ lead_id (FK)    │───┐   │ lead_id (FK)    │───┐
-│ channel         │   │   │ lead_type       │   │
-│ direction       │   │   │ interest        │   │
-│ content         │   │   │ priority        │   │
-│ created_at      │   │   │ confidence      │   │
-└─────────────────┘   │   │ ...             │   │
-                      │   └─────────────────┘   │
-                      │                         │
-                      └─────────────────────────┘
-```
+
+UNIQUE(channel, external_id) — дедупликация идентификаторов канала.
 
 ---
 
@@ -112,41 +119,27 @@ SELECT
 ### Telegram Workflow
 
 **Старая логика:**
-```
-Telegram message → INSERT lead with external_id = telegram_user_id
-```
+
+`Telegram message → INSERT lead with external_id = telegram_user_id`
 
 **Новая логика:**
-```
-Telegram message
-↓
-find_or_create_contact_by_telegram(telegram_id, name, username)
-↓
-Create new lead for this contact
-↓
-Create message
-↓
-Send confirmation
+
+```mermaid
+flowchart LR
+    T["Telegram message"] --> F["find_or_create_contact_by_telegram<br/>(telegram_id · name · username)"] --> L["Create new lead<br/>for this contact"] --> M["Create message"] --> S["Send confirmation"]
 ```
 
 ### Web Form Workflow
 
 **Старая логика:**
-```
-Web form → INSERT lead without deduplication
-```
+
+`Web form → INSERT lead without deduplication`
 
 **Новая логика:**
-```
-Web form
-↓
-find_or_create_contact_by_email_phone(email, phone, name)
-↓
-Create new lead for this contact
-↓
-Create message
-↓
-Return success
+
+```mermaid
+flowchart LR
+    W["Web form"] --> F["find_or_create_contact_by_email_phone<br/>(email · phone · name)"] --> L["Create new lead<br/>for this contact"] --> M["Create message"] --> R["Return success"]
 ```
 
 ### Classification Workflow
